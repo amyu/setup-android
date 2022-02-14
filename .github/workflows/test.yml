@@ -8,3 +8,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: adopt
+
+      - name: remove android sdk from ubuntu-latest
+        shell: bash
+        run: |
+          echo 'ANDROID_HOME=' >> $GITHUB_ENV
+          echo 'ANDROID_SDK_ROOT=ANDROID_SDK_ROOT' >> $GITHUB_ENV
+          rm -rf ~/android
+
+      - name: Setup Android SDK
+        uses: amyu/setup-android@4ca8e5ad57582d384bf8cae43c4b1010acf18f96
+        with:
+          sdk-version: '30'
+
+      - run: |
+          cd sample-android-project
+          ./gradlew assembleDebug
