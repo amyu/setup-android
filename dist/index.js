@@ -151,6 +151,10 @@ function getAndroidSdk(sdkVersion) {
         core.info(`installed`);
         // add cache
         core.info(`cache`);
+<<<<<<< HEAD
+=======
+        yield tc.extractTar(constants_1.ANDROID_HOME_DIR);
+>>>>>>> 6d58ffcd99cdb2cf19f8382e070151886c704e78
         const cachedPath = yield tc.cacheDir(constants_1.ANDROID_HOME_DIR, 'android', sdkVersion);
         core.addPath(cachedPath);
     });
