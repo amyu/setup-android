@@ -6,13 +6,13 @@ import {
   COMMANDLINE_TOOLS_LINUX_URL
 } from './constants'
 import {execSync} from 'child_process'
-import os from 'os'
 
 export async function getAndroidSdk(sdkVersion: string): Promise<void> {
-  const cachePath = tc.find('android', sdkVersion, os.arch())
+  const cachePath = tc.find('android', sdkVersion)
 
   if (cachePath) {
     core.info(`Found in cache @ ${cachePath}`)
+    core.addPath(cachePath)
 
     return Promise.resolve()
   }
@@ -45,12 +45,8 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
   core.info(`installed`)
 
   // add cache
-  core.info(`cache`)
-  const cachedPath = await tc.cacheDir(
-    ANDROID_HOME_DIR,
-    'android',
-    sdkVersion,
-    os.arch()
-  )
+  core.info(`caching ...`)
+  const cachedPath = await tc.cacheDir(ANDROID_HOME_DIR, 'android', sdkVersion)
   core.addPath(cachedPath)
+  core.info(`cached ${cachedPath}`)
 }

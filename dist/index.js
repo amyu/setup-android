@@ -116,21 +116,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getAndroidSdk = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
 const constants_1 = __nccwpck_require__(105);
 const child_process_1 = __nccwpck_require__(129);
-const os_1 = __importDefault(__nccwpck_require__(87));
 function getAndroidSdk(sdkVersion) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cachePath = tc.find('android', sdkVersion, os_1.default.arch());
+        const cachePath = tc.find('android', sdkVersion);
         if (cachePath) {
             core.info(`Found in cache @ ${cachePath}`);
+            core.addPath(cachePath);
             return Promise.resolve();
         }
         // download sdk-tools
@@ -154,7 +151,7 @@ function getAndroidSdk(sdkVersion) {
         core.info(`installed`);
         // add cache
         core.info(`cache`);
-        const cachedPath = yield tc.cacheDir(constants_1.ANDROID_HOME_DIR, 'android', sdkVersion, os_1.default.arch());
+        const cachedPath = yield tc.cacheDir(constants_1.ANDROID_HOME_DIR, 'android', sdkVersion);
         core.addPath(cachedPath);
     });
 }
