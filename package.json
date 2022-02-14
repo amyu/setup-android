@@ -1,8 +1,7 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
-  "private": true,
-  "description": "TypeScript template action",
+  "name": "setup-android",
+  "version": "0.0.1",
+  "description": "setup-android for self hosted runner",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -19,13 +18,17 @@
   },
   "keywords": [
     "actions",
-    "node",
-    "setup"
+    "android",
+    "setup",
+    "self",
+    "hosted",
+    "runner"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.6.0"
+    "@actions/core": "^1.6.0",
+    "@actions/tool-cache": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "^16.10.5",
