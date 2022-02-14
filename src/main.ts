@@ -1,16 +1,24 @@
+import * as constants from './constants'
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {addPath} from './add-path'
+import {getAndroidSdk} from './installer'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION, {
+      required: true
+    })
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    core.info(`sdk-version: ${sdkVersion}`)
 
-    core.setOutput('time', new Date().toTimeString())
+    if (!sdkVersion) {
+      core.setFailed('not found sdk-version')
+      return
+    }
+
+    await getAndroidSdk(sdkVersion)
+
+    addPath()
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
