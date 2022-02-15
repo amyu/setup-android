@@ -22,7 +22,7 @@ jobs:
           rm -rf ~/android
 
       - name: Setup Android SDK
-        uses: amyu/setup-android@7b09db9284198847669d9e2c65f36ac73884f3d3
+        uses: amyu/setup-android@ddd909f5d10813cb92d9c93ba15046f9b96b453b
         with:
           sdk-version: '30'
 
