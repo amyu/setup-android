@@ -1,5 +1,5 @@
+import * as cache from '@actions/cache'
 import * as core from '@actions/core'
-import * as tc from '@actions/tool-cache'
 import {
   ANDROID_HOME_DIR,
   ANDROID_SDK_ROOT,
@@ -8,15 +8,12 @@ import {
 import {execSync} from 'child_process'
 
 export async function getAndroidSdk(sdkVersion: string): Promise<void> {
-  const cachePath = tc.find('android', sdkVersion)
-
-  const allNodeVersions = tc.findAllVersions('android')
-  core.info(`Versions of node available: ${allNodeVersions}`)
-  if (cachePath) {
-    core.info(`Found in cache @ ${cachePath}`)
-    // todo cache dirを$HOME/,androidへcopyする
-
-    throw Error('ここまだ未実装')
+  const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], 'CACHE_KEY', [
+    sdkVersion
+  ])
+  if (matchedKey) {
+    core.info(`Found in cache`)
+    return Promise.resolve()
   }
 
   // download sdk-tools
@@ -48,6 +45,6 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
 
   // add cache
   core.info(`caching ...`)
-  const cachedPath = await tc.cacheDir(ANDROID_HOME_DIR, 'android', sdkVersion)
-  core.info(`cached ${cachedPath}`)
+  await cache.saveCache([ANDROID_HOME_DIR], sdkVersion)
+  core.info(`cached`)
 }

@@ -1,6 +1,6 @@
 name: 'build-test'
 on:
-  pull_request:
+  push:
 
 jobs:
   test: # make sure the action works on a clean machine without building
