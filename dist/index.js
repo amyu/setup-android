@@ -125,6 +125,8 @@ const child_process_1 = __nccwpck_require__(129);
 function getAndroidSdk(sdkVersion) {
     return __awaiter(this, void 0, void 0, function* () {
         const cachePath = tc.find('android', sdkVersion);
+        const allNodeVersions = tc.findAllVersions('android');
+        core.info(`Versions of node available: ${allNodeVersions}`);
         if (cachePath) {
             core.info(`Found in cache @ ${cachePath}`);
             core.addPath(cachePath);
@@ -150,10 +152,10 @@ function getAndroidSdk(sdkVersion) {
         });
         core.info(`installed`);
         // add cache
-        core.info(`cache`);
-        yield tc.extractTar(constants_1.ANDROID_HOME_DIR);
+        core.info(`caching ...`);
         const cachedPath = yield tc.cacheDir(constants_1.ANDROID_HOME_DIR, 'android', sdkVersion);
         core.addPath(cachedPath);
+        core.info(`cached ${cachedPath}`);
     });
 }
 exports.getAndroidSdk = getAndroidSdk;

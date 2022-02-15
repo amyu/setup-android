@@ -10,6 +10,8 @@ import {execSync} from 'child_process'
 export async function getAndroidSdk(sdkVersion: string): Promise<void> {
   const cachePath = tc.find('android', sdkVersion)
 
+  const allNodeVersions = tc.findAllVersions('android')
+  core.info(`Versions of node available: ${allNodeVersions}`)
   if (cachePath) {
     core.info(`Found in cache @ ${cachePath}`)
     core.addPath(cachePath)
@@ -45,8 +47,8 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
   core.info(`installed`)
 
   // add cache
-  core.info(`cache`)
-  await tc.extractTar(ANDROID_HOME_DIR)
+  core.info(`caching ...`)
   const cachedPath = await tc.cacheDir(ANDROID_HOME_DIR, 'android', sdkVersion)
   core.addPath(cachedPath)
+  core.info(`cached ${cachedPath}`)
 }
