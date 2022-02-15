@@ -1,6 +1,6 @@
 name: 'build-test'
 on:
-  push:
+  pull_request:
 
 jobs:
   test: # make sure the action works on a clean machine without building
@@ -22,7 +22,7 @@ jobs:
           rm -rf ~/android
 
       - name: Setup Android SDK
-        uses: amyu/setup-android@ddd909f5d10813cb92d9c93ba15046f9b96b453b
+        uses: amyu/setup-android@5b095266aefbf1e8258d337152da2daae5e1c756
         with:
           sdk-version: '30'
 
