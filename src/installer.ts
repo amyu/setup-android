@@ -5,6 +5,7 @@ import {
   ANDROID_SDK_ROOT,
   COMMANDLINE_TOOLS_LINUX_URL
 } from './constants'
+import {ReserveCacheError} from '@actions/cache'
 import {execSync} from 'child_process'
 
 export async function getAndroidSdk(sdkVersion: string): Promise<void> {
@@ -45,6 +46,13 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
 
   // add cache
   core.info(`caching ...`)
-  await cache.saveCache([ANDROID_HOME_DIR], sdkVersion)
+  try {
+    await cache.saveCache([ANDROID_HOME_DIR], sdkVersion)
+  } catch (error) {
+    // 同じKeyで登録してもOK
+    if (error instanceof ReserveCacheError) {
+      core.info(error.message)
+    }
+  }
   core.info(`cached`)
 }

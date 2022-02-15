@@ -121,6 +121,7 @@ exports.getAndroidSdk = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const constants_1 = __nccwpck_require__(5105);
+const cache_1 = __nccwpck_require__(7799);
 const child_process_1 = __nccwpck_require__(3129);
 function getAndroidSdk(sdkVersion) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -152,7 +153,15 @@ function getAndroidSdk(sdkVersion) {
         core.info(`installed`);
         // add cache
         core.info(`caching ...`);
-        yield cache.saveCache([constants_1.ANDROID_HOME_DIR], sdkVersion);
+        try {
+            yield cache.saveCache([constants_1.ANDROID_HOME_DIR], sdkVersion);
+        }
+        catch (error) {
+            // 同じKeyで登録してもOK
+            if (error instanceof cache_1.ReserveCacheError) {
+                core.info(error.message);
+            }
+        }
         core.info(`cached`);
     });
 }
