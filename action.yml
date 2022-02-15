@@ -1,8 +1,8 @@
-name: 'amyu'
+name: 'setup android sdk for self hosted runner'
 description: 'setup-android for self hosted runner'
 author: 'amyu'
 inputs:
-  sdk-version: # change this
+  sdk-version:
     required: true
     description: 'sdk version'
 runs:

@@ -14,9 +14,9 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
   core.info(`Versions of node available: ${allNodeVersions}`)
   if (cachePath) {
     core.info(`Found in cache @ ${cachePath}`)
-    core.addPath(cachePath)
+    // todo cache dirを$HOME/,androidへcopyする
 
-    return Promise.resolve()
+    throw Error('ここまだ未実装')
   }
 
   // download sdk-tools
@@ -49,6 +49,5 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
   // add cache
   core.info(`caching ...`)
   const cachedPath = await tc.cacheDir(ANDROID_HOME_DIR, 'android', sdkVersion)
-  core.addPath(cachedPath)
   core.info(`cached ${cachedPath}`)
 }

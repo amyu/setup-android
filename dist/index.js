@@ -129,8 +129,8 @@ function getAndroidSdk(sdkVersion) {
         core.info(`Versions of node available: ${allNodeVersions}`);
         if (cachePath) {
             core.info(`Found in cache @ ${cachePath}`);
-            core.addPath(cachePath);
-            return Promise.resolve();
+            // todo cache dirを$HOME/,androidへcopyする
+            throw Error('ここまだ未実装');
         }
         // download sdk-tools
         core.info(`downloading cmdline-tools ...`);
@@ -154,7 +154,6 @@ function getAndroidSdk(sdkVersion) {
         // add cache
         core.info(`caching ...`);
         const cachedPath = yield tc.cacheDir(constants_1.ANDROID_HOME_DIR, 'android', sdkVersion);
-        core.addPath(cachedPath);
         core.info(`cached ${cachedPath}`);
     });
 }
