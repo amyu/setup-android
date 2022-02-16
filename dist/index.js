@@ -32,9 +32,9 @@ const path = __importStar(__nccwpck_require__(5622));
 const constants_1 = __nccwpck_require__(5105);
 function addPath() {
     core.exportVariable('ANDROID_HOME', constants_1.ANDROID_SDK_ROOT);
-    core.exportVariable('ANDROID_SDK_ROOT', constants_1.ANDROID_SDK_ROOT);
     // adb ...
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'platform-tools'));
+    core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'ndk-bundle'));
 }
 exports.addPath = addPath;
 
@@ -69,13 +69,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_IS_USE_CACHE = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(2087));
 const path_1 = __importDefault(__nccwpck_require__(5622));
 exports.INPUT_SDK_VERSION = 'sdk-version';
+exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
+exports.INPUT_NDK_VERSION = 'ndk-version';
+exports.INPUT_CMAKE_VERSION = 'cmake-version';
+exports.INPUT_IS_USE_CACHE = 'is-use-cache';
 // https://developer.android.com/studio#command-tools
 exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`;
 exports.HOME = os.homedir();
+// github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
 exports.ANDROID_HOME_DIR = path_1.default.join(exports.HOME, '.android');
 // https://developer.android.com/studio/command-line/variables
 exports.ANDROID_SDK_ROOT = path_1.default.join(exports.ANDROID_HOME_DIR, 'sdk');
@@ -123,14 +128,14 @@ const core = __importStar(__nccwpck_require__(2186));
 const constants_1 = __nccwpck_require__(5105);
 const cache_1 = __nccwpck_require__(7799);
 const child_process_1 = __nccwpck_require__(3129);
-function getAndroidSdk(sdkVersion) {
+function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, isUseCache) {
     return __awaiter(this, void 0, void 0, function* () {
-        const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], 'CACHE_KEY', [
-            sdkVersion
-        ]);
-        if (matchedKey) {
-            core.info(`Found in cache`);
-            return Promise.resolve();
+        if (isUseCache) {
+            const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], 'CACHE_KEY', [sdkVersion]);
+            if (matchedKey) {
+                core.info(`Found in cache`);
+                return Promise.resolve();
+            }
         }
         // download sdk-tools
         core.info(`downloading cmdline-tools ...`);
@@ -147,9 +152,19 @@ function getAndroidSdk(sdkVersion) {
         (0, child_process_1.execSync)(`yes | ${constants_1.ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}`, {
             stdio: 'inherit'
         });
-        (0, child_process_1.execSync)(`${constants_1.ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "build-tools;30.0.3" "platform-tools" "platforms;android-${sdkVersion}" --sdk_root=${constants_1.ANDROID_SDK_ROOT}`, {
+        (0, child_process_1.execSync)(`${constants_1.ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "build-tools;${buildToolsVersion}" "platform-tools" "platforms;android-${sdkVersion}" --sdk_root=${constants_1.ANDROID_SDK_ROOT}`, {
             stdio: 'inherit'
         });
+        if (ndkVersion) {
+            (0, child_process_1.execSync)(`${constants_1.ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "ndk;${ndkVersion}" --sdk_root=${constants_1.ANDROID_SDK_ROOT}`, {
+                stdio: 'inherit'
+            });
+        }
+        if (cmakeVersion) {
+            (0, child_process_1.execSync)(`${constants_1.ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "cmake;${cmakeVersion}" --sdk_root=${constants_1.ANDROID_SDK_ROOT}`, {
+                stdio: 'inherit'
+            });
+        }
         core.info(`installed`);
         // add cache
         core.info(`caching ...`);
@@ -211,15 +226,17 @@ const installer_1 = __nccwpck_require__(1480);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION, {
-                required: true
-            });
+            const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION);
+            const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
+            const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
+            const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
+            const isUseCache = core.getBooleanInput(constants.INPUT_IS_USE_CACHE);
             core.info(`sdk-version: ${sdkVersion}`);
-            if (!sdkVersion) {
-                core.setFailed('not found sdk-version');
-                return;
-            }
-            yield (0, installer_1.getAndroidSdk)(sdkVersion);
+            core.info(`build-tools-version: ${buildToolsVersion}`);
+            core.info(`ndk-version: ${ndkVersion}`);
+            core.info(`cmake-version: ${cmakeVersion}`);
+            core.info(`is-use-cache: ${isUseCache}`);
+            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, isUseCache);
             (0, add_path_1.addPath)();
         }
         catch (error) {

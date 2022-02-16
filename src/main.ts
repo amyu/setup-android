@@ -5,18 +5,25 @@ import {getAndroidSdk} from './installer'
 
 async function run(): Promise<void> {
   try {
-    const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION, {
-      required: true
-    })
+    const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION)
+    const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION)
+    const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
+    const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
+    const isUseCache = core.getBooleanInput(constants.INPUT_IS_USE_CACHE)
 
     core.info(`sdk-version: ${sdkVersion}`)
+    core.info(`build-tools-version: ${buildToolsVersion}`)
+    core.info(`ndk-version: ${ndkVersion}`)
+    core.info(`cmake-version: ${cmakeVersion}`)
+    core.info(`is-use-cache: ${isUseCache}`)
 
-    if (!sdkVersion) {
-      core.setFailed('not found sdk-version')
-      return
-    }
-
-    await getAndroidSdk(sdkVersion)
+    await getAndroidSdk(
+      sdkVersion,
+      buildToolsVersion,
+      ndkVersion,
+      cmakeVersion,
+      isUseCache
+    )
 
     addPath()
   } catch (error) {
