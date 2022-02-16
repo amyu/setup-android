@@ -165,24 +165,24 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         core.info(`downloaded cmdline-tools`);
         // install android sdk
         core.info(`installing ...`);
-        const sdkManager = path.join(extractedCmdlineToolPath, 'bin', 'sdkmanager');
-        yield exec.exec(sdkManager, [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+        core.addPath(path.join(extractedCmdlineToolPath, 'bin'));
+        yield exec.exec('sdkManager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
             input: Buffer.from('y')
         });
-        yield exec.exec(sdkManager, [
+        yield exec.exec('sdkManager', [
             `"build-tools;${buildToolsVersion}"`,
             `"platform-tools"`,
             `"platforms;android-${sdkVersion}"`,
             `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
         ]);
         if (ndkVersion) {
-            yield exec.exec(sdkManager, [
+            yield exec.exec('sdkManager', [
                 `"ndk;${ndkVersion}"`,
                 `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
             ]);
         }
         if (cmakeVersion) {
-            yield exec.exec(sdkManager, [
+            yield exec.exec('sdkManager', [
                 `"cmake;${cmakeVersion}"`,
                 `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
             ]);
