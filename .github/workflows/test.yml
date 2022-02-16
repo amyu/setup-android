@@ -22,9 +22,9 @@ jobs:
           rm -rf ~/android
 
       - name: Setup Android SDK
-        uses: amyu/setup-android@5b095266aefbf1e8258d337152da2daae5e1c756
+        uses: amyu/setup-android@02b9269a064ca5ce5c1de5631e456a12f7691cdc
         with:
-          sdk-version: '30'
+          is-use-cache: true
 
       - run: |
           cd sample-android-project
