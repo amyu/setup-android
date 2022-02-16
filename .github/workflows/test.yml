@@ -23,7 +23,12 @@ jobs:
 
       - name: Setup Android SDK
         uses: ./
+        with:
+          is-use-cache: false
+          sdk-version: '30'
+          build-tools-version: '30.0.3'
+          cmake-version: '3.10.2.4988404'
+          ndk-version: '23.1.7779620'
 
       - run: |
-          cd sample-android-project
-          ./gradlew assembleDebug
+          ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace

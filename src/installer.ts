@@ -54,17 +54,16 @@ export async function getAndroidSdk(
   const extractedCmdlineToolPath = await toolCache.extractZip(
     downloadedCmdlineToolsPath
   )
-  core.info(`downloaded cmdline-tools`)
-
-  // install android sdk
-  core.info(`installing ...`)
   const sdkManagerBin = path.join(
     extractedCmdlineToolPath,
     'cmdline-tools',
     'bin'
   )
   core.addPath(sdkManagerBin)
+  core.info(`downloaded cmdline-tools`)
 
+  // install android sdk
+  core.info(`installing ...`)
   await exec.exec(
     'sdkmanager',
     [`--licenses`, `--sdk_root=${ANDROID_SDK_ROOT}`],
@@ -86,7 +85,7 @@ export async function getAndroidSdk(
   taskList.push(
     exec.exec(
       'sdkmanager',
-      [`platform-tools`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+      [`platform-tools`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
       {
         silent: true
       }
@@ -95,28 +94,25 @@ export async function getAndroidSdk(
   taskList.push(
     exec.exec(
       'sdkmanager',
-      [`platforms;android-${sdkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+      [
+        `platforms;android-${sdkVersion}`,
+        `--sdk_root=${ANDROID_SDK_ROOT}`,
+        '--verbose'
+      ],
       {
         silent: true
       }
     )
   )
-  if (ndkVersion) {
-    taskList.push(
-      exec.exec(
-        'sdkmanager',
-        [`ndk;${ndkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
-        {
-          silent: true
-        }
-      )
-    )
-  }
   if (cmakeVersion) {
     taskList.push(
       exec.exec(
         'sdkmanager',
-        [`cmake;${cmakeVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+        [
+          `cmake;${cmakeVersion}`,
+          `--sdk_root=${ANDROID_SDK_ROOT}`,
+          '--verbose'
+        ],
         {
           silent: true
         }
@@ -124,6 +120,15 @@ export async function getAndroidSdk(
     )
   }
   await Promise.all(taskList)
+  if (ndkVersion) {
+    await exec.exec(
+      'sdkmanager',
+      [`ndk;${ndkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
+      {
+        silent: false
+      }
+    )
+  }
   core.info(`installed`)
 
   // add cache

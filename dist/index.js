@@ -163,11 +163,11 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         }
         const downloadedCmdlineToolsPath = yield toolCache.downloadTool(cmdlineToolsDownloadUrl);
         const extractedCmdlineToolPath = yield toolCache.extractZip(downloadedCmdlineToolsPath);
+        const sdkManagerBin = path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin');
+        core.addPath(sdkManagerBin);
         core.info(`downloaded cmdline-tools`);
         // install android sdk
         core.info(`installing ...`);
-        const sdkManagerBin = path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin');
-        core.addPath(sdkManagerBin);
         yield exec.exec('sdkmanager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
             input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
         });
@@ -175,23 +175,31 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         taskList.push(exec.exec('sdkmanager', [`build-tools;${buildToolsVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
             silent: true
         }));
-        taskList.push(exec.exec('sdkmanager', [`platform-tools`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+        taskList.push(exec.exec('sdkmanager', [`platform-tools`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`, '--verbose'], {
             silent: true
         }));
-        taskList.push(exec.exec('sdkmanager', [`platforms;android-${sdkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+        taskList.push(exec.exec('sdkmanager', [
+            `platforms;android-${sdkVersion}`,
+            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
+            '--verbose'
+        ], {
             silent: true
         }));
-        if (ndkVersion) {
-            taskList.push(exec.exec('sdkmanager', [`ndk;${ndkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
-                silent: true
-            }));
-        }
         if (cmakeVersion) {
-            taskList.push(exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+            taskList.push(exec.exec('sdkmanager', [
+                `cmake;${cmakeVersion}`,
+                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
+                '--verbose'
+            ], {
                 silent: true
             }));
         }
         yield Promise.all(taskList);
+        if (ndkVersion) {
+            yield exec.exec('sdkmanager', [`ndk;${ndkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`, '--verbose'], {
+                silent: false
+            });
+        }
         core.info(`installed`);
         // add cache
         core.info(`caching ...`);
