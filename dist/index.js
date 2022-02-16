@@ -196,8 +196,9 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         }
         yield Promise.all(taskList);
         if (ndkVersion) {
+            // ndkのInstallを並列で実装すると何故か失敗する...
             yield exec.exec('sdkmanager', [`ndk;${ndkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`, '--verbose'], {
-                silent: false
+                silent: true
             });
         }
         core.info(`installed`);

@@ -120,12 +120,14 @@ export async function getAndroidSdk(
     )
   }
   await Promise.all(taskList)
+
   if (ndkVersion) {
+    // ndkのInstallを並列で実装すると何故か失敗する...
     await exec.exec(
       'sdkmanager',
       [`ndk;${ndkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
       {
-        silent: false
+        silent: true
       }
     )
   }
