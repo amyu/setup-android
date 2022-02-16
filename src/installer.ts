@@ -20,7 +20,7 @@ export async function getAndroidSdk(
   cmakeVersion: string,
   isUseCache: boolean
 ): Promise<void> {
-  const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}`
+  const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`
 
   if (isUseCache) {
     const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
@@ -54,37 +54,76 @@ export async function getAndroidSdk(
   const extractedCmdlineToolPath = await toolCache.extractZip(
     downloadedCmdlineToolsPath
   )
-  core.info(extractedCmdlineToolPath)
-  core.addPath(path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin'))
   core.info(`downloaded cmdline-tools`)
 
   // install android sdk
   core.info(`installing ...`)
+  const sdkManagerBin = path.join(
+    extractedCmdlineToolPath,
+    'cmdline-tools',
+    'bin'
+  )
+  core.addPath(sdkManagerBin)
+
   await exec.exec(
-    'sdkManager',
+    'sdkmanager',
     [`--licenses`, `--sdk_root=${ANDROID_SDK_ROOT}`],
     {
-      input: Buffer.from('y')
+      input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
     }
   )
-  await exec.exec('sdkManager', [
-    `"build-tools;${buildToolsVersion}"`,
-    `"platform-tools"`,
-    `"platforms;android-${sdkVersion}"`,
-    `--sdk_root=${ANDROID_SDK_ROOT}`
-  ])
+
+  const taskList = []
+  taskList.push(
+    exec.exec(
+      'sdkmanager',
+      [`build-tools;${buildToolsVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+      {
+        silent: true
+      }
+    )
+  )
+  taskList.push(
+    exec.exec(
+      'sdkmanager',
+      [`platform-tools`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+      {
+        silent: true
+      }
+    )
+  )
+  taskList.push(
+    exec.exec(
+      'sdkmanager',
+      [`platforms;android-${sdkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+      {
+        silent: true
+      }
+    )
+  )
   if (ndkVersion) {
-    await exec.exec('sdkManager', [
-      `"ndk;${ndkVersion}"`,
-      `--sdk_root=${ANDROID_SDK_ROOT}`
-    ])
+    taskList.push(
+      exec.exec(
+        'sdkmanager',
+        [`ndk;${ndkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+        {
+          silent: true
+        }
+      )
+    )
   }
   if (cmakeVersion) {
-    await exec.exec('sdkManager', [
-      `"cmake;${cmakeVersion}"`,
-      `--sdk_root=${ANDROID_SDK_ROOT}`
-    ])
+    taskList.push(
+      exec.exec(
+        'sdkmanager',
+        [`cmake;${cmakeVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
+        {
+          silent: true
+        }
+      )
+    )
   }
+  await Promise.all(taskList)
   core.info(`installed`)
 
   // add cache

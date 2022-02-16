@@ -12,7 +12,7 @@ export const COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/reposi
 export const COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip`
 export const COMMANDLINE_TOOLS_WINDOWS_URL = `https://dl.google.com/android/repository/commandlinetools-win-8092744_latest.zip`
 
-const HOME = os.homedir()
+export const HOME = os.homedir()
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
 export const ANDROID_HOME_DIR = path.join(HOME, '.android')
 

@@ -31,6 +31,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(5622));
 const constants_1 = __nccwpck_require__(5105);
 function addPath() {
+    core.exportVariable('ANDROID_SDK_ROOT', constants_1.ANDROID_SDK_ROOT);
     core.exportVariable('ANDROID_HOME', constants_1.ANDROID_SDK_ROOT);
     // adb ...
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'platform-tools'));
@@ -69,7 +70,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_IS_USE_CACHE = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_IS_USE_CACHE = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(2087));
 const path_1 = __importDefault(__nccwpck_require__(5622));
 exports.INPUT_SDK_VERSION = 'sdk-version';
@@ -81,9 +82,9 @@ exports.INPUT_IS_USE_CACHE = 'is-use-cache';
 exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`;
 exports.COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip`;
 exports.COMMANDLINE_TOOLS_WINDOWS_URL = `https://dl.google.com/android/repository/commandlinetools-win-8092744_latest.zip`;
-const HOME = os.homedir();
+exports.HOME = os.homedir();
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
-exports.ANDROID_HOME_DIR = path_1.default.join(HOME, '.android');
+exports.ANDROID_HOME_DIR = path_1.default.join(exports.HOME, '.android');
 // https://developer.android.com/studio/command-line/variables
 exports.ANDROID_SDK_ROOT = path_1.default.join(exports.ANDROID_HOME_DIR, 'sdk');
 
@@ -135,7 +136,7 @@ const constants_1 = __nccwpck_require__(5105);
 const cache_1 = __nccwpck_require__(7799);
 function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, isUseCache) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}`;
+        const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`;
         if (isUseCache) {
             const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
             if (matchedKey) {
@@ -162,32 +163,35 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         }
         const downloadedCmdlineToolsPath = yield toolCache.downloadTool(cmdlineToolsDownloadUrl);
         const extractedCmdlineToolPath = yield toolCache.extractZip(downloadedCmdlineToolsPath);
-        core.info(extractedCmdlineToolPath);
-        core.addPath(path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin'));
         core.info(`downloaded cmdline-tools`);
         // install android sdk
         core.info(`installing ...`);
-        yield exec.exec('sdkManager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
-            input: Buffer.from('y')
+        const sdkManagerBin = path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin');
+        core.addPath(sdkManagerBin);
+        yield exec.exec('sdkmanager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+            input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
         });
-        yield exec.exec('sdkManager', [
-            `"build-tools;${buildToolsVersion}"`,
-            `"platform-tools"`,
-            `"platforms;android-${sdkVersion}"`,
-            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
-        ]);
+        const taskList = [];
+        taskList.push(exec.exec('sdkmanager', [`build-tools;${buildToolsVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+            silent: true
+        }));
+        taskList.push(exec.exec('sdkmanager', [`platform-tools`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+            silent: true
+        }));
+        taskList.push(exec.exec('sdkmanager', [`platforms;android-${sdkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+            silent: true
+        }));
         if (ndkVersion) {
-            yield exec.exec('sdkManager', [
-                `"ndk;${ndkVersion}"`,
-                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
-            ]);
+            taskList.push(exec.exec('sdkmanager', [`ndk;${ndkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+                silent: true
+            }));
         }
         if (cmakeVersion) {
-            yield exec.exec('sdkManager', [
-                `"cmake;${cmakeVersion}"`,
-                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
-            ]);
+            taskList.push(exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
+                silent: true
+            }));
         }
+        yield Promise.all(taskList);
         core.info(`installed`);
         // add cache
         core.info(`caching ...`);
