@@ -1,12 +1,17 @@
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
+import * as exec from '@actions/exec'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as toolCache from '@actions/tool-cache'
 import {
   ANDROID_HOME_DIR,
   ANDROID_SDK_ROOT,
-  COMMANDLINE_TOOLS_LINUX_URL
+  COMMANDLINE_TOOLS_LINUX_URL,
+  COMMANDLINE_TOOLS_MAC_URL,
+  COMMANDLINE_TOOLS_WINDOWS_URL
 } from './constants'
 import {ReserveCacheError} from '@actions/cache'
-import {execSync} from 'child_process'
 
 export async function getAndroidSdk(
   sdkVersion: string,
@@ -15,12 +20,10 @@ export async function getAndroidSdk(
   cmakeVersion: string,
   isUseCache: boolean
 ): Promise<void> {
+  const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`
+
   if (isUseCache) {
-    const matchedKey = await cache.restoreCache(
-      [ANDROID_HOME_DIR],
-      'CACHE_KEY',
-      [sdkVersion]
-    )
+    const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
     if (matchedKey) {
       core.info(`Found in cache`)
       return Promise.resolve()
@@ -29,42 +32,102 @@ export async function getAndroidSdk(
 
   // download sdk-tools
   core.info(`downloading cmdline-tools ...`)
-  execSync(`mkdir -p ${ANDROID_SDK_ROOT}`, {stdio: 'inherit'})
-  execSync(`curl -o cmdline-tools.zip ${COMMANDLINE_TOOLS_LINUX_URL}`, {
-    stdio: 'inherit'
-  })
-  execSync(`unzip "cmdline-tools.zip" -d ${ANDROID_SDK_ROOT}`, {
-    stdio: 'inherit'
-  })
+  fs.mkdirSync(ANDROID_HOME_DIR, {recursive: true})
+
+  let cmdlineToolsDownloadUrl: string
+  switch (process.platform) {
+    case 'win32':
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_WINDOWS_URL
+      break
+    case 'darwin':
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_MAC_URL
+      break
+    case 'linux':
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_LINUX_URL
+      break
+    default:
+      throw Error(`Unsupported platform: ${process.platform}`)
+  }
+  const downloadedCmdlineToolsPath = await toolCache.downloadTool(
+    cmdlineToolsDownloadUrl
+  )
+  const extractedCmdlineToolPath = await toolCache.extractZip(
+    downloadedCmdlineToolsPath
+  )
+  const sdkManagerBin = path.join(
+    extractedCmdlineToolPath,
+    'cmdline-tools',
+    'bin'
+  )
+  core.addPath(sdkManagerBin)
   core.info(`downloaded cmdline-tools`)
 
   // install android sdk
   core.info(`installing ...`)
-  execSync(
-    `yes | ${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT}`,
+  await exec.exec(
+    'sdkmanager',
+    [`--licenses`, `--sdk_root=${ANDROID_SDK_ROOT}`],
     {
-      stdio: 'inherit'
+      input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
     }
   )
-  execSync(
-    `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "build-tools;${buildToolsVersion}" "platform-tools" "platforms;android-${sdkVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
-    {
-      stdio: 'inherit'
-    }
-  )
-  if (ndkVersion) {
-    execSync(
-      `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "ndk;${ndkVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
+
+  const taskList = []
+  taskList.push(
+    exec.exec(
+      'sdkmanager',
+      [`build-tools;${buildToolsVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
       {
-        stdio: 'inherit'
+        silent: true
       }
     )
-  }
-  if (cmakeVersion) {
-    execSync(
-      `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "cmake;${cmakeVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
+  )
+  taskList.push(
+    exec.exec(
+      'sdkmanager',
+      [`platform-tools`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
       {
-        stdio: 'inherit'
+        silent: true
+      }
+    )
+  )
+  taskList.push(
+    exec.exec(
+      'sdkmanager',
+      [
+        `platforms;android-${sdkVersion}`,
+        `--sdk_root=${ANDROID_SDK_ROOT}`,
+        '--verbose'
+      ],
+      {
+        silent: true
+      }
+    )
+  )
+  if (cmakeVersion) {
+    taskList.push(
+      exec.exec(
+        'sdkmanager',
+        [
+          `cmake;${cmakeVersion}`,
+          `--sdk_root=${ANDROID_SDK_ROOT}`,
+          '--verbose'
+        ],
+        {
+          silent: true
+        }
+      )
+    )
+  }
+  await Promise.all(taskList)
+
+  if (ndkVersion) {
+    // ndkのInstallを並列で実装すると何故か失敗する...
+    await exec.exec(
+      'sdkmanager',
+      [`ndk;${ndkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
+      {
+        silent: true
       }
     )
   }
@@ -73,7 +136,7 @@ export async function getAndroidSdk(
   // add cache
   core.info(`caching ...`)
   try {
-    await cache.saveCache([ANDROID_HOME_DIR], sdkVersion)
+    await cache.saveCache([ANDROID_HOME_DIR], restoreKey)
   } catch (error) {
     // 同じKeyで登録してもOK
     if (error instanceof ReserveCacheError) {

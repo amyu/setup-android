@@ -9,6 +9,8 @@ export const INPUT_IS_USE_CACHE = 'is-use-cache'
 
 // https://developer.android.com/studio#command-tools
 export const COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`
+export const COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip`
+export const COMMANDLINE_TOOLS_WINDOWS_URL = `https://dl.google.com/android/repository/commandlinetools-win-8092744_latest.zip`
 
 export const HOME = os.homedir()
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
