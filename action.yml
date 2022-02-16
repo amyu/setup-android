@@ -19,7 +19,7 @@ inputs:
   is-use-cache:
     required: false
     description: 'is use cache'
-    default: true
+    default: 'true'
 runs:
   using: 'node12'
   main: 'dist/index.js'
