@@ -55,7 +55,7 @@ export async function getAndroidSdk(
     downloadedCmdlineToolsPath
   )
   core.info(extractedCmdlineToolPath)
-  core.addPath(path.join(extractedCmdlineToolPath, 'bin'))
+  core.addPath(path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin'))
   core.info(`downloaded cmdline-tools`)
 
   // install android sdk
