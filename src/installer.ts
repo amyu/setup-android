@@ -54,11 +54,12 @@ export async function getAndroidSdk(
   const extractedCmdlineToolPath = await toolCache.extractZip(
     downloadedCmdlineToolsPath
   )
+  core.info(extractedCmdlineToolPath)
+  core.addPath(path.join(extractedCmdlineToolPath, 'bin'))
   core.info(`downloaded cmdline-tools`)
 
   // install android sdk
   core.info(`installing ...`)
-  core.addPath(path.join(extractedCmdlineToolPath, 'bin'))
   await exec.exec(
     'sdkManager',
     [`--licenses`, `--sdk_root=${ANDROID_SDK_ROOT}`],

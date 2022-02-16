@@ -162,10 +162,11 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         }
         const downloadedCmdlineToolsPath = yield toolCache.downloadTool(cmdlineToolsDownloadUrl);
         const extractedCmdlineToolPath = yield toolCache.extractZip(downloadedCmdlineToolsPath);
+        core.info(extractedCmdlineToolPath);
+        core.addPath(path.join(extractedCmdlineToolPath, 'bin'));
         core.info(`downloaded cmdline-tools`);
         // install android sdk
         core.info(`installing ...`);
-        core.addPath(path.join(extractedCmdlineToolPath, 'bin'));
         yield exec.exec('sdkManager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
             input: Buffer.from('y')
         });
