@@ -8,13 +8,23 @@ import {
 import {ReserveCacheError} from '@actions/cache'
 import {execSync} from 'child_process'
 
-export async function getAndroidSdk(sdkVersion: string): Promise<void> {
-  const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], 'CACHE_KEY', [
-    sdkVersion
-  ])
-  if (matchedKey) {
-    core.info(`Found in cache`)
-    return Promise.resolve()
+export async function getAndroidSdk(
+  sdkVersion: string,
+  buildToolsVersion: string,
+  ndkVersion: string,
+  cmakeVersion: string,
+  isUseCache: boolean
+): Promise<void> {
+  if (isUseCache) {
+    const matchedKey = await cache.restoreCache(
+      [ANDROID_HOME_DIR],
+      'CACHE_KEY',
+      [sdkVersion]
+    )
+    if (matchedKey) {
+      core.info(`Found in cache`)
+      return Promise.resolve()
+    }
   }
 
   // download sdk-tools
@@ -37,11 +47,27 @@ export async function getAndroidSdk(sdkVersion: string): Promise<void> {
     }
   )
   execSync(
-    `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "build-tools;30.0.3" "platform-tools" "platforms;android-${sdkVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
+    `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "build-tools;${buildToolsVersion}" "platform-tools" "platforms;android-${sdkVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
     {
       stdio: 'inherit'
     }
   )
+  if (ndkVersion) {
+    execSync(
+      `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "ndk;${ndkVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
+      {
+        stdio: 'inherit'
+      }
+    )
+  }
+  if (cmakeVersion) {
+    execSync(
+      `${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager "cmake;${cmakeVersion}" --sdk_root=${ANDROID_SDK_ROOT}`,
+      {
+        stdio: 'inherit'
+      }
+    )
+  }
   core.info(`installed`)
 
   // add cache

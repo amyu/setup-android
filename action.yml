@@ -3,8 +3,23 @@ description: 'setup-android for self hosted runner'
 author: 'amyu'
 inputs:
   sdk-version:
-    required: true
+    required: false
     description: 'sdk version'
+    default: '30'
+  build-tools-version:
+    required: false
+    description: 'build tools version'
+    default: '30.0.3'
+  ndk-version:
+    required: false
+    description: 'ndk version'
+  cmake-version:
+    required: false
+    description: 'cmake version'
+  is-use-cache:
+    required: false
+    description: 'is use cache'
+    default: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
