@@ -58,28 +58,28 @@ export async function getAndroidSdk(
 
   // install android sdk
   core.info(`installing ...`)
-  const sdkManager = path.join(extractedCmdlineToolPath, 'bin', 'sdkmanager')
+  core.addPath(path.join(extractedCmdlineToolPath, 'bin'))
   await exec.exec(
-    sdkManager,
+    'sdkManager',
     [`--licenses`, `--sdk_root=${ANDROID_SDK_ROOT}`],
     {
       input: Buffer.from('y')
     }
   )
-  await exec.exec(sdkManager, [
+  await exec.exec('sdkManager', [
     `"build-tools;${buildToolsVersion}"`,
     `"platform-tools"`,
     `"platforms;android-${sdkVersion}"`,
     `--sdk_root=${ANDROID_SDK_ROOT}`
   ])
   if (ndkVersion) {
-    await exec.exec(sdkManager, [
+    await exec.exec('sdkManager', [
       `"ndk;${ndkVersion}"`,
       `--sdk_root=${ANDROID_SDK_ROOT}`
     ])
   }
   if (cmakeVersion) {
-    await exec.exec(sdkManager, [
+    await exec.exec('sdkManager', [
       `"cmake;${cmakeVersion}"`,
       `--sdk_root=${ANDROID_SDK_ROOT}`
     ])
