@@ -135,9 +135,9 @@ const constants_1 = __nccwpck_require__(5105);
 const cache_1 = __nccwpck_require__(7799);
 function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, isUseCache) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = `sdk-version: ${sdkVersion}, build-tools-version: ${buildToolsVersion}, ndk-version: ${ndkVersion}, cmake-version: ${cmakeVersion}`;
+        const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}`;
         if (isUseCache) {
-            const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], 'PRIMARY_KEY', [restoreKey]);
+            const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
             if (matchedKey) {
                 core.info(`Found in cache`);
                 return Promise.resolve();
@@ -176,10 +176,16 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
             `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
         ]);
         if (ndkVersion) {
-            yield exec.exec(sdkManager, [`"ndk;${ndkVersion}"`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`]);
+            yield exec.exec(sdkManager, [
+                `"ndk;${ndkVersion}"`,
+                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
+            ]);
         }
         if (cmakeVersion) {
-            yield exec.exec(sdkManager, [`"cmake;${cmakeVersion}"`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`]);
+            yield exec.exec(sdkManager, [
+                `"cmake;${cmakeVersion}"`,
+                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
+            ]);
         }
         core.info(`installed`);
         // add cache

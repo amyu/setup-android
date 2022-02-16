@@ -20,14 +20,10 @@ export async function getAndroidSdk(
   cmakeVersion: string,
   isUseCache: boolean
 ): Promise<void> {
-  const restoreKey = `sdk-version: ${sdkVersion}, build-tools-version: ${buildToolsVersion}, ndk-version: ${ndkVersion}, cmake-version: ${cmakeVersion}`
+  const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}`
 
   if (isUseCache) {
-    const matchedKey = await cache.restoreCache(
-      [ANDROID_HOME_DIR],
-      'PRIMARY_KEY',
-      [restoreKey]
-    )
+    const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
     if (matchedKey) {
       core.info(`Found in cache`)
       return Promise.resolve()
