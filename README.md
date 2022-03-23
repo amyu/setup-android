@@ -24,7 +24,7 @@ steps:
       distribution: adopt
       
   - name: Setup Android SDK
-    uses: amyu/setup-android@v1
+    uses: amyu/setup-android@v1.1
 
   - run: ./gradlew build --stacktrace
 ```
@@ -40,7 +40,7 @@ steps:
       distribution: adopt
       
   - name: Setup Android SDK
-    uses: amyu/setup-android@v1
+    uses: amyu/setup-android@v1.1
     with:
       # default: true
       # Whether to use the cache     
