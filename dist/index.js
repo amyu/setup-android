@@ -171,35 +171,33 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         yield exec.exec('sdkmanager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
             input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
         });
-        const taskList = [];
-        taskList.push(exec.exec('sdkmanager', [`build-tools;${buildToolsVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
-            silent: true
-        }));
-        taskList.push(exec.exec('sdkmanager', [`platform-tools`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`, '--verbose'], {
-            silent: true
-        }));
-        taskList.push(exec.exec('sdkmanager', [
+        yield exec.exec('sdkmanager', [
+            `build-tools;${buildToolsVersion}`,
+            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
+        ]);
+        yield exec.exec('sdkmanager', [
+            `platform-tools`,
+            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
+            '--verbose'
+        ]);
+        yield exec.exec('sdkmanager', [
             `platforms;android-${sdkVersion}`,
             `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
             '--verbose'
-        ], {
-            silent: true
-        }));
+        ]);
         if (cmakeVersion) {
-            taskList.push(exec.exec('sdkmanager', [
+            yield exec.exec('sdkmanager', [
                 `cmake;${cmakeVersion}`,
                 `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
                 '--verbose'
-            ], {
-                silent: true
-            }));
+            ]);
         }
-        yield Promise.all(taskList);
         if (ndkVersion) {
-            // ndkのInstallを並列で実装すると何故か失敗する...
-            yield exec.exec('sdkmanager', [`ndk;${ndkVersion}`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`, '--verbose'], {
-                silent: true
-            });
+            yield exec.exec('sdkmanager', [
+                `ndk;${ndkVersion}`,
+                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
+                '--verbose'
+            ]);
         }
         core.info(`installed`);
         // add cache

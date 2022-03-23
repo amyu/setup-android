@@ -72,64 +72,33 @@ export async function getAndroidSdk(
     }
   )
 
-  const taskList = []
-  taskList.push(
-    exec.exec(
-      'sdkmanager',
-      [`build-tools;${buildToolsVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`],
-      {
-        silent: true
-      }
-    )
-  )
-  taskList.push(
-    exec.exec(
-      'sdkmanager',
-      [`platform-tools`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
-      {
-        silent: true
-      }
-    )
-  )
-  taskList.push(
-    exec.exec(
-      'sdkmanager',
-      [
-        `platforms;android-${sdkVersion}`,
-        `--sdk_root=${ANDROID_SDK_ROOT}`,
-        '--verbose'
-      ],
-      {
-        silent: true
-      }
-    )
-  )
+  await exec.exec('sdkmanager', [
+    `build-tools;${buildToolsVersion}`,
+    `--sdk_root=${ANDROID_SDK_ROOT}`
+  ])
+  await exec.exec('sdkmanager', [
+    `platform-tools`,
+    `--sdk_root=${ANDROID_SDK_ROOT}`,
+    '--verbose'
+  ])
+  await exec.exec('sdkmanager', [
+    `platforms;android-${sdkVersion}`,
+    `--sdk_root=${ANDROID_SDK_ROOT}`,
+    '--verbose'
+  ])
   if (cmakeVersion) {
-    taskList.push(
-      exec.exec(
-        'sdkmanager',
-        [
-          `cmake;${cmakeVersion}`,
-          `--sdk_root=${ANDROID_SDK_ROOT}`,
-          '--verbose'
-        ],
-        {
-          silent: true
-        }
-      )
-    )
+    await exec.exec('sdkmanager', [
+      `cmake;${cmakeVersion}`,
+      `--sdk_root=${ANDROID_SDK_ROOT}`,
+      '--verbose'
+    ])
   }
-  await Promise.all(taskList)
-
   if (ndkVersion) {
-    // ndkのInstallを並列で実装すると何故か失敗する...
-    await exec.exec(
-      'sdkmanager',
-      [`ndk;${ndkVersion}`, `--sdk_root=${ANDROID_SDK_ROOT}`, '--verbose'],
-      {
-        silent: true
-      }
-    )
+    await exec.exec('sdkmanager', [
+      `ndk;${ndkVersion}`,
+      `--sdk_root=${ANDROID_SDK_ROOT}`,
+      '--verbose'
+    ])
   }
   core.info(`installed`)
 
