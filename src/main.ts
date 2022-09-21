@@ -16,6 +16,7 @@ async function run(): Promise<void> {
     core.info(`ndk-version: ${ndkVersion}`)
     core.info(`cmake-version: ${cmakeVersion}`)
     core.info(`cache-disabled: ${cacheDisabled}`)
+    core.info('hoge')
 
     await getAndroidSdk(
       sdkVersion,
