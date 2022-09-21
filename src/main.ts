@@ -9,20 +9,20 @@ async function run(): Promise<void> {
     const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION)
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
-    const isUseCache = core.getBooleanInput(constants.INPUT_IS_USE_CACHE)
+    const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED)
 
     core.info(`sdk-version: ${sdkVersion}`)
     core.info(`build-tools-version: ${buildToolsVersion}`)
     core.info(`ndk-version: ${ndkVersion}`)
     core.info(`cmake-version: ${cmakeVersion}`)
-    core.info(`is-use-cache: ${isUseCache}`)
+    core.info(`cache-disabled: ${cacheDisabled}`)
 
     await getAndroidSdk(
       sdkVersion,
       buildToolsVersion,
       ndkVersion,
       cmakeVersion,
-      isUseCache
+      cacheDisabled
     )
 
     addPath()

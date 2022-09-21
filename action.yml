@@ -16,10 +16,10 @@ inputs:
   cmake-version:
     required: false
     description: 'cmake version'
-  is-use-cache:
+  cache-disabled:
     required: false
-    description: 'is use cache'
-    default: 'true'
+    description: 'disabled cache'
+    default: 'false'
 runs:
   using: 'node12'
   main: 'dist/index.js'

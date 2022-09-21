@@ -70,14 +70,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_IS_USE_CACHE = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(2087));
 const path_1 = __importDefault(__nccwpck_require__(5622));
 exports.INPUT_SDK_VERSION = 'sdk-version';
 exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
 exports.INPUT_CMAKE_VERSION = 'cmake-version';
-exports.INPUT_IS_USE_CACHE = 'is-use-cache';
+exports.INPUT_CACHE_DISABLED = 'cache-disabled';
 // https://developer.android.com/studio#command-tools
 exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`;
 exports.COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip`;
@@ -134,10 +134,10 @@ const path = __importStar(__nccwpck_require__(5622));
 const toolCache = __importStar(__nccwpck_require__(7784));
 const constants_1 = __nccwpck_require__(5105);
 const cache_1 = __nccwpck_require__(7799);
-function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, isUseCache) {
+function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled) {
     return __awaiter(this, void 0, void 0, function* () {
         const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`;
-        if (isUseCache) {
+        if (!cacheDisabled) {
             const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
             if (matchedKey) {
                 core.info(`Found in cache`);
@@ -264,13 +264,13 @@ function run() {
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
-            const isUseCache = core.getBooleanInput(constants.INPUT_IS_USE_CACHE);
+            const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
             core.info(`sdk-version: ${sdkVersion}`);
             core.info(`build-tools-version: ${buildToolsVersion}`);
             core.info(`ndk-version: ${ndkVersion}`);
             core.info(`cmake-version: ${cmakeVersion}`);
-            core.info(`is-use-cache: ${isUseCache}`);
-            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, isUseCache);
+            core.info(`cache-disabled: ${cacheDisabled}`);
+            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled);
             (0, add_path_1.addPath)();
         }
         catch (error) {

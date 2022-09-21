@@ -5,7 +5,7 @@ export const INPUT_SDK_VERSION = 'sdk-version'
 export const INPUT_BUILD_TOOLS_VERSION = 'build-tools-version'
 export const INPUT_NDK_VERSION = 'ndk-version'
 export const INPUT_CMAKE_VERSION = 'cmake-version'
-export const INPUT_IS_USE_CACHE = 'is-use-cache'
+export const INPUT_CACHE_DISABLED = 'cache-disabled'
 
 // https://developer.android.com/studio#command-tools
 export const COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`
