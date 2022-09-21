@@ -21,5 +21,6 @@ inputs:
     description: 'disabled cache'
     default: 'false'
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: 'node16'
+  main: 'dist/setup/index.js'
+  post: 'dist/cleanup/index.js'

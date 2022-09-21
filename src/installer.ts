@@ -11,7 +11,7 @@ import {
   COMMANDLINE_TOOLS_MAC_URL,
   COMMANDLINE_TOOLS_WINDOWS_URL
 } from './constants'
-import {ReserveCacheError} from '@actions/cache'
+import {generateRestoreKey} from './cache'
 
 export async function getAndroidSdk(
   sdkVersion: string,
@@ -20,7 +20,12 @@ export async function getAndroidSdk(
   cmakeVersion: string,
   cacheDisabled: boolean
 ): Promise<void> {
-  const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`
+  const restoreKey = generateRestoreKey(
+    sdkVersion,
+    buildToolsVersion,
+    ndkVersion,
+    cmakeVersion
+  )
 
   if (!cacheDisabled) {
     const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
@@ -101,16 +106,4 @@ export async function getAndroidSdk(
     ])
   }
   core.info(`installed`)
-
-  // add cache
-  core.info(`caching ...`)
-  try {
-    await cache.saveCache([ANDROID_HOME_DIR], restoreKey)
-  } catch (error) {
-    // 同じKeyで登録してもOK
-    if (error instanceof ReserveCacheError) {
-      core.info(error.message)
-    }
-  }
-  core.info(`cached`)
 }

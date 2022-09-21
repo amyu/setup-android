@@ -2,13 +2,13 @@
   "name": "setup-android",
   "version": "2.0.0",
   "description": "setup-android for self hosted runner",
-  "main": "lib/main.js",
+  "main": "dist/setup/index.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map --license licenses.txt",
+    "package": "ncc build -o dist/setup src/setup-android.ts && ncc build -o dist/cleanup src/cleanup-android.ts",
     "all": "npm run build && npm run format && npm run lint && npm run package"
   },
   "repository": {
