@@ -1,4 +1,3 @@
-import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as fs from 'fs'
@@ -11,7 +10,7 @@ import {
   COMMANDLINE_TOOLS_MAC_URL,
   COMMANDLINE_TOOLS_WINDOWS_URL
 } from './constants'
-import {generateRestoreKey} from './cache'
+import {restoreCache} from './cache'
 
 export async function getAndroidSdk(
   sdkVersion: string,
@@ -20,17 +19,14 @@ export async function getAndroidSdk(
   cmakeVersion: string,
   cacheDisabled: boolean
 ): Promise<void> {
-  const restoreKey = generateRestoreKey(
-    sdkVersion,
-    buildToolsVersion,
-    ndkVersion,
-    cmakeVersion
-  )
-
   if (!cacheDisabled) {
-    const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
-    if (matchedKey) {
-      core.info(`Found in cache`)
+    const restoreCacheEntry = await restoreCache(
+      sdkVersion,
+      buildToolsVersion,
+      ndkVersion,
+      cmakeVersion
+    )
+    if (restoreCacheEntry) {
       return Promise.resolve()
     }
   }

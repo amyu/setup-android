@@ -102,26 +102,18 @@ function restoreCache(paths, primaryKey, restoreKeys, options) {
             }
             archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
             core.debug(`Archive Path: ${archivePath}`);
+            const restoredEntry = new CacheEntry(cacheEntry.cacheKey);
             // Download the cache from the cache entry
             yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
             if (core.isDebug()) {
                 yield tar_1.listTar(archivePath, compressionMethod);
             }
             const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
+            restoredEntry.size = archiveFileSize;
             core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
             yield tar_1.extractTar(archivePath, compressionMethod);
             core.info('Cache restored successfully');
-            return cacheEntry.cacheKey;
-        }
-        catch (error) {
-            const typedError = error;
-            if (typedError.name === ValidationError.name) {
-                throw error;
-            }
-            else {
-                // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
-            }
+            return restoredEntry;
         }
         finally {
             // Try to delete the archive to save space
@@ -160,6 +152,7 @@ function saveCache(paths, key, options) {
         const archiveFolder = yield utils.createTempDirectory();
         const archivePath = path.join(archiveFolder, utils.getCacheFileName(compressionMethod));
         core.debug(`Archive Path: ${archivePath}`);
+        const savedEntry = new CacheEntry(key);
         try {
             yield tar_1.createTar(archiveFolder, cachePaths, compressionMethod);
             if (core.isDebug()) {
@@ -167,6 +160,7 @@ function saveCache(paths, key, options) {
             }
             const fileSizeLimit = 10 * 1024 * 1024 * 1024; // 10GB per repo limit
             const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
+            savedEntry.size = archiveFileSize;
             core.debug(`File Size: ${archiveFileSize}`);
             // For GHES, this check will take place in ReserveCache API with enterprise file size limit
             if (archiveFileSize > fileSizeLimit && !utils.isGhes()) {
@@ -189,18 +183,6 @@ function saveCache(paths, key, options) {
             core.debug(`Saving Cache (ID: ${cacheId})`);
             yield cacheHttpClient.saveCache(cacheId, archivePath, options);
         }
-        catch (error) {
-            const typedError = error;
-            if (typedError.name === ValidationError.name) {
-                throw error;
-            }
-            else if (typedError.name === ReserveCacheError.name) {
-                core.info(`Failed to save: ${typedError.message}`);
-            }
-            else {
-                core.warning(`Failed to save: ${typedError.message}`);
-            }
-        }
         finally {
             // Try to delete the archive to save space
             try {
@@ -210,10 +192,17 @@ function saveCache(paths, key, options) {
                 core.debug(`Failed to delete archive: ${error}`);
             }
         }
-        return cacheId;
+        return savedEntry;
     });
 }
 exports.saveCache = saveCache;
+class CacheEntry {
+    constructor(key, size) {
+        this.key = key;
+        this.size = size;
+    }
+}
+exports.CacheEntry = CacheEntry;
 //# sourceMappingURL=cache.js.map
 
 /***/ }),
@@ -60127,16 +60116,102 @@ exports.addPath = addPath;
 /***/ }),
 
 /***/ 4810:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.generateRestoreKey = void 0;
+exports.getSavedEntry = exports.getRestoredEntry = exports.saveCache = exports.restoreCache = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const cache = __importStar(__nccwpck_require__(7799));
+const constants_1 = __nccwpck_require__(9042);
+const cache_1 = __nccwpck_require__(7799);
+const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
+const SAVED_ENTRY_STATE_KEY = 'savedEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
     return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`;
 }
-exports.generateRestoreKey = generateRestoreKey;
+function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+        const restoredEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
+        if (restoredEntry) {
+            core.info(`Found in cache`);
+        }
+        else {
+            core.info(`Not Found cache`);
+        }
+        core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);
+        return Promise.resolve(restoredEntry);
+    });
+}
+exports.restoreCache = restoreCache;
+function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+        core.info(`caching ...`);
+        try {
+            const savedEntry = yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
+            core.saveState(SAVED_ENTRY_STATE_KEY, savedEntry);
+            return Promise.resolve(savedEntry);
+        }
+        catch (error) {
+            // 同じKeyで登録してもOK
+            if (error instanceof cache_1.ReserveCacheError) {
+                core.info(error.message);
+            }
+        }
+        core.info(`cached`);
+        return Promise.resolve(undefined);
+    });
+}
+exports.saveCache = saveCache;
+function getRestoredEntry() {
+    const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY);
+    if (restoredEntryJson) {
+        return JSON.parse(core.getState(RESTORED_ENTRY_STATE_KEY));
+    }
+}
+exports.getRestoredEntry = getRestoredEntry;
+function getSavedEntry() {
+    const savedEntryJson = core.getState(SAVED_ENTRY_STATE_KEY);
+    if (savedEntryJson) {
+        return JSON.parse(savedEntryJson);
+    }
+}
+exports.getSavedEntry = getSavedEntry;
 
 
 /***/ }),
@@ -60233,7 +60308,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getAndroidSdk = void 0;
-const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs = __importStar(__nccwpck_require__(7147));
@@ -60243,14 +60317,9 @@ const constants_1 = __nccwpck_require__(9042);
 const cache_1 = __nccwpck_require__(4810);
 function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = (0, cache_1.generateRestoreKey)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
         if (!cacheDisabled) {
-            const matchedKey = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
-            if (matchedKey) {
-                core.info(`Found in cache`);
-                yield exec.exec('ls', [`-al`, constants_1.ANDROID_HOME_DIR], {
-                    input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
-                });
+            const restoreCacheEntry = yield (0, cache_1.restoreCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            if (restoreCacheEntry) {
                 return Promise.resolve();
             }
         }
