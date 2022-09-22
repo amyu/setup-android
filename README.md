@@ -16,12 +16,12 @@ See [action.yml](action.yml)
 **Basic:**
 ```yaml
 steps:
-  - uses: actions/checkout@v2
+  - uses: actions/checkout@v3
   - name: Setup JDK 11
-    uses: actions/setup-java@v2
+    uses: actions/setup-java@v3
     with:
       java-version: 11
-      distribution: adopt
+      distribution: temurin
       
   - name: Setup Android SDK
     uses: amyu/setup-android@v2
