@@ -7,6 +7,8 @@ export const INPUT_NDK_VERSION = 'ndk-version'
 export const INPUT_CMAKE_VERSION = 'cmake-version'
 export const INPUT_CACHE_DISABLED = 'cache-disabled'
 
+export const INPUT_JOB_STATUS = 'job-status'
+
 // https://developer.android.com/studio#command-tools
 export const COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`
 export const COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip`

@@ -59312,13 +59312,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isJobStatusSuccess = void 0;
 const constants = __importStar(__nccwpck_require__(9042));
 const core = __importStar(__nccwpck_require__(2186));
 const cache_1 = __nccwpck_require__(4810);
 const summary_1 = __nccwpck_require__(2553);
+const constants_1 = __nccwpck_require__(9042);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            if (!isJobStatusSuccess()) {
+                return Promise.resolve();
+            }
             const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION);
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
@@ -59332,6 +59337,11 @@ function run() {
         }
     });
 }
+function isJobStatusSuccess() {
+    const jobStatus = core.getInput(constants_1.INPUT_JOB_STATUS);
+    return jobStatus === 'success';
+}
+exports.isJobStatusSuccess = isJobStatusSuccess;
 run();
 
 
@@ -59369,7 +59379,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 exports.INPUT_SDK_VERSION = 'sdk-version';
@@ -59377,6 +59387,7 @@ exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
 exports.INPUT_CMAKE_VERSION = 'cmake-version';
 exports.INPUT_CACHE_DISABLED = 'cache-disabled';
+exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
 exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip`;
 exports.COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip`;
