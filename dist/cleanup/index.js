@@ -59219,7 +59219,7 @@ const cache_1 = __nccwpck_require__(7799);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
 const SAVED_ENTRY_STATE_KEY = 'savedEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
-    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`;
+    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-2`;
 }
 function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
     return __awaiter(this, void 0, void 0, function* () {
