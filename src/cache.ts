@@ -49,8 +49,8 @@ export async function saveCache(
     ndkVersion,
     cmakeVersion
   )
-  core.info(`caching ...`)
 
+  core.info(`caching ...`)
   try {
     const savedEntry = await cache.saveCache([ANDROID_HOME_DIR], restoreKey)
     return Promise.resolve(savedEntry)
