@@ -4,14 +4,15 @@ on:
 
 jobs:
   test:
-    name: run test ${{ matrix.os }}
+    name: run test ${{ matrix.os }} sdkversion ${{ matrix.sdk }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
+        sdk: [30, 32, 33]
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.sdk }}
       cancel-in-progress: true
 
     steps:
@@ -34,7 +35,7 @@ jobs:
         uses: ./
         with:
           cache-disabled: false
-          sdk-version: '30'
+          sdk-version: ${{ matrix.sdk }}
           build-tools-version: '30.0.3'
           cmake-version: '3.10.2.4988404'
           ndk-version: '23.1.7779620'
