@@ -4,7 +4,6 @@ import {ANDROID_HOME_DIR} from './constants'
 import {CacheEntry, ReserveCacheError} from '@actions/cache'
 
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry'
-const SAVED_ENTRY_STATE_KEY = 'savedEntry'
 
 function generateRestoreKey(
   sdkVersion: string,
@@ -12,7 +11,7 @@ function generateRestoreKey(
   ndkVersion: string,
   cmakeVersion: string
 ): string {
-  return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-2`
+  return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v2`
 }
 
 export async function restoreCache(
@@ -54,7 +53,6 @@ export async function saveCache(
 
   try {
     const savedEntry = await cache.saveCache([ANDROID_HOME_DIR], restoreKey)
-    core.saveState(SAVED_ENTRY_STATE_KEY, savedEntry)
     return Promise.resolve(savedEntry)
   } catch (error) {
     // 同じKeyで登録してもOK
@@ -62,21 +60,11 @@ export async function saveCache(
       core.info(error.message)
     }
   }
-
-  core.info(`cached`)
-  return Promise.resolve(undefined)
 }
 
 export function getRestoredEntry(): CacheEntry | undefined {
   const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY)
   if (restoredEntryJson) {
-    return JSON.parse(core.getState(RESTORED_ENTRY_STATE_KEY))
-  }
-}
-
-export function getSavedEntry(): CacheEntry | undefined {
-  const savedEntryJson = core.getState(SAVED_ENTRY_STATE_KEY)
-  if (savedEntryJson) {
-    return JSON.parse(savedEntryJson)
+    return JSON.parse(restoredEntryJson)
   }
 }

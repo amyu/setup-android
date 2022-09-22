@@ -15,8 +15,19 @@ async function run(): Promise<void> {
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
 
-    await saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion)
-    await renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion)
+    const savedCacheEntry = await saveCache(
+      sdkVersion,
+      buildToolsVersion,
+      ndkVersion,
+      cmakeVersion
+    )
+    await renderSummary(
+      sdkVersion,
+      buildToolsVersion,
+      ndkVersion,
+      cmakeVersion,
+      savedCacheEntry
+    )
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

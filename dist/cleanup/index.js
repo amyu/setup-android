@@ -59211,15 +59211,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getSavedEntry = exports.getRestoredEntry = exports.saveCache = exports.restoreCache = void 0;
+exports.getRestoredEntry = exports.saveCache = exports.restoreCache = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const cache = __importStar(__nccwpck_require__(7799));
 const constants_1 = __nccwpck_require__(9042);
 const cache_1 = __nccwpck_require__(7799);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
-const SAVED_ENTRY_STATE_KEY = 'savedEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
-    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-2`;
+    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v2`;
 }
 function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -59242,7 +59241,6 @@ function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
         core.info(`caching ...`);
         try {
             const savedEntry = yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
-            core.saveState(SAVED_ENTRY_STATE_KEY, savedEntry);
             return Promise.resolve(savedEntry);
         }
         catch (error) {
@@ -59251,25 +59249,16 @@ function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
                 core.info(error.message);
             }
         }
-        core.info(`cached`);
-        return Promise.resolve(undefined);
     });
 }
 exports.saveCache = saveCache;
 function getRestoredEntry() {
     const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY);
     if (restoredEntryJson) {
-        return JSON.parse(core.getState(RESTORED_ENTRY_STATE_KEY));
+        return JSON.parse(restoredEntryJson);
     }
 }
 exports.getRestoredEntry = getRestoredEntry;
-function getSavedEntry() {
-    const savedEntryJson = core.getState(SAVED_ENTRY_STATE_KEY);
-    if (savedEntryJson) {
-        return JSON.parse(savedEntryJson);
-    }
-}
-exports.getSavedEntry = getSavedEntry;
 
 
 /***/ }),
@@ -59328,8 +59317,8 @@ function run() {
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
-            yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
-            yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            const savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry);
         }
         catch (error) {
             if (error instanceof Error)
@@ -59443,13 +59432,12 @@ exports.renderSummary = void 0;
 const summary_1 = __nccwpck_require__(1327);
 const core = __importStar(__nccwpck_require__(2186));
 const cache_1 = __nccwpck_require__(4810);
-function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry) {
     return __awaiter(this, void 0, void 0, function* () {
         // is supported job summary
         if (!process.env[summary_1.SUMMARY_ENV_VAR]) {
             return Promise.resolve();
         }
-        core.info('Installed Info');
         core.summary.addHeading('setup-android');
         core.summary.addRaw(`
 <table>
@@ -59467,8 +59455,6 @@ function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) 
   </tr>
 </table>
     `);
-        core.info('Cached Size Info');
-        const savedCacheEntry = (0, cache_1.getSavedEntry)();
         const restoredCacheEntry = (0, cache_1.getRestoredEntry)();
         core.summary.addHeading('Cached Summary', 3);
         if (savedCacheEntry) {

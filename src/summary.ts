@@ -1,19 +1,20 @@
 import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary'
 import * as core from '@actions/core'
-import {getRestoredEntry, getSavedEntry} from './cache'
+import {getRestoredEntry} from './cache'
+import {CacheEntry} from '@actions/cache'
 
 export async function renderSummary(
   sdkVersion: string,
   buildToolsVersion: string,
   ndkVersion: string,
-  cmakeVersion: string
+  cmakeVersion: string,
+  savedCacheEntry: CacheEntry | undefined
 ): Promise<void> {
   // is supported job summary
   if (!process.env[SUMMARY_ENV_VAR]) {
     return Promise.resolve()
   }
 
-  core.info('Installed Info')
   core.summary.addHeading('setup-android')
   core.summary.addRaw(`
 <table>
@@ -32,8 +33,6 @@ export async function renderSummary(
 </table>
     `)
 
-  core.info('Cached Size Info')
-  const savedCacheEntry = getSavedEntry()
   const restoredCacheEntry = getRestoredEntry()
   core.summary.addHeading('Cached Summary', 3)
   if (savedCacheEntry) {

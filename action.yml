@@ -20,6 +20,9 @@ inputs:
     required: false
     description: 'disabled cache'
     default: 'false'
+  job-status:
+    description: 'Workaround to pass job status to post job step. This variable is not intended for manual setting'
+    default: ${{ job.status }}
 runs:
   using: 'node16'
   main: 'dist/setup/index.js'

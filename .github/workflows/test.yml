@@ -2,6 +2,9 @@ name: 'build-test'
 on:
   pull_request:
 
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
 jobs:
   test:
     name: run test ${{ matrix.os }} sdkversion ${{ matrix.sdk }}
