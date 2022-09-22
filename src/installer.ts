@@ -1,4 +1,3 @@
-import * as cache from '@actions/cache'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as fs from 'fs'
@@ -11,21 +10,23 @@ import {
   COMMANDLINE_TOOLS_MAC_URL,
   COMMANDLINE_TOOLS_WINDOWS_URL
 } from './constants'
-import {ReserveCacheError} from '@actions/cache'
+import {restoreCache} from './cache'
 
 export async function getAndroidSdk(
   sdkVersion: string,
   buildToolsVersion: string,
   ndkVersion: string,
   cmakeVersion: string,
-  isUseCache: boolean
+  cacheDisabled: boolean
 ): Promise<void> {
-  const restoreKey = `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-0`
-
-  if (isUseCache) {
-    const matchedKey = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
-    if (matchedKey) {
-      core.info(`Found in cache`)
+  if (!cacheDisabled) {
+    const restoreCacheEntry = await restoreCache(
+      sdkVersion,
+      buildToolsVersion,
+      ndkVersion,
+      cmakeVersion
+    )
+    if (restoreCacheEntry) {
       return Promise.resolve()
     }
   }
@@ -101,16 +102,4 @@ export async function getAndroidSdk(
     ])
   }
   core.info(`installed`)
-
-  // add cache
-  core.info(`caching ...`)
-  try {
-    await cache.saveCache([ANDROID_HOME_DIR], restoreKey)
-  } catch (error) {
-    // 同じKeyで登録してもOK
-    if (error instanceof ReserveCacheError) {
-      core.info(error.message)
-    }
-  }
-  core.info(`cached`)
 }

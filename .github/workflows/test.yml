@@ -2,16 +2,24 @@ name: 'build-test'
 on:
   pull_request:
 
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
 jobs:
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    name: run test ${{ matrix.os }} sdkversion ${{ matrix.sdk }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        sdk: [30, 32, 33]
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.sdk }}
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -21,16 +29,16 @@ jobs:
           rm -rf ~/android
 
       - name: Setup JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: adopt
+          distribution: temurin
 
       - name: Setup Android SDK
         uses: ./
         with:
-          is-use-cache: true
-          sdk-version: '30'
+          cache-disabled: false
+          sdk-version: ${{ matrix.sdk }}
           build-tools-version: '30.0.3'
           cmake-version: '3.10.2.4988404'
           ndk-version: '23.1.7779620'

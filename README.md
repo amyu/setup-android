@@ -24,7 +24,7 @@ steps:
       distribution: adopt
       
   - name: Setup Android SDK
-    uses: amyu/setup-android@v1.1
+    uses: amyu/setup-android@v2
 
   - run: ./gradlew build --stacktrace
 ```
@@ -32,19 +32,19 @@ steps:
 **Additional:**
 ```yaml
 steps:
-  - uses: actions/checkout@v2
+  - uses: actions/checkout@v3
   - name: Setup JDK 11
-    uses: actions/setup-java@v2
+    uses: actions/setup-java@v3
     with:
       java-version: 11
-      distribution: adopt
+      distribution: temurin
       
   - name: Setup Android SDK
-    uses: amyu/setup-android@v1.1
+    uses: amyu/setup-android@v2
     with:
-      # default: true
+      # default: false
       # Whether to use the cache     
-      is-use-cache: true
+      cache-disabled: true
       
       # default: '30'
       # sdk version

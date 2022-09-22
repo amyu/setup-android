@@ -16,10 +16,14 @@ inputs:
   cmake-version:
     required: false
     description: 'cmake version'
-  is-use-cache:
+  cache-disabled:
     required: false
-    description: 'is use cache'
-    default: 'true'
+    description: 'disabled cache'
+    default: 'false'
+  job-status:
+    description: 'Workaround to pass job status to post job step. This variable is not intended for manual setting'
+    default: ${{ job.status }}
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: 'node16'
+  main: 'dist/setup/index.js'
+  post: 'dist/cleanup/index.js'
