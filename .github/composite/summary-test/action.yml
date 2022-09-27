@@ -1,0 +1,22 @@
+name: "composite action内でSummaryの書き込み領域が1つしかないのでは"
+description:
+runs:
+  using: "composite"
+  steps:
+    - name: Setup JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+
+    - name: Setup Android SDK
+      uses: amyu/setup-android@v2
+      with:
+        cache-disabled: false
+        sdk-version: '32'
+        build-tools-version: '30.0.3'
+        cmake-version: '3.10.2.4988404'
+        ndk-version: '23.1.7779620'
