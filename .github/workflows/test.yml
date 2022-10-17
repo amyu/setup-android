@@ -35,7 +35,7 @@ jobs:
           distribution: temurin
 
       - name: Setup Android SDK
-        uses: ./
+        uses: amyu/setup-android@v2
         with:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
