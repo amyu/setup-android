@@ -14,13 +14,18 @@ async function run(): Promise<void> {
     const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION)
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
+    const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED)
 
-    const savedCacheEntry = await saveCache(
-      sdkVersion,
-      buildToolsVersion,
-      ndkVersion,
-      cmakeVersion
-    )
+    let savedCacheEntry
+    if (!cacheDisabled) {
+      savedCacheEntry = await saveCache(
+        sdkVersion,
+        buildToolsVersion,
+        ndkVersion,
+        cmakeVersion
+      )
+    }
+
     await renderSummary(
       sdkVersion,
       buildToolsVersion,

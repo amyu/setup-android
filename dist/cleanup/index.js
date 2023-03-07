@@ -59332,7 +59332,11 @@ function run() {
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
-            const savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED);
+            let savedCacheEntry;
+            if (!cacheDisabled) {
+                savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            }
             yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry);
         }
         catch (error) {
