@@ -16,21 +16,23 @@ async function run(): Promise<void> {
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
     const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED)
 
+    let savedCacheEntry
     if (!cacheDisabled) {
-      const savedCacheEntry = await saveCache(
+      savedCacheEntry = await saveCache(
         sdkVersion,
         buildToolsVersion,
         ndkVersion,
         cmakeVersion
       )
-      await renderSummary(
-        sdkVersion,
-        buildToolsVersion,
-        ndkVersion,
-        cmakeVersion,
-        savedCacheEntry
-      )
     }
+
+    await renderSummary(
+      sdkVersion,
+      buildToolsVersion,
+      ndkVersion,
+      cmakeVersion,
+      savedCacheEntry
+    )
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
