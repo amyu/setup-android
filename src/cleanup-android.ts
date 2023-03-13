@@ -15,7 +15,9 @@ async function run(): Promise<void> {
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
     const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED)
-    const displayJobSummary = core.getInput(constants.INPUT_JOB_SUMMARY)
+    const generateJobSummary = core.getInput(
+      constants.INPUT_GENERATE_JOB_SUMMARY
+    )
 
     let savedCacheEntry
     if (!cacheDisabled) {
@@ -27,7 +29,7 @@ async function run(): Promise<void> {
       )
     }
 
-    if (displayJobSummary) {
+    if (generateJobSummary) {
       await renderSummary(
         sdkVersion,
         buildToolsVersion,

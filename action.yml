@@ -20,7 +20,7 @@ inputs:
     required: false
     description: 'disabled cache'
     default: 'false'
-  display-summary:
+  generate-job-summary:
     required: false
     description: 'display job summary'
     default: 'true'
