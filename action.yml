@@ -20,6 +20,10 @@ inputs:
     required: false
     description: 'disabled cache'
     default: 'false'
+  display-summary:
+    required: false
+    description: 'display job summary'
+    default: 'true'
   job-status:
     description: 'Workaround to pass job status to post job step. This variable is not intended for manual setting'
     default: ${{ job.status }}

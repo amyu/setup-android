@@ -59333,11 +59333,14 @@ function run() {
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
             const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED);
+            const displayJobSummary = core.getInput(constants.INPUT_JOB_SUMMARY);
             let savedCacheEntry;
             if (!cacheDisabled) {
                 savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
             }
-            yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry);
+            if (displayJobSummary) {
+                yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry);
+            }
         }
         catch (error) {
             if (error instanceof Error)
@@ -59387,7 +59390,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_JOB_SUMMARY = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 exports.INPUT_SDK_VERSION = 'sdk-version';
@@ -59395,6 +59398,7 @@ exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
 exports.INPUT_CMAKE_VERSION = 'cmake-version';
 exports.INPUT_CACHE_DISABLED = 'cache-disabled';
+exports.INPUT_JOB_SUMMARY = 'job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
 exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip`;
