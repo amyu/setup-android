@@ -59332,8 +59332,10 @@ function run() {
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
-            const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED);
-            const generateJobSummary = core.getInput(constants.INPUT_GENERATE_JOB_SUMMARY);
+            const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
+            const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
+            core.info(`cache-disabled: ${cacheDisabled}`);
+            core.info(`generate-job-summary: ${generateJobSummary}`);
             let savedCacheEntry;
             if (!cacheDisabled) {
                 savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
