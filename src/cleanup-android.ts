@@ -14,7 +14,13 @@ async function run(): Promise<void> {
     const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION)
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
-    const cacheDisabled = core.getInput(constants.INPUT_CACHE_DISABLED)
+    const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED)
+    const generateJobSummary = core.getBooleanInput(
+      constants.INPUT_GENERATE_JOB_SUMMARY
+    )
+
+    core.info(`cache-disabled: ${cacheDisabled}`)
+    core.info(`generate-job-summary: ${generateJobSummary}`)
 
     let savedCacheEntry
     if (!cacheDisabled) {
@@ -26,13 +32,15 @@ async function run(): Promise<void> {
       )
     }
 
-    await renderSummary(
-      sdkVersion,
-      buildToolsVersion,
-      ndkVersion,
-      cmakeVersion,
-      savedCacheEntry
-    )
+    if (generateJobSummary) {
+      await renderSummary(
+        sdkVersion,
+        buildToolsVersion,
+        ndkVersion,
+        cmakeVersion,
+        savedCacheEntry
+      )
+    }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

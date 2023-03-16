@@ -70,6 +70,10 @@ steps:
       # Installed when the version is specified
       ndk-version: '23.1.7779620'
 
+      # default: true
+      # Whether to generate or not the job summary     
+      generate-job-summary: false
+
   - run: ./gradlew build --stacktrace
 ```
 
