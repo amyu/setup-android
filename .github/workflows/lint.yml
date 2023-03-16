@@ -1,0 +1,23 @@
+name: 'lint'
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: run lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lint and prettier
+        run: |
+          npm run lint
+          npm run format-check
