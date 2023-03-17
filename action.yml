@@ -5,11 +5,11 @@ inputs:
   sdk-version:
     required: false
     description: 'sdk version'
-    default: '30'
+    default: '33'
   build-tools-version:
     required: false
     description: 'build tools version'
-    default: '30.0.3'
+    default: '33.0.2'
   ndk-version:
     required: false
     description: 'ndk version'
