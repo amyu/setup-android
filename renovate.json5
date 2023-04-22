@@ -18,6 +18,13 @@
       // Renovate is not used because the patch is applied
       "matchPackagePatterns": ["@actions/cache"],
       "enabled": false
+    },
+    {
+      groupName: "Android Gradle Plugin",
+      matchPackagePrefixes: [
+        "com.android.library",
+        "com.android.application",
+      ],
     }
   ]
 }
