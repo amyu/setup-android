@@ -17,10 +17,10 @@ See [action.yml](action.yml)
 ```yaml
 steps:
   - uses: actions/checkout@v3
-  - name: Setup JDK 11
+  - name: Setup JDK 17
     uses: actions/setup-java@v3
     with:
-      java-version: 11
+      java-version: 17
       distribution: temurin
       
   - name: Setup Android SDK
@@ -33,10 +33,10 @@ steps:
 ```yaml
 steps:
   - uses: actions/checkout@v3
-  - name: Setup JDK 11
+  - name: Setup JDK 17
     uses: actions/setup-java@v3
     with:
-      java-version: 11
+      java-version: 17
       distribution: temurin
       
   - name: Setup Android SDK
