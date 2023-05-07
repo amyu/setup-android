@@ -60353,9 +60353,20 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         core.info(`downloaded cmdline-tools`);
         // install android sdk
         core.info(`installing ...`);
-        yield exec.exec('sdkmanager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
-            input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
-        });
+        // https://github.com/actions/toolkit/issues/359 pipes workaround
+        switch (process.platform) {
+            case 'win32':
+                yield exec.exec(`cmd /c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                break;
+            case 'darwin':
+                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                break;
+            case 'linux':
+                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                break;
+            default:
+                throw Error(`Unsupported platform: ${process.platform}`);
+        }
         yield exec.exec('sdkmanager', [
             `build-tools;${buildToolsVersion}`,
             `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
