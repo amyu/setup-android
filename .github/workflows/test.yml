@@ -39,9 +39,9 @@ jobs:
         with:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
-          build-tools-version: '33.0.2'
+          build-tools-version: '34.0.0-rc3'
           cmake-version: '3.10.2.4988404'
-          ndk-version: '23.1.7779620'
+          ndk-version: '25.1.8937393'
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
