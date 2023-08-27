@@ -60263,9 +60263,9 @@ exports.INPUT_CACHE_DISABLED = 'cache-disabled';
 exports.INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
-exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip`;
-exports.COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip`;
-exports.COMMANDLINE_TOOLS_WINDOWS_URL = `https://dl.google.com/android/repository/commandlinetools-win-8512546_latest.zip`;
+exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip`;
+exports.COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-10406996_latest.zip`;
+exports.COMMANDLINE_TOOLS_WINDOWS_URL = `https://dl.google.com/android/repository/commandlinetools-win-10406996_latest.zip`;
 exports.HOME = os.homedir();
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
 exports.ANDROID_HOME_DIR = path_1.default.join(exports.HOME, '.android');
@@ -60353,9 +60353,20 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         core.info(`downloaded cmdline-tools`);
         // install android sdk
         core.info(`installing ...`);
-        yield exec.exec('sdkmanager', [`--licenses`, `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`], {
-            input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
-        });
+        // https://github.com/actions/toolkit/issues/359 pipes workaround
+        switch (process.platform) {
+            case 'win32':
+                yield exec.exec(`cmd /c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                break;
+            case 'darwin':
+                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                break;
+            case 'linux':
+                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                break;
+            default:
+                throw Error(`Unsupported platform: ${process.platform}`);
+        }
         yield exec.exec('sdkmanager', [
             `build-tools;${buildToolsVersion}`,
             `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`

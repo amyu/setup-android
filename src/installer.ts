@@ -65,13 +65,26 @@ export async function getAndroidSdk(
 
   // install android sdk
   core.info(`installing ...`)
-  await exec.exec(
-    'sdkmanager',
-    [`--licenses`, `--sdk_root=${ANDROID_SDK_ROOT}`],
-    {
-      input: Buffer.from(Array(10).fill('y').join('\n'), 'utf8')
-    }
-  )
+  // https://github.com/actions/toolkit/issues/359 pipes workaround
+  switch (process.platform) {
+    case 'win32':
+      await exec.exec(
+        `cmd /c "yes | sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT}"`
+      )
+      break
+    case 'darwin':
+      await exec.exec(
+        `/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT}"`
+      )
+      break
+    case 'linux':
+      await exec.exec(
+        `/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT}"`
+      )
+      break
+    default:
+      throw Error(`Unsupported platform: ${process.platform}`)
+  }
 
   await exec.exec('sdkmanager', [
     `build-tools;${buildToolsVersion}`,

@@ -24,7 +24,7 @@
     "hosted",
     "runner"
   ],
-  "author": "",
+  "author": "amyu",
   "license": "MIT",
   "dependencies": {
     "@actions/cache": "^3.0.5",
