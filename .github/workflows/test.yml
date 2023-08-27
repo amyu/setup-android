@@ -39,7 +39,7 @@ jobs:
         with:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
-          build-tools-version: '34.0.0-rc3'
+          build-tools-version: '34.0.0'
           cmake-version: '3.10.2.4988404'
           ndk-version: '25.1.8937393'
 
@@ -78,7 +78,7 @@ jobs:
         with:
           cache-disabled: true
           sdk-version: 33
-          build-tools-version: '34.0.0-rc3'
+          build-tools-version: '34.0.0'
           cmake-version: '3.10.2.4988404'
           ndk-version: '25.1.8937393'
 
