@@ -24,7 +24,7 @@ steps:
       distribution: temurin
       
   - name: Setup Android SDK
-    uses: amyu/setup-android@v2
+    uses: amyu/setup-android@v3
 
   - run: ./gradlew build --stacktrace
 ```
@@ -40,23 +40,23 @@ steps:
       distribution: temurin
       
   - name: Setup Android SDK
-    uses: amyu/setup-android@v2
+    uses: amyu/setup-android@v3
     with:
       # default: false
       # Whether to use the cache     
       cache-disabled: true
       
-      # default: '30'
+      # default: '33'
       # sdk version
       # see https://developer.android.com/studio/releases/platforms
       # It will always be installed.
-      sdk-version: '30'
+      sdk-version: '33'
       
-      # default: '30.0.3'
+      # default: '33.0.2'
       # build tools version
       # see https://developer.android.com/studio/releases/build-tools
       # It will always be installed.
-      build-tools-version: '30.0.3'
+      build-tools-version: '33.0.2'
       
       # default: ''
       # cmake version
