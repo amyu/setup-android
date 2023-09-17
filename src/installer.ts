@@ -69,7 +69,7 @@ export async function getAndroidSdk(
       `cmd /c "rename ${path.join(
         extractedCmdlineToolPath,
         'cmdline-tools'
-      )} latest`
+      )} latest"`
     )
   } else {
     await fs.mkdir(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {

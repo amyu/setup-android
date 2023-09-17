@@ -11,7 +11,7 @@ function generateRestoreKey(
   ndkVersion: string,
   cmakeVersion: string
 ): string {
-  return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v2`
+  return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.1`
 }
 
 export async function restoreCache(

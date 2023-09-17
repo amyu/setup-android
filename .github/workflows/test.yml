@@ -85,8 +85,8 @@ jobs:
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
 
-  test_167:
-    name: run test_167
+  test_check_cmdline_tools_path:
+    name: run check cmdline-tools path
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
