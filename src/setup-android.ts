@@ -17,6 +17,8 @@ async function run(): Promise<void> {
     core.info(`cmake-version: ${cmakeVersion}`)
     core.info(`cache-disabled: ${cacheDisabled}`)
 
+    addPath()
+
     await getAndroidSdk(
       sdkVersion,
       buildToolsVersion,
@@ -24,8 +26,6 @@ async function run(): Promise<void> {
       cmakeVersion,
       cacheDisabled
     )
-
-    addPath()
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

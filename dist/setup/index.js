@@ -1838,7 +1838,7 @@ class OidcClient {
                 .catch(error => {
                 throw new Error(`Failed to get ID Token. \n 
         Error Code : ${error.statusCode}\n 
-        Error Message: ${error.result.message}`);
+        Error Message: ${error.message}`);
             });
             const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
             if (!id_token) {
@@ -60121,9 +60121,9 @@ const constants_1 = __nccwpck_require__(9042);
 function addPath() {
     core.exportVariable('ANDROID_SDK_ROOT', constants_1.ANDROID_SDK_ROOT);
     core.exportVariable('ANDROID_HOME', constants_1.ANDROID_SDK_ROOT);
-    // adb ...
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'platform-tools'));
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'ndk-bundle'));
+    core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', 'latest', 'bin'));
 }
 exports.addPath = addPath;
 
@@ -60316,7 +60316,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getAndroidSdk = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-const fs = __importStar(__nccwpck_require__(7147));
+const fs = __importStar(__nccwpck_require__(3292));
 const path = __importStar(__nccwpck_require__(1017));
 const toolCache = __importStar(__nccwpck_require__(7784));
 const constants_1 = __nccwpck_require__(9042);
@@ -60326,12 +60326,13 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         if (!cacheDisabled) {
             const restoreCacheEntry = yield (0, cache_1.restoreCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
             if (restoreCacheEntry) {
+                core.info(`cache hit`);
                 return Promise.resolve();
             }
         }
+        yield fs.mkdir(constants_1.ANDROID_SDK_ROOT, { recursive: true });
+        core.info(`success create directory`);
         // download sdk-tools
-        core.info(`downloading cmdline-tools ...`);
-        fs.mkdirSync(constants_1.ANDROID_HOME_DIR, { recursive: true });
         let cmdlineToolsDownloadUrl;
         switch (process.platform) {
             case 'win32':
@@ -60346,54 +60347,48 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
             default:
                 throw Error(`Unsupported platform: ${process.platform}`);
         }
+        core.info(`start download cmdline-tools url: ${cmdlineToolsDownloadUrl}`);
         const downloadedCmdlineToolsPath = yield toolCache.downloadTool(cmdlineToolsDownloadUrl);
-        const extractedCmdlineToolPath = yield toolCache.extractZip(downloadedCmdlineToolsPath);
-        const sdkManagerBin = path.join(extractedCmdlineToolPath, 'cmdline-tools', 'bin');
-        core.addPath(sdkManagerBin);
-        core.info(`downloaded cmdline-tools`);
+        core.info(`success download cmdline-tools path: ${downloadedCmdlineToolsPath}`);
+        core.info(`start extract cmdline-tools.zip`);
+        const extractedCmdlineToolPath = yield toolCache.extractZip(downloadedCmdlineToolsPath, path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools'));
+        core.info(`success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`);
+        if (process.platform === 'win32') {
+            yield exec.exec(`cmd /c "rename ${path.join(extractedCmdlineToolPath, 'cmdline-tools')} latest`);
+        }
+        else {
+            yield fs.mkdir(path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
+                recursive: true
+            });
+            yield fs.rename(path.join(extractedCmdlineToolPath, 'cmdline-tools'), path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'));
+        }
         // install android sdk
         core.info(`installing ...`);
         // https://github.com/actions/toolkit/issues/359 pipes workaround
         switch (process.platform) {
             case 'win32':
-                yield exec.exec(`cmd /c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                yield exec.exec(`cmd /c "yes | sdkmanager --licenses"`);
                 break;
             case 'darwin':
-                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`);
                 break;
             case 'linux':
-                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses --sdk_root=${constants_1.ANDROID_SDK_ROOT}"`);
+                yield exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`);
                 break;
             default:
                 throw Error(`Unsupported platform: ${process.platform}`);
         }
-        yield exec.exec('sdkmanager', [
-            `build-tools;${buildToolsVersion}`,
-            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`
-        ]);
-        yield exec.exec('sdkmanager', [
-            `platform-tools`,
-            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
-            '--verbose'
-        ]);
+        yield exec.exec('sdkmanager', [`build-tools;${buildToolsVersion}`]);
+        yield exec.exec('sdkmanager', [`platform-tools`, '--verbose']);
         yield exec.exec('sdkmanager', [
             `platforms;android-${sdkVersion}`,
-            `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
             '--verbose'
         ]);
         if (cmakeVersion) {
-            yield exec.exec('sdkmanager', [
-                `cmake;${cmakeVersion}`,
-                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
-                '--verbose'
-            ]);
+            yield exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose']);
         }
         if (ndkVersion) {
-            yield exec.exec('sdkmanager', [
-                `ndk;${ndkVersion}`,
-                `--sdk_root=${constants_1.ANDROID_SDK_ROOT}`,
-                '--verbose'
-            ]);
+            yield exec.exec('sdkmanager', [`ndk;${ndkVersion}`, '--verbose']);
         }
         core.info(`installed`);
     });
@@ -60458,8 +60453,8 @@ function run() {
             core.info(`ndk-version: ${ndkVersion}`);
             core.info(`cmake-version: ${cmakeVersion}`);
             core.info(`cache-disabled: ${cacheDisabled}`);
-            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled);
             (0, add_path_1.addPath)();
+            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled);
         }
         catch (error) {
             if (error instanceof Error)
@@ -60525,6 +60520,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 3292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 

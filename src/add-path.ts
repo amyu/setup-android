@@ -6,8 +6,7 @@ export function addPath(): void {
   core.exportVariable('ANDROID_SDK_ROOT', ANDROID_SDK_ROOT)
   core.exportVariable('ANDROID_HOME', ANDROID_SDK_ROOT)
 
-  // adb ...
   core.addPath(path.join(ANDROID_SDK_ROOT, 'platform-tools'))
-
   core.addPath(path.join(ANDROID_SDK_ROOT, 'ndk-bundle'))
+  core.addPath(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest', 'bin'))
 }

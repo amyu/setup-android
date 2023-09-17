@@ -28,6 +28,6 @@ inputs:
     description: 'Workaround to pass job status to post job step. This variable is not intended for manual setting'
     default: ${{ job.status }}
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/setup/index.js'
   post: 'dist/cleanup/index.js'
