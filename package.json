@@ -17,6 +17,7 @@
     "url": "git+https://github.com/actions/typescript-action.git"
   },
   "keywords": [
+    "setup-android",
     "actions",
     "android",
     "setup",
