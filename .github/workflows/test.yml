@@ -144,7 +144,7 @@ jobs:
       - name: Setup Android SDK
         uses: ./
         with:
-          cache-key: 'default-version'
+          cache-key: custom-cache-key-on-${{matrix.os}}
 
       - run: |
           sdkmanager --install emulator
