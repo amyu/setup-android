@@ -10,12 +10,14 @@ async function run(): Promise<void> {
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
     const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED)
+    const cacheKey = core.getInput(constants.INPUT_CACHE_KEY)
 
     core.info(`sdk-version: ${sdkVersion}`)
     core.info(`build-tools-version: ${buildToolsVersion}`)
     core.info(`ndk-version: ${ndkVersion}`)
     core.info(`cmake-version: ${cmakeVersion}`)
     core.info(`cache-disabled: ${cacheDisabled}`)
+    core.info(`cache-key: ${cacheKey}`)
 
     addPath()
 
@@ -24,7 +26,8 @@ async function run(): Promise<void> {
       buildToolsVersion,
       ndkVersion,
       cmakeVersion,
-      cacheDisabled
+      cacheDisabled,
+      cacheKey
     )
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)

@@ -60585,28 +60585,30 @@ const cache = __importStar(__nccwpck_require__(7799));
 const constants_1 = __nccwpck_require__(9042);
 const cache_1 = __nccwpck_require__(7799);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
-function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+    if (cacheKey)
+        return cacheKey;
     return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.1`;
 }
-function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
         const restoredEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
         if (restoredEntry) {
-            core.info(`Found in cache`);
+            core.info(`Found in cache: ${restoredEntry}`);
         }
         else {
-            core.info(`Not Found cache`);
+            core.info(`Not Found cache: ${restoredEntry}`);
         }
         core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);
         return Promise.resolve(restoredEntry);
     });
 }
 exports.restoreCache = restoreCache;
-function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
-        core.info(`caching ...`);
+        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+        core.info(`caching "${restoreKey}" ...`);
         try {
             const savedEntry = yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
             return Promise.resolve(savedEntry);
@@ -60663,7 +60665,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_KEY = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(2037));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 exports.INPUT_SDK_VERSION = 'sdk-version';
@@ -60671,6 +60673,7 @@ exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
 exports.INPUT_CMAKE_VERSION = 'cmake-version';
 exports.INPUT_CACHE_DISABLED = 'cache-disabled';
+exports.INPUT_CACHE_KEY = 'cache-key';
 exports.INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
@@ -60732,12 +60735,12 @@ const path = __importStar(__nccwpck_require__(1017));
 const toolCache = __importStar(__nccwpck_require__(7784));
 const constants_1 = __nccwpck_require__(9042);
 const cache_1 = __nccwpck_require__(4810);
-function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled) {
+function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!cacheDisabled) {
-            const restoreCacheEntry = yield (0, cache_1.restoreCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            const restoreCacheEntry = yield (0, cache_1.restoreCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
             if (restoreCacheEntry) {
-                core.info(`cache hit`);
+                core.info(`cache hit: ${restoreCacheEntry}`);
                 return Promise.resolve();
             }
         }
@@ -60859,13 +60862,15 @@ function run() {
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
             const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
+            const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
             core.info(`sdk-version: ${sdkVersion}`);
             core.info(`build-tools-version: ${buildToolsVersion}`);
             core.info(`ndk-version: ${ndkVersion}`);
             core.info(`cmake-version: ${cmakeVersion}`);
             core.info(`cache-disabled: ${cacheDisabled}`);
+            core.info(`cache-key: ${cacheKey}`);
             (0, add_path_1.addPath)();
-            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled);
+            yield (0, installer_1.getAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheDisabled, cacheKey);
         }
         catch (error) {
             if (error instanceof Error)
