@@ -13,7 +13,7 @@ function generateRestoreKey(
   cacheKey: string
 ): string {
   if (cacheKey) return cacheKey
-  return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.1`
+  return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.2`
 }
 
 export async function restoreCache(

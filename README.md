@@ -49,7 +49,7 @@ steps:
       # Whether to use the cache
       cache-disabled: true
 
-      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.1`
+      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.2`
       # Custom key for cache. It is invalid when `cache-disabled: true`
       cache-key: 'custom-cache-key'
 
