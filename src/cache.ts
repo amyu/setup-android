@@ -33,9 +33,9 @@ export async function restoreCache(
 
   const restoredEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
   if (restoredEntry) {
-    core.info(`Found in cache: ${restoredEntry}`)
+    core.info(`Found in cache: ${restoreKey}`)
   } else {
-    core.info(`Not Found cache: ${restoredEntry}`)
+    core.info(`Not Found cache: ${restoreKey}`)
   }
   core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry)
   return Promise.resolve(restoredEntry)

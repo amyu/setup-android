@@ -28,7 +28,7 @@ export async function getAndroidSdk(
       cacheKey
     )
     if (restoreCacheEntry) {
-      core.info(`cache hit: ${restoreCacheEntry}`)
+      core.info(`cache hit: ${restoreCacheEntry.key}`)
       return Promise.resolve()
     }
   }
