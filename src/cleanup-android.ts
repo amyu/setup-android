@@ -15,11 +15,13 @@ async function run(): Promise<void> {
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
     const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED)
+    const cacheKey = core.getInput(constants.INPUT_CACHE_KEY)
     const generateJobSummary = core.getBooleanInput(
       constants.INPUT_GENERATE_JOB_SUMMARY
     )
 
     core.info(`cache-disabled: ${cacheDisabled}`)
+    core.info(`cache-key: ${cacheKey}`)
     core.info(`generate-job-summary: ${generateJobSummary}`)
 
     let savedCacheEntry
@@ -28,7 +30,8 @@ async function run(): Promise<void> {
         sdkVersion,
         buildToolsVersion,
         ndkVersion,
-        cmakeVersion
+        cmakeVersion,
+        cacheKey
       )
     }
 

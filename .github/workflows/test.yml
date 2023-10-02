@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         sdk: [32, 33]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.sdk }}-test
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-test_not_use_cache
       cancel-in-progress: true
@@ -91,7 +91,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -116,3 +116,35 @@ jobs:
 
       - run: |
           sdkmanager --install "system-images;android-31;default;x86_64"
+
+  test_custom_cache_key:
+    name: run test custom cache key
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: remove android sdk from ubuntu-latest
+        shell: bash
+        run: |
+          echo 'ANDROID_HOME=' >> $GITHUB_ENV
+          echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          rm -rf ~/android
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: ./
+        with:
+          cache-key: 'default-version'
+
+      - run: |
+          sdkmanager --install emulator
