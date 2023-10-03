@@ -59646,17 +59646,17 @@ const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     if (cacheKey)
         return cacheKey;
-    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.1`;
+    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.2`;
 }
 function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
         const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
         const restoredEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
         if (restoredEntry) {
-            core.info(`Found in cache: ${restoredEntry}`);
+            core.info(`Found in cache: ${restoreKey}`);
         }
         else {
-            core.info(`Not Found cache: ${restoredEntry}`);
+            core.info(`Not Found cache: ${restoreKey}`);
         }
         core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);
         return Promise.resolve(restoredEntry);
