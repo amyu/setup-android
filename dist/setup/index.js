@@ -60583,7 +60583,6 @@ exports.getRestoredEntry = exports.saveCache = exports.restoreCache = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const cache = __importStar(__nccwpck_require__(7799));
 const constants_1 = __nccwpck_require__(9042);
-const cache_1 = __nccwpck_require__(7799);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     if (cacheKey)
@@ -60608,17 +60607,14 @@ exports.restoreCache = restoreCache;
 function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
         const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+        core.info(`checking if "${restoreKey}" is already cached ...`);
+        const hasEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey, [], { lookupOnly: true });
+        if (hasEntry) {
+            core.info(`Found in cache: ${restoreKey}`);
+            return;
+        }
         core.info(`caching "${restoreKey}" ...`);
-        try {
-            const savedEntry = yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
-            return Promise.resolve(savedEntry);
-        }
-        catch (error) {
-            // 同じKeyで登録してもOK
-            if (error instanceof cache_1.ReserveCacheError) {
-                core.info(error.message);
-            }
-        }
+        return yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
     });
 }
 exports.saveCache = saveCache;
