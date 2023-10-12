@@ -6,6 +6,7 @@ export const INPUT_BUILD_TOOLS_VERSION = 'build-tools-version'
 export const INPUT_NDK_VERSION = 'ndk-version'
 export const INPUT_CMAKE_VERSION = 'cmake-version'
 export const INPUT_CACHE_DISABLED = 'cache-disabled'
+export const INPUT_CACHE_KEY = 'cache-key'
 
 export const INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary'
 export const INPUT_JOB_STATUS = 'job-status'

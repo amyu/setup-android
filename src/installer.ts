@@ -16,17 +16,19 @@ export async function getAndroidSdk(
   buildToolsVersion: string,
   ndkVersion: string,
   cmakeVersion: string,
-  cacheDisabled: boolean
+  cacheDisabled: boolean,
+  cacheKey: string
 ): Promise<void> {
   if (!cacheDisabled) {
     const restoreCacheEntry = await restoreCache(
       sdkVersion,
       buildToolsVersion,
       ndkVersion,
-      cmakeVersion
+      cmakeVersion,
+      cacheKey
     )
     if (restoreCacheEntry) {
-      core.info(`cache hit`)
+      core.info(`cache hit: ${restoreCacheEntry.key}`)
       return Promise.resolve()
     }
   }

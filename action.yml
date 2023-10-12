@@ -20,6 +20,10 @@ inputs:
     required: false
     description: 'disabled cache'
     default: 'false'
+  cache-key:
+    required: false
+    description: 'cache key'
+    default: ''
   generate-job-summary:
     required: false
     description: 'display job summary'

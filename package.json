@@ -1,13 +1,13 @@
 {
   "name": "setup-android",
-  "version": "2",
+  "version": "3",
   "description": "setup-android for self hosted runner",
   "main": "dist/setup/index.js",
   "scripts": {
     "postinstall": "patch-package",
     "build": "tsc",
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
     "package": "ncc build -o dist/setup src/setup-android.ts && ncc build -o dist/cleanup src/cleanup-android.ts",
     "all": "npm run postinstall && npm run build && npm run format && npm run lint && npm run package"
@@ -17,6 +17,7 @@
     "url": "git+https://github.com/actions/typescript-action.git"
   },
   "keywords": [
+    "setup-android",
     "actions",
     "android",
     "setup",
