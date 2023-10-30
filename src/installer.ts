@@ -12,7 +12,7 @@ import {
 import {restoreCache} from './cache'
 
 export async function getAndroidSdk(
-  sdkVersion: string,
+  sdkVersion: string[],
   buildToolsVersion: string,
   ndkVersion: string,
   cmakeVersion: string,
@@ -100,12 +100,16 @@ export async function getAndroidSdk(
       throw Error(`Unsupported platform: ${process.platform}`)
   }
 
-  await exec.exec('sdkmanager', [`build-tools;${buildToolsVersion}`])
-  await exec.exec('sdkmanager', [`platform-tools`, '--verbose'])
+  const sdkVersionCommand = sdkVersion.map(
+    version => `platforms;android-${version}`
+  )
   await exec.exec('sdkmanager', [
-    `platforms;android-${sdkVersion}`,
+    `build-tools;${buildToolsVersion}`,
+    `platform-tools`,
+    ...sdkVersionCommand,
     '--verbose'
   ])
+
   if (cmakeVersion) {
     await exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose'])
   }

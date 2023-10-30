@@ -60583,11 +60583,16 @@ exports.getRestoredEntry = exports.saveCache = exports.restoreCache = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const cache = __importStar(__nccwpck_require__(7799));
 const constants_1 = __nccwpck_require__(9042);
+const cache_1 = __nccwpck_require__(7799);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+    const suffixVersion = 'v3.4';
     if (cacheKey)
-        return cacheKey;
-    return `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.2`;
+        return `${cacheKey}-${suffixVersion}`;
+    return (`${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${suffixVersion}`
+        // cache keys can't contain `,`
+        .replace(/,/g, '')
+        .toLowerCase());
 }
 function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -60614,7 +60619,15 @@ function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cach
             return;
         }
         core.info(`caching "${restoreKey}" ...`);
-        return yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
+        try {
+            const savedEntry = yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
+            return Promise.resolve(savedEntry);
+        }
+        catch (error) {
+            if (error instanceof cache_1.ReserveCacheError) {
+                core.info(error.message);
+            }
+        }
     });
 }
 exports.saveCache = saveCache;
@@ -60788,10 +60801,11 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
             default:
                 throw Error(`Unsupported platform: ${process.platform}`);
         }
-        yield exec.exec('sdkmanager', [`build-tools;${buildToolsVersion}`]);
-        yield exec.exec('sdkmanager', [`platform-tools`, '--verbose']);
+        const sdkVersionCommand = sdkVersion.map(version => `platforms;android-${version}`);
         yield exec.exec('sdkmanager', [
-            `platforms;android-${sdkVersion}`,
+            `build-tools;${buildToolsVersion}`,
+            `platform-tools`,
+            ...sdkVersionCommand,
             '--verbose'
         ]);
         if (cmakeVersion) {
@@ -60853,7 +60867,7 @@ const installer_1 = __nccwpck_require__(2574);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const sdkVersion = core.getInput(constants.INPUT_SDK_VERSION);
+            const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION);
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);

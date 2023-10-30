@@ -1,4 +1,4 @@
-name: 'build-test'
+name: build-test
 on:
   pull_request:
 
@@ -39,15 +39,15 @@ jobs:
         with:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
-          build-tools-version: '34.0.0'
-          cmake-version: '3.10.2.4988404'
-          ndk-version: '25.1.8937393'
+          build-tools-version: 34.0.0
+          cmake-version: 3.10.2.4988404
+          ndk-version: 25.1.8937393
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
 
   test_not_use_cache:
-    name: run test not use cache
+    name: run test not use cache ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -78,15 +78,15 @@ jobs:
         with:
           cache-disabled: true
           sdk-version: 33
-          build-tools-version: '34.0.0'
-          cmake-version: '3.10.2.4988404'
-          ndk-version: '25.1.8937393'
+          build-tools-version: 34.0.0
+          cmake-version: 3.10.2.4988404
+          ndk-version: 25.1.8937393
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
 
   test_check_cmdline_tools_path:
-    name: run check cmdline-tools path
+    name: run check cmdline-tools path ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -118,7 +118,7 @@ jobs:
           sdkmanager --install "system-images;android-31;default;x86_64"
 
   test_custom_cache_key:
-    name: run test custom cache key
+    name: run test custom cache key ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -148,3 +148,40 @@ jobs:
 
       - run: |
           sdkmanager --install emulator
+
+  test_install_multiple_sdk_version:
+    name: run test install multiple sdk ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-test_install_multiple_sdk_version
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: remove android sdk from ubuntu-latest
+        shell: bash
+        run: |
+          echo 'ANDROID_HOME=' >> $GITHUB_ENV
+          echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          rm -rf ~/android
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: ./
+        with:
+          sdk-version: |
+            33
+            34
+
+      - run: |
+          sdkmanager --list_installed
