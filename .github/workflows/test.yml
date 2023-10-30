@@ -148,3 +148,34 @@ jobs:
 
       - run: |
           sdkmanager --install emulator
+
+  test2:
+    name: test2
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: remove android sdk from ubuntu-latest
+        shell: bash
+        run: |
+          echo 'ANDROID_HOME=' >> $GITHUB_ENV
+          echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          rm -rf ~/android
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: ./
+        with:
+          sdk-version: 34
+          cache-key: '33and34installed'
+
+      - run: sdkmanager --list
+
+      - run: sdkmanager --install "platforms;android-33"
