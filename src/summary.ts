@@ -4,7 +4,7 @@ import {getRestoredEntry} from './cache'
 import {CacheEntry} from '@actions/cache'
 
 export async function renderSummary(
-  sdkVersion: string,
+  sdkVersion: string[],
   buildToolsVersion: string,
   ndkVersion: string,
   cmakeVersion: string,

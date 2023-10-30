@@ -53,29 +53,33 @@ steps:
       # Custom key for cache. It is invalid when `cache-disabled: true`
       cache-key: 'custom-cache-key'
 
-      # default: '33'
+      # default: 33
       # sdk version
       # see https://developer.android.com/studio/releases/platforms
       # It will always be installed.
-      sdk-version: '33'
+      sdk-version: 33
+      # or 
+      sdk-version: |
+        33
+        34
 
-      # default: '33.0.2'
+      # default: 33.0.2
       # build tools version
       # see https://developer.android.com/studio/releases/build-tools
       # It will always be installed.
-      build-tools-version: '33.0.2'
+      build-tools-version: 33.0.2
 
       # default: ''
       # cmake version
       # see https://developer.android.com/studio/projects/install-ndk
       # Installed when the version is specified
-      cmake-version: '3.10.2.4988404'
+      cmake-version: 3.10.2.4988404
 
       # default: ''
       # cmake version
       # see https://developer.android.com/studio/projects/install-ndk
       # Installed when the version is specified
-      ndk-version: '23.1.7779620'
+      ndk-version: 23.1.7779620
 
       # default: true
       # Whether to generate or not the job summary
