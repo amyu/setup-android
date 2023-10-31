@@ -59924,7 +59924,7 @@ function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
 <table>
     <tr>
         <th>Cached size</th>
-        <th>Restered size</th>
+        <th>Restored size</th>
     </tr>
     <tr>
       <td>${formatSize(savedCacheEntry === null || savedCacheEntry === void 0 ? void 0 : savedCacheEntry.size)}</td>

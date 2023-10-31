@@ -51,7 +51,7 @@ export async function renderSummary(
 <table>
     <tr>
         <th>Cached size</th>
-        <th>Restered size</th>
+        <th>Restored size</th>
     </tr>
     <tr>
       <td>${formatSize(savedCacheEntry?.size)}</td>
