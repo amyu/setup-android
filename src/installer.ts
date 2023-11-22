@@ -33,6 +33,13 @@ export async function getAndroidSdk(
     }
   }
 
+  await fs.rm(ANDROID_SDK_ROOT, {recursive: true, force: true})
+  await fs.rm(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
+    recursive: true,
+    force: true
+  })
+  core.info(`success cleanup`)
+
   await fs.mkdir(ANDROID_SDK_ROOT, {recursive: true})
   core.info(`success create directory`)
 
