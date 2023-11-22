@@ -217,5 +217,12 @@ jobs:
           ndk-version: 21.3.6528147
           cache-disabled: true
 
+      - name: Setup Android SDK
+        uses: ./
+        with:
+          sdk-version: 26
+          ndk-version: 21.3.6528147
+          cache-disabled: true
+
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
