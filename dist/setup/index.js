@@ -60753,6 +60753,12 @@ function getAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
                 return Promise.resolve();
             }
         }
+        yield fs.rm(constants_1.ANDROID_SDK_ROOT, { recursive: true, force: true });
+        yield fs.rm(path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
+            recursive: true,
+            force: true
+        });
+        core.info(`success cleanup`);
         yield fs.mkdir(constants_1.ANDROID_SDK_ROOT, { recursive: true });
         core.info(`success create directory`);
         // download sdk-tools
