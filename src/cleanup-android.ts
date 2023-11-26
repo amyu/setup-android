@@ -20,12 +20,9 @@ async function run(): Promise<void> {
       constants.INPUT_GENERATE_JOB_SUMMARY
     )
 
-    core.info(`cache-disabled: ${cacheDisabled}`)
-    core.info(`cache-key: ${cacheKey}`)
-    core.info(`generate-job-summary: ${generateJobSummary}`)
-
     let savedCacheEntry
     if (!cacheDisabled) {
+      core.startGroup('Save Cache')
       savedCacheEntry = await saveCache(
         sdkVersion,
         buildToolsVersion,
@@ -33,6 +30,7 @@ async function run(): Promise<void> {
         cmakeVersion,
         cacheKey
       )
+      core.endGroup()
     }
 
     if (generateJobSummary) {

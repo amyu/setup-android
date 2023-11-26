@@ -59757,12 +59757,11 @@ function run() {
             const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
             const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
             const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
-            core.info(`cache-disabled: ${cacheDisabled}`);
-            core.info(`cache-key: ${cacheKey}`);
-            core.info(`generate-job-summary: ${generateJobSummary}`);
             let savedCacheEntry;
             if (!cacheDisabled) {
+                core.startGroup('Save Cache');
                 savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+                core.endGroup();
             }
             if (generateJobSummary) {
                 yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry);

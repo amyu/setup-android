@@ -9,30 +9,13 @@ import {
   COMMANDLINE_TOOLS_MAC_URL,
   COMMANDLINE_TOOLS_WINDOWS_URL
 } from './constants'
-import {restoreCache} from './cache'
 
-export async function getAndroidSdk(
+export async function installAndroidSdk(
   sdkVersion: string[],
   buildToolsVersion: string,
   ndkVersion: string,
-  cmakeVersion: string,
-  cacheDisabled: boolean,
-  cacheKey: string
+  cmakeVersion: string
 ): Promise<void> {
-  if (!cacheDisabled) {
-    const restoreCacheEntry = await restoreCache(
-      sdkVersion,
-      buildToolsVersion,
-      ndkVersion,
-      cmakeVersion,
-      cacheKey
-    )
-    if (restoreCacheEntry) {
-      core.info(`cache hit: ${restoreCacheEntry.key}`)
-      return Promise.resolve()
-    }
-  }
-
   await fs.rm(ANDROID_SDK_ROOT, {recursive: true, force: true})
   await fs.rm(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
     recursive: true,
@@ -43,7 +26,6 @@ export async function getAndroidSdk(
   await fs.mkdir(ANDROID_SDK_ROOT, {recursive: true})
   core.info(`success create directory`)
 
-  // download sdk-tools
   let cmdlineToolsDownloadUrl: string
   switch (process.platform) {
     case 'win32':
@@ -73,55 +55,75 @@ export async function getAndroidSdk(
   core.info(
     `success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`
   )
+
+  const from = path.join(extractedCmdlineToolPath, 'cmdline-tools')
+  const to = `latest`
+  core.info(`start rename ${from} to ${to}`)
   if (process.platform === 'win32') {
-    await exec.exec(
-      `cmd /c "rename ${path.join(
-        extractedCmdlineToolPath,
-        'cmdline-tools'
-      )} latest"`
-    )
+    await exec.exec(`cmd /c "rename ${from} ${to}"`)
   } else {
-    await fs.mkdir(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
+    await fs.mkdir(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', to), {
       recursive: true
     })
-    await fs.rename(
-      path.join(extractedCmdlineToolPath, 'cmdline-tools'),
-      path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest')
-    )
+    await fs.rename(from, path.join(ANDROID_SDK_ROOT, 'cmdline-tools', to))
   }
+  core.info(`success rename ${from} to ${to}`)
 
-  // install android sdk
-  core.info(`installing ...`)
+  core.info(`start accept licenses`)
   // https://github.com/actions/toolkit/issues/359 pipes workaround
   switch (process.platform) {
     case 'win32':
-      await exec.exec(`cmd /c "yes | sdkmanager --licenses"`)
+      await exec.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
+        silent: !core.isDebug()
+      })
       break
     case 'darwin':
-      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`)
+      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
+        silent: !core.isDebug()
+      })
       break
     case 'linux':
-      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`)
+      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
+        silent: !core.isDebug()
+      })
       break
     default:
       throw Error(`Unsupported platform: ${process.platform}`)
   }
+  core.info(`success accept licenses`)
 
+  core.info(
+    `start install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`
+  )
   const sdkVersionCommand = sdkVersion.map(
     version => `platforms;android-${version}`
   )
-  await exec.exec('sdkmanager', [
-    `build-tools;${buildToolsVersion}`,
-    `platform-tools`,
-    ...sdkVersionCommand,
-    '--verbose'
-  ])
+  await exec.exec(
+    'sdkmanager',
+    [
+      `build-tools;${buildToolsVersion}`,
+      `platform-tools`,
+      ...sdkVersionCommand,
+      '--verbose'
+    ],
+    {silent: !core.isDebug()}
+  )
+  core.info(
+    `success install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`
+  )
 
   if (cmakeVersion) {
-    await exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose'])
+    core.info(`start install cmake:${cmakeVersion}`)
+    await exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose'], {
+      silent: !core.isDebug()
+    })
+    core.info(`success install cmake:${cmakeVersion}`)
   }
   if (ndkVersion) {
-    await exec.exec('sdkmanager', [`ndk;${ndkVersion}`, '--verbose'])
+    core.info(`start install ndk:${ndkVersion}`)
+    await exec.exec('sdkmanager', [`ndk;${ndkVersion}`, '--verbose'], {
+      silent: !core.isDebug()
+    })
+    core.info(`success install ndk:${ndkVersion}`)
   }
-  core.info(`installed`)
 }

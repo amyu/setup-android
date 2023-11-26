@@ -1,7 +1,8 @@
 import * as constants from './constants'
 import * as core from '@actions/core'
 import {addPath} from './add-path'
-import {getAndroidSdk} from './installer'
+import {installAndroidSdk} from './installer'
+import {restoreCache} from './cache'
 
 async function run(): Promise<void> {
   try {
@@ -12,24 +13,40 @@ async function run(): Promise<void> {
     const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED)
     const cacheKey = core.getInput(constants.INPUT_CACHE_KEY)
 
-    core.info(`sdk-version: ${sdkVersion}`)
-    core.info(`build-tools-version: ${buildToolsVersion}`)
-    core.info(`ndk-version: ${ndkVersion}`)
-    core.info(`cmake-version: ${cmakeVersion}`)
-    core.info(`cache-disabled: ${cacheDisabled}`)
-    core.info(`cache-key: ${cacheKey}`)
-
+    core.startGroup('Environment details for Android SDK')
     addPath()
+    core.endGroup()
 
-    await getAndroidSdk(
+    if (!cacheDisabled) {
+      core.startGroup('Restored Android SDK from Cache')
+      const restoreCacheEntry = await restoreCache(
+        sdkVersion,
+        buildToolsVersion,
+        ndkVersion,
+        cmakeVersion,
+        cacheKey
+      )
+      core.endGroup()
+      if (restoreCacheEntry) {
+        return Promise.resolve()
+      }
+    }
+
+    core.startGroup('Installed Android SDK')
+    await installAndroidSdk(
       sdkVersion,
       buildToolsVersion,
       ndkVersion,
-      cmakeVersion,
-      cacheDisabled,
-      cacheKey
+      cmakeVersion
     )
+    core.endGroup()
   } catch (error) {
+    core.info(
+      `To see the logs executed by sdkmanager, set ACTIONS_STEP_DEBUG to true`
+    )
+    core.info(
+      `https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging`
+    )
     if (error instanceof Error) core.setFailed(error.message)
   }
 }
