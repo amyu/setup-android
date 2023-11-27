@@ -1,6 +1,6 @@
 {
   "name": "setup-android",
-  "version": "3",
+  "version": "4",
   "description": "setup-android for self hosted runner",
   "main": "dist/setup/index.js",
   "scripts": {

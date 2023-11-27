@@ -12,7 +12,7 @@ function generateRestoreKey(
   cmakeVersion: string,
   cacheKey: string
 ): string {
-  const suffixVersion = 'v3.4'
+  const suffixVersion = 'v4'
   if (cacheKey) return `${cacheKey}-${suffixVersion}`
   return (
     `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${suffixVersion}`
