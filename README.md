@@ -26,7 +26,7 @@ steps:
       distribution: temurin
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@v3
+    uses: amyu/setup-android@v4
 
   - run: ./gradlew build --stacktrace
 ```
@@ -43,7 +43,7 @@ steps:
       distribution: temurin
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@v3
+    uses: amyu/setup-android@v4
     with:
       # default: false
       # Whether to use the cache
