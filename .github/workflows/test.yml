@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        sdk: [32, 33]
+        sdk: [33, 34]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.sdk }}-test
       cancel-in-progress: true
@@ -74,7 +74,7 @@ jobs:
         uses: ./
         with:
           cache-disabled: true
-          sdk-version: 33
+          sdk-version: 34
           build-tools-version: 34.0.0
           cmake-version: 3.10.2.4988404
           ndk-version: 25.1.8937393

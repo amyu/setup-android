@@ -49,15 +49,15 @@ steps:
       # Whether to use the cache
       cache-disabled: true
 
-      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v3.2`
+      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v4`
       # Custom key for cache. It is invalid when `cache-disabled: true`
       cache-key: 'custom-cache-key'
 
-      # default: 33
+      # default: 34
       # sdk version
       # see https://developer.android.com/studio/releases/platforms
       # It will always be installed.
-      sdk-version: 33
+      sdk-version: 34
       # or 
       sdk-version: |
         33

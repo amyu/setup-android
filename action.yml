@@ -5,7 +5,7 @@ inputs:
   sdk-version:
     required: false
     description: 'sdk version'
-    default: '33'
+    default: '34'
   build-tools-version:
     required: false
     description: 'build tools version'

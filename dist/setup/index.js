@@ -60593,7 +60593,7 @@ const constants_1 = __nccwpck_require__(9042);
 const cache_1 = __nccwpck_require__(7799);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
-    const suffixVersion = 'v3.4';
+    const suffixVersion = 'v4';
     if (cacheKey)
         return `${cacheKey}-${suffixVersion}`;
     return (`${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${suffixVersion}`
