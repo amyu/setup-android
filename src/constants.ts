@@ -22,3 +22,4 @@ export const ANDROID_HOME_DIR = path.join(HOME, '.android')
 
 // https://developer.android.com/studio/command-line/variables
 export const ANDROID_SDK_ROOT = path.join(ANDROID_HOME_DIR, 'sdk')
+
