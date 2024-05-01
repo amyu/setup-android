@@ -31,17 +31,27 @@ steps:
   - run: ./gradlew build --stacktrace
 ```
 
-**Additional:**
+**Recommend:**
+
+If your project uses VersionCatalog, the following settings are recommended  
 
 ```yaml
-steps:
-  - uses: actions/checkout@v4
-  - name: Setup JDK 17
-    uses: actions/setup-java@v3
-    with:
-      java-version: 17
-      distribution: temurin
+  - name: 'Get sdkVersion from versions.toml'
+    id: read_version
+    shell: bash
+    run: |
+      version=`perl -nlE 'say if s/compileSdkVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml`
+      echo "sdkVersion=$version" >> $GITHUB_OUTPUT
 
+  - name: Setup Android SDK
+    uses: amyu/setup-android@v4
+    with:
+      sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
+```
+
+**More Information:**
+
+```yaml
   - name: Setup Android SDK
     uses: amyu/setup-android@v4
     with:
@@ -84,8 +94,18 @@ steps:
       # default: true
       # Whether to generate or not the job summary
       generate-job-summary: false
+```
 
-  - run: ./gradlew build --stacktrace
+**Install Beta SDK:**
+
+Set sdk-version to the value written in API Level from SDK Manager  
+![](./screenshots/information_for_install_beta_sdk.png)
+
+```yaml
+  - name: Setup Android SDK
+    uses: amyu/setup-android@v4
+    with:
+      sdk-version: VanillaIceCream
 ```
 
 # License
