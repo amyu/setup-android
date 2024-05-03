@@ -1,6 +1,5 @@
 const eslint = require('@eslint/js')
 const eslintConfigPrettier = require('eslint-config-prettier')
-const globals = require('globals')
 const tsEslint = require('typescript-eslint')
 
 module.exports = tsEslint.config(
@@ -10,9 +9,6 @@ module.exports = tsEslint.config(
   {
     files: ['**/*.js'],
     languageOptions: {
-      globals: {
-        ...globals.node
-      },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module'
