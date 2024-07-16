@@ -60571,7 +60571,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.addPath = void 0;
+exports.addPath = addPath;
 const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(1017));
 const constants_1 = __nccwpck_require__(9042);
@@ -60589,7 +60589,6 @@ function addPath() {
     core.info(`  ${path.join(constants_1.ANDROID_SDK_ROOT, 'ndk-bundle')}`);
     core.info(`  ${path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', 'latest', 'bin')}`);
 }
-exports.addPath = addPath;
 
 
 /***/ }),
@@ -60632,7 +60631,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getRestoredEntry = exports.saveCache = exports.restoreCache = void 0;
+exports.restoreCache = restoreCache;
+exports.saveCache = saveCache;
+exports.getRestoredEntry = getRestoredEntry;
 const core = __importStar(__nccwpck_require__(2186));
 const cache = __importStar(__nccwpck_require__(7799));
 const constants_1 = __nccwpck_require__(9042);
@@ -60661,7 +60662,6 @@ function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, c
         return Promise.resolve(restoredEntry);
     });
 }
-exports.restoreCache = restoreCache;
 function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
         const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
@@ -60683,14 +60683,12 @@ function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cach
         }
     });
 }
-exports.saveCache = saveCache;
 function getRestoredEntry() {
     const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY);
     if (restoredEntryJson) {
         return JSON.parse(restoredEntryJson);
     }
 }
-exports.getRestoredEntry = getRestoredEntry;
 
 
 /***/ }),
@@ -60789,7 +60787,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installAndroidSdk = void 0;
+exports.installAndroidSdk = installAndroidSdk;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs = __importStar(__nccwpck_require__(3292));
@@ -60886,7 +60884,6 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
         }
     });
 }
-exports.installAndroidSdk = installAndroidSdk;
 
 
 /***/ }),
