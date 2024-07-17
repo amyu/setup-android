@@ -1,7 +1,7 @@
-import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary'
+import type {CacheEntry} from '@actions/cache'
 import * as core from '@actions/core'
+import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary'
 import {getRestoredEntry} from './cache'
-import {CacheEntry} from '@actions/cache'
 
 export async function renderSummary(
   sdkVersion: string[],
@@ -38,13 +38,13 @@ export async function renderSummary(
   if (savedCacheEntry) {
     core.summary.addRaw(`save cache key: \`${savedCacheEntry.key}\``)
   } else {
-    core.summary.addRaw(`Not saved cache`)
+    core.summary.addRaw('Not saved cache')
   }
   core.summary.addBreak()
   if (restoredCacheEntry) {
     core.summary.addRaw(`restore cache key: \`${restoredCacheEntry.key}\``)
   } else {
-    core.summary.addRaw(`Not restored cache`)
+    core.summary.addRaw('Not restored cache')
   }
 
   core.summary.addRaw(`

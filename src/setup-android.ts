@@ -1,8 +1,8 @@
-import * as constants from './constants'
 import * as core from '@actions/core'
 import {addPath} from './add-path'
-import {installAndroidSdk} from './installer'
 import {restoreCache} from './cache'
+import * as constants from './constants'
+import {installAndroidSdk} from './installer'
 
 async function run(): Promise<void> {
   try {
@@ -42,10 +42,10 @@ async function run(): Promise<void> {
     core.endGroup()
   } catch (error) {
     core.info(
-      `To see the logs executed by sdkmanager, set ACTIONS_STEP_DEBUG to true`
+      'To see the logs executed by sdkmanager, set ACTIONS_STEP_DEBUG to true'
     )
     core.info(
-      `https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging`
+      'https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging'
     )
     if (error instanceof Error) core.setFailed(error.message)
   }
