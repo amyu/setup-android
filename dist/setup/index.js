@@ -60572,8 +60572,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.addPath = addPath;
+const path = __importStar(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(2186));
-const path = __importStar(__nccwpck_require__(1017));
 const constants_1 = __nccwpck_require__(9042);
 function addPath() {
     core.exportVariable('ANDROID_SDK_ROOT', constants_1.ANDROID_SDK_ROOT);
@@ -60634,10 +60634,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.restoreCache = restoreCache;
 exports.saveCache = saveCache;
 exports.getRestoredEntry = getRestoredEntry;
-const core = __importStar(__nccwpck_require__(2186));
 const cache = __importStar(__nccwpck_require__(7799));
-const constants_1 = __nccwpck_require__(9042);
 const cache_1 = __nccwpck_require__(7799);
+const core = __importStar(__nccwpck_require__(2186));
+const constants_1 = __nccwpck_require__(9042);
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry';
 function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
     const suffixVersion = 'v4';
@@ -60726,8 +60726,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_KEY = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
-const os = __importStar(__nccwpck_require__(2037));
-const path_1 = __importDefault(__nccwpck_require__(1017));
+const os = __importStar(__nccwpck_require__(612));
+const node_path_1 = __importDefault(__nccwpck_require__(9411));
 exports.INPUT_SDK_VERSION = 'sdk-version';
 exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
@@ -60737,14 +60737,14 @@ exports.INPUT_CACHE_KEY = 'cache-key';
 exports.INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
-exports.COMMANDLINE_TOOLS_LINUX_URL = `https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip`;
-exports.COMMANDLINE_TOOLS_MAC_URL = `https://dl.google.com/android/repository/commandlinetools-mac-10406996_latest.zip`;
-exports.COMMANDLINE_TOOLS_WINDOWS_URL = `https://dl.google.com/android/repository/commandlinetools-win-10406996_latest.zip`;
+exports.COMMANDLINE_TOOLS_LINUX_URL = 'https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip';
+exports.COMMANDLINE_TOOLS_MAC_URL = 'https://dl.google.com/android/repository/commandlinetools-mac-10406996_latest.zip';
+exports.COMMANDLINE_TOOLS_WINDOWS_URL = 'https://dl.google.com/android/repository/commandlinetools-win-10406996_latest.zip';
 exports.HOME = os.homedir();
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
-exports.ANDROID_HOME_DIR = path_1.default.join(exports.HOME, '.android');
+exports.ANDROID_HOME_DIR = node_path_1.default.join(exports.HOME, '.android');
 // https://developer.android.com/studio/command-line/variables
-exports.ANDROID_SDK_ROOT = path_1.default.join(exports.ANDROID_HOME_DIR, 'sdk');
+exports.ANDROID_SDK_ROOT = node_path_1.default.join(exports.ANDROID_HOME_DIR, 'sdk');
 
 
 /***/ }),
@@ -60788,10 +60788,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.installAndroidSdk = installAndroidSdk;
+const fs = __importStar(__nccwpck_require__(3977));
+const path = __importStar(__nccwpck_require__(9411));
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-const fs = __importStar(__nccwpck_require__(3292));
-const path = __importStar(__nccwpck_require__(1017));
 const toolCache = __importStar(__nccwpck_require__(7784));
 const constants_1 = __nccwpck_require__(9042);
 function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
@@ -60801,9 +60801,9 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
             recursive: true,
             force: true
         });
-        core.info(`success cleanup`);
+        core.info('success cleanup');
         yield fs.mkdir(constants_1.ANDROID_SDK_ROOT, { recursive: true });
-        core.info(`success create directory`);
+        core.info('success create directory');
         let cmdlineToolsDownloadUrl;
         switch (process.platform) {
             case 'win32':
@@ -60821,11 +60821,11 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
         core.info(`start download cmdline-tools url: ${cmdlineToolsDownloadUrl}`);
         const downloadedCmdlineToolsPath = yield toolCache.downloadTool(cmdlineToolsDownloadUrl);
         core.info(`success download cmdline-tools path: ${downloadedCmdlineToolsPath}`);
-        core.info(`start extract cmdline-tools.zip`);
+        core.info('start extract cmdline-tools.zip');
         const extractedCmdlineToolPath = yield toolCache.extractZip(downloadedCmdlineToolsPath, path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools'));
         core.info(`success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`);
         const from = path.join(extractedCmdlineToolPath, 'cmdline-tools');
-        const to = `latest`;
+        const to = 'latest';
         core.info(`start rename ${from} to ${to}`);
         if (process.platform === 'win32') {
             yield exec.exec(`cmd /c "rename ${from} ${to}"`);
@@ -60837,7 +60837,7 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
             yield fs.rename(from, path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', to));
         }
         core.info(`success rename ${from} to ${to}`);
-        core.info(`start accept licenses`);
+        core.info('start accept licenses');
         // https://github.com/actions/toolkit/issues/359 pipes workaround
         switch (process.platform) {
             case 'win32':
@@ -60858,12 +60858,12 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
             default:
                 throw Error(`Unsupported platform: ${process.platform}`);
         }
-        core.info(`success accept licenses`);
+        core.info('success accept licenses');
         core.info(`start install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`);
         const sdkVersionCommand = sdkVersion.map(version => `platforms;android-${version}`);
         yield exec.exec('sdkmanager', [
             `build-tools;${buildToolsVersion}`,
-            `platform-tools`,
+            'platform-tools',
             ...sdkVersionCommand,
             '--verbose'
         ], { silent: !core.isDebug() });
@@ -60926,11 +60926,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const constants = __importStar(__nccwpck_require__(9042));
 const core = __importStar(__nccwpck_require__(2186));
 const add_path_1 = __nccwpck_require__(2302);
-const installer_1 = __nccwpck_require__(2574);
 const cache_1 = __nccwpck_require__(4810);
+const constants = __importStar(__nccwpck_require__(9042));
+const installer_1 = __nccwpck_require__(2574);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -60956,8 +60956,8 @@ function run() {
             core.endGroup();
         }
         catch (error) {
-            core.info(`To see the logs executed by sdkmanager, set ACTIONS_STEP_DEBUG to true`);
-            core.info(`https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging`);
+            core.info('To see the logs executed by sdkmanager, set ACTIONS_STEP_DEBUG to true');
+            core.info('https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging');
             if (error instanceof Error)
                 core.setFailed(error.message);
         }
@@ -61024,14 +61024,6 @@ module.exports = require("fs");
 
 /***/ }),
 
-/***/ 3292:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("fs/promises");
-
-/***/ }),
-
 /***/ 3685:
 /***/ ((module) => {
 
@@ -61053,6 +61045,30 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 3977:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 612:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:os");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
 
 /***/ }),
 

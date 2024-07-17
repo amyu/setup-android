@@ -1,7 +1,7 @@
-import * as core from '@actions/core'
 import * as cache from '@actions/cache'
+import {type CacheEntry, ReserveCacheError} from '@actions/cache'
+import * as core from '@actions/core'
 import {ANDROID_HOME_DIR} from './constants'
-import {CacheEntry, ReserveCacheError} from '@actions/cache'
 
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry'
 

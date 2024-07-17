@@ -1,8 +1,9 @@
-import * as constants from './constants'
+import type {CacheEntry} from '@actions/cache'
 import * as core from '@actions/core'
 import {saveCache} from './cache'
-import {renderSummary} from './summary'
+import * as constants from './constants'
 import {INPUT_JOB_STATUS} from './constants'
+import {renderSummary} from './summary'
 
 async function run(): Promise<void> {
   try {
@@ -20,7 +21,7 @@ async function run(): Promise<void> {
       constants.INPUT_GENERATE_JOB_SUMMARY
     )
 
-    let savedCacheEntry
+    let savedCacheEntry: CacheEntry | undefined
     if (!cacheDisabled) {
       core.startGroup('Save Cache')
       savedCacheEntry = await saveCache(

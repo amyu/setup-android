@@ -1,7 +1,7 @@
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
-import * as fs from 'fs/promises'
-import * as path from 'path'
 import * as toolCache from '@actions/tool-cache'
 import {
   ANDROID_SDK_ROOT,
@@ -21,10 +21,10 @@ export async function installAndroidSdk(
     recursive: true,
     force: true
   })
-  core.info(`success cleanup`)
+  core.info('success cleanup')
 
   await fs.mkdir(ANDROID_SDK_ROOT, {recursive: true})
-  core.info(`success create directory`)
+  core.info('success create directory')
 
   let cmdlineToolsDownloadUrl: string
   switch (process.platform) {
@@ -47,7 +47,7 @@ export async function installAndroidSdk(
   core.info(
     `success download cmdline-tools path: ${downloadedCmdlineToolsPath}`
   )
-  core.info(`start extract cmdline-tools.zip`)
+  core.info('start extract cmdline-tools.zip')
   const extractedCmdlineToolPath = await toolCache.extractZip(
     downloadedCmdlineToolsPath,
     path.join(ANDROID_SDK_ROOT, 'cmdline-tools')
@@ -57,7 +57,7 @@ export async function installAndroidSdk(
   )
 
   const from = path.join(extractedCmdlineToolPath, 'cmdline-tools')
-  const to = `latest`
+  const to = 'latest'
   core.info(`start rename ${from} to ${to}`)
   if (process.platform === 'win32') {
     await exec.exec(`cmd /c "rename ${from} ${to}"`)
@@ -69,7 +69,7 @@ export async function installAndroidSdk(
   }
   core.info(`success rename ${from} to ${to}`)
 
-  core.info(`start accept licenses`)
+  core.info('start accept licenses')
   // https://github.com/actions/toolkit/issues/359 pipes workaround
   switch (process.platform) {
     case 'win32':
@@ -90,7 +90,7 @@ export async function installAndroidSdk(
     default:
       throw Error(`Unsupported platform: ${process.platform}`)
   }
-  core.info(`success accept licenses`)
+  core.info('success accept licenses')
 
   core.info(
     `start install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`
@@ -102,7 +102,7 @@ export async function installAndroidSdk(
     'sdkmanager',
     [
       `build-tools;${buildToolsVersion}`,
-      `platform-tools`,
+      'platform-tools',
       ...sdkVersionCommand,
       '--verbose'
     ],
