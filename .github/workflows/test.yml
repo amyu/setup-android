@@ -183,15 +183,15 @@ jobs:
       - run: |
           sdkmanager --list_installed
 
-  test_VanillaIceCream:
-    name: run test ${{ matrix.os }} sdkversion VanillaIceCream
+  test_Baklava:
+    name: run test ${{ matrix.os }} sdkversion Baklava
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-VanillaIceCream-test
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-Baklava-test
       cancel-in-progress: true
 
     steps:
@@ -214,7 +214,7 @@ jobs:
         uses: ./
         with:
           cache-disabled: false
-          sdk-version: VanillaIceCream
+          sdk-version: Baklava
           build-tools-version: 34.0.0
           cmake-version: 3.10.2.4988404
           ndk-version: 25.1.8937393
