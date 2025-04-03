@@ -68380,22 +68380,15 @@ function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
             return Promise.resolve();
         }
         core.summary.addHeading('setup-android');
-        core.summary.addRaw(`
-<table>
-    <tr>
-        <th>SDK</th>
-        <th>Build Tools</th>
-        <th>NDK</th>
-        <th>Cmake</th>
-    </tr>
-    <tr>
-      <td>${sdkVersion}</td>
-      <td>${buildToolsVersion}</td>
-      <td>${ndkVersion}</td>
-      <td>${cmakeVersion}</td>
-  </tr>
-</table>
-    `);
+        core.summary.addTable([
+            [
+                { data: 'SDK', header: true },
+                { data: 'Build Tools', header: true },
+                { data: 'NDK', header: true },
+                { data: 'Cmake', header: true }
+            ],
+            [sdkVersion.join(', '), buildToolsVersion, ndkVersion, cmakeVersion]
+        ]);
         const restoredCacheEntry = (0, cache_1.getRestoredEntry)();
         core.summary.addHeading('Cached Summary', 3);
         if (savedCacheEntry) {
@@ -68411,18 +68404,13 @@ function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
         else {
             core.summary.addRaw('Not restored cache');
         }
-        core.summary.addRaw(`
-<table>
-    <tr>
-        <th>Cached size</th>
-        <th>Restored size</th>
-    </tr>
-    <tr>
-      <td>${formatSize(savedCacheEntry === null || savedCacheEntry === void 0 ? void 0 : savedCacheEntry.size)}</td>
-      <td>${formatSize(restoredCacheEntry === null || restoredCacheEntry === void 0 ? void 0 : restoredCacheEntry.size)}</td>
-  </tr>
-</table>
-    `);
+        core.summary.addTable([
+            [
+                { data: 'Cached size', header: true },
+                { data: 'Restored size', header: true }
+            ],
+            [formatSize(savedCacheEntry === null || savedCacheEntry === void 0 ? void 0 : savedCacheEntry.size), formatSize(restoredCacheEntry === null || restoredCacheEntry === void 0 ? void 0 : restoredCacheEntry.size)]
+        ]);
         yield core.summary.write();
     });
 }

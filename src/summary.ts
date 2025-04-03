@@ -16,22 +16,15 @@ export async function renderSummary(
   }
 
   core.summary.addHeading('setup-android')
-  core.summary.addRaw(`
-<table>
-    <tr>
-        <th>SDK</th>
-        <th>Build Tools</th>
-        <th>NDK</th>
-        <th>Cmake</th>
-    </tr>
-    <tr>
-      <td>${sdkVersion}</td>
-      <td>${buildToolsVersion}</td>
-      <td>${ndkVersion}</td>
-      <td>${cmakeVersion}</td>
-  </tr>
-</table>
-    `)
+  core.summary.addTable([
+    [
+      {data: 'SDK', header: true},
+      {data: 'Build Tools', header: true},
+      {data: 'NDK', header: true},
+      {data: 'Cmake', header: true}
+    ],
+    [sdkVersion.join(', '), buildToolsVersion, ndkVersion, cmakeVersion]
+  ])
 
   const restoredCacheEntry = getRestoredEntry()
   core.summary.addHeading('Cached Summary', 3)
@@ -47,18 +40,14 @@ export async function renderSummary(
     core.summary.addRaw('Not restored cache')
   }
 
-  core.summary.addRaw(`
-<table>
-    <tr>
-        <th>Cached size</th>
-        <th>Restored size</th>
-    </tr>
-    <tr>
-      <td>${formatSize(savedCacheEntry?.size)}</td>
-      <td>${formatSize(restoredCacheEntry?.size)}</td>
-  </tr>
-</table>
-    `)
+  core.summary.addTable([
+    [
+      {data: 'Cached size', header: true},
+      {data: 'Restored size', header: true}
+    ],
+    [formatSize(savedCacheEntry?.size), formatSize(restoredCacheEntry?.size)]
+  ])
+
   await core.summary.write()
 }
 
