@@ -29,15 +29,21 @@ export async function renderSummary(
   const restoredCacheEntry = getRestoredEntry()
   core.summary.addHeading('Cached Summary', 3)
   if (savedCacheEntry) {
-    core.summary.addRaw(`save cache key: \`${savedCacheEntry.key}\``)
+    core.summary.addRaw(
+      `save cache key: <code>${savedCacheEntry.key}</code>`,
+      true
+    )
   } else {
-    core.summary.addRaw('Not saved cache')
+    core.summary.addRaw('Not saved cache', true)
   }
   core.summary.addBreak()
   if (restoredCacheEntry) {
-    core.summary.addRaw(`restore cache key: \`${restoredCacheEntry.key}\``)
+    core.summary.addRaw(
+      `restore cache key: <code>${restoredCacheEntry.key}</code>`,
+      true
+    )
   } else {
-    core.summary.addRaw('Not restored cache')
+    core.summary.addRaw('Not restored cache', true)
   }
 
   core.summary.addTable([
