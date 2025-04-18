@@ -1,31 +1,32 @@
 {
-  "extends": [
-    "config:base",
-    "customManagers:biomeVersions"
+  extends: [
+    'config:recommended',
+    'customManagers:biomeVersions',
   ],
   timezone: 'Asia/Tokyo',
   major: {
-    stabilityDays: 7,
+    minimumReleaseAge: '7 days',
   },
   minor: {
-    stabilityDays: 3,
+    minimumReleaseAge: '3 days',
   },
   patch: {
-    stabilityDays: 2,
+    minimumReleaseAge: '2 days',
     automerge: true,
   },
-  "packageRules": [
+  packageRules: [
     {
-      // Renovate is not used because the patch is applied
-      "matchPackagePatterns": ["@actions/cache"],
-      "enabled": false
+      enabled: false,
+      matchPackageNames: [
+        '/@actions/cache/',
+      ],
     },
     {
-      groupName: "Android Gradle Plugin",
-      matchPackagePrefixes: [
-        "com.android.library",
-        "com.android.application",
+      groupName: 'Android Gradle Plugin',
+      matchPackageNames: [
+        'com.android.library{/,}**',
+        'com.android.application{/,}**',
       ],
-    }
-  ]
+    },
+  ],
 }
