@@ -33,20 +33,20 @@ steps:
 
 **Recommend:**
 
-If your project uses VersionCatalog, the following settings are recommended  
+If your project uses VersionCatalog, the following settings are recommended
 
 ```yaml
-  - name: 'Get sdkVersion from versions.toml'
-    id: read_version
-    shell: bash
-    run: |
-      version=`perl -nlE 'say if s/compileSdkVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml`
-      echo "sdkVersion=$version" >> $GITHUB_OUTPUT
+- name: "Get sdkVersion from versions.toml"
+  id: read_version
+  shell: bash
+  run: |
+    version=`perl -nlE 'say if s/compileSdkVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml`
+    echo "sdkVersion=$version" >> $GITHUB_OUTPUT
 
-  - name: Setup Android SDK
-    uses: amyu/setup-android@v4
-    with:
-      sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
+- name: Setup Android SDK
+  uses: amyu/setup-android@v4
+  with:
+    sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
 
 **More Information:**
@@ -59,7 +59,7 @@ If your project uses VersionCatalog, the following settings are recommended
       # Whether to use the cache
       cache-disabled: true
 
-      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-v4`
+      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${hashedCacheDirectory}-v4`
       # Custom key for cache. It is invalid when `cache-disabled: true`
       cache-key: 'custom-cache-key'
 
@@ -68,7 +68,7 @@ If your project uses VersionCatalog, the following settings are recommended
       # see https://developer.android.com/studio/releases/platforms
       # It will always be installed.
       sdk-version: 34
-      # or 
+      # or
       sdk-version: |
         33
         34
@@ -102,10 +102,10 @@ Set sdk-version to the value written in API Level from SDK Manager
 ![](./screenshots/information_for_install_beta_sdk.png)
 
 ```yaml
-  - name: Setup Android SDK
-    uses: amyu/setup-android@v4
-    with:
-      sdk-version: VanillaIceCream
+- name: Setup Android SDK
+  uses: amyu/setup-android@v4
+  with:
+    sdk-version: VanillaIceCream
 ```
 
 # License

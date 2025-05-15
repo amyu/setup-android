@@ -5,6 +5,19 @@ import {ANDROID_HOME_DIR} from './constants'
 
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry'
 
+function simpleHash(str: string): string {
+  let hash = 0
+  if (str.length === 0) return hash.toString(16)
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+
+  return Math.abs(hash).toString(16).substring(0, 8)
+}
+
 function generateRestoreKey(
   sdkVersion: string[],
   buildToolsVersion: string,
@@ -13,13 +26,15 @@ function generateRestoreKey(
   cacheKey: string
 ): string {
   const suffixVersion = 'v4'
-  if (cacheKey) return `${cacheKey}-${suffixVersion}`
-  return (
-    `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${suffixVersion}`
-      // cache keys can't contain `,`
-      .replace(/,/g, '')
-      .toLowerCase()
-  )
+  // https://github.com/actions/cache/issues/1127
+  const dirHash = simpleHash(ANDROID_HOME_DIR)
+
+  const baseKey = cacheKey
+    ? `${cacheKey}-${dirHash}-${suffixVersion}`
+    : `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${dirHash}-${suffixVersion}`
+
+  // cache keys can't contain `,`
+  return baseKey.replace(/,/g, '').toLowerCase()
 }
 
 export async function restoreCache(
@@ -63,6 +78,7 @@ export async function saveCache(
   )
 
   core.info(`checking if "${restoreKey}" is already cached ...`)
+  core.info(`cacheDir: ${ANDROID_HOME_DIR}`)
   const hasEntry = await cache.restoreCache(
     [ANDROID_HOME_DIR],
     restoreKey,
