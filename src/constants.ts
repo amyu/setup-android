@@ -13,11 +13,11 @@ export const INPUT_JOB_STATUS = 'job-status'
 
 // https://developer.android.com/studio#command-tools
 export const COMMANDLINE_TOOLS_LINUX_URL =
-  'https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip'
+  'https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip'
 export const COMMANDLINE_TOOLS_MAC_URL =
-  'https://dl.google.com/android/repository/commandlinetools-mac-10406996_latest.zip'
+  'https://dl.google.com/android/repository/commandlinetools-mac-13114758_latest.zip'
 export const COMMANDLINE_TOOLS_WINDOWS_URL =
-  'https://dl.google.com/android/repository/commandlinetools-win-10406996_latest.zip'
+  'https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip'
 
 export const HOME = os.homedir()
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避

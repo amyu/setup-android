@@ -68322,9 +68322,9 @@ exports.INPUT_CACHE_KEY = 'cache-key';
 exports.INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
-exports.COMMANDLINE_TOOLS_LINUX_URL = 'https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip';
-exports.COMMANDLINE_TOOLS_MAC_URL = 'https://dl.google.com/android/repository/commandlinetools-mac-10406996_latest.zip';
-exports.COMMANDLINE_TOOLS_WINDOWS_URL = 'https://dl.google.com/android/repository/commandlinetools-win-10406996_latest.zip';
+exports.COMMANDLINE_TOOLS_LINUX_URL = 'https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip';
+exports.COMMANDLINE_TOOLS_MAC_URL = 'https://dl.google.com/android/repository/commandlinetools-mac-13114758_latest.zip';
+exports.COMMANDLINE_TOOLS_WINDOWS_URL = 'https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip';
 exports.HOME = os.homedir();
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
 exports.ANDROID_HOME_DIR = node_path_1.default.join(exports.HOME, '.android');
