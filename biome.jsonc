@@ -1,9 +1,7 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
-  "files": { "ignore": ["**/dist/", "**/lib/", "**/node_modules/"] },
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.0.5/schema.json",
+  "files": { "includes": ["**", "!**/dist/", "!**/lib/", "!**/node_modules/"] },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
@@ -27,7 +25,16 @@
         "useBlockStatements": "off",
         "useConsistentArrayType": "error",
         "useForOf": "warn",
-        "useShorthandFunctionType": "warn"
+        "useShorthandFunctionType": "warn",
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noUselessElse": "error"
       }
     }
   },
