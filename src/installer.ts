@@ -93,7 +93,7 @@ export async function installAndroidSdk(
   core.info('success accept licenses')
 
   core.info(
-    `start install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`
+    `start install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`
   )
   const sdkVersionCommand = sdkVersion.map(
     version => `platforms;android-${version}`
@@ -109,7 +109,7 @@ export async function installAndroidSdk(
     {silent: !core.isDebug()}
   )
   core.info(
-    `success install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`
+    `success install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`
   )
 
   if (cmakeVersion) {
