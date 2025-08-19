@@ -69326,7 +69326,7 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
                 throw Error(`Unsupported platform: ${process.platform}`);
         }
         core.info('success accept licenses');
-        core.info(`start install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`);
+        core.info(`start install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`);
         const sdkVersionCommand = sdkVersion.map(version => `platforms;android-${version}`);
         yield exec.exec('sdkmanager', [
             `build-tools;${buildToolsVersion}`,
@@ -69334,7 +69334,7 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
             ...sdkVersionCommand,
             '--verbose'
         ], { silent: !core.isDebug() });
-        core.info(`success install build-tools:${buildToolsVersion} and platform-tools and skd:${sdkVersion}`);
+        core.info(`success install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`);
         if (cmakeVersion) {
             core.info(`start install cmake:${cmakeVersion}`);
             yield exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose'], {
