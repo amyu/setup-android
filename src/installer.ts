@@ -7,15 +7,11 @@ import {
   ANDROID_SDK_ROOT,
   COMMANDLINE_TOOLS_LINUX_URL,
   COMMANDLINE_TOOLS_MAC_URL,
-  COMMANDLINE_TOOLS_WINDOWS_URL
+  COMMANDLINE_TOOLS_WINDOWS_URL,
+  type Versions
 } from './constants'
 
-export async function installAndroidSdk(
-  sdkVersion: string[],
-  buildToolsVersion: string,
-  ndkVersion: string,
-  cmakeVersion: string
-): Promise<void> {
+export async function installAndroidSdk(versions: Versions): Promise<void> {
   await fs.rm(ANDROID_SDK_ROOT, {recursive: true, force: true})
   await fs.rm(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
     recursive: true,
@@ -29,13 +25,19 @@ export async function installAndroidSdk(
   let cmdlineToolsDownloadUrl: string
   switch (process.platform) {
     case 'win32':
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_WINDOWS_URL
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_WINDOWS_URL(
+        versions.commandLineToolsVersion
+      )
       break
     case 'darwin':
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_MAC_URL
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_MAC_URL(
+        versions.commandLineToolsVersion
+      )
       break
     case 'linux':
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_LINUX_URL
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_LINUX_URL(
+        versions.commandLineToolsVersion
+      )
       break
     default:
       throw Error(`Unsupported platform: ${process.platform}`)
@@ -93,15 +95,15 @@ export async function installAndroidSdk(
   core.info('success accept licenses')
 
   core.info(
-    `start install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`
+    `start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
   )
-  const sdkVersionCommand = sdkVersion.map(
+  const sdkVersionCommand = versions.sdkVersion.map(
     version => `platforms;android-${version}`
   )
   await exec.exec(
     'sdkmanager',
     [
-      `build-tools;${buildToolsVersion}`,
+      `build-tools;${versions.buildToolsVersion}`,
       'platform-tools',
       ...sdkVersionCommand,
       '--verbose'
@@ -109,21 +111,25 @@ export async function installAndroidSdk(
     {silent: !core.isDebug()}
   )
   core.info(
-    `success install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`
+    `success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
   )
 
-  if (cmakeVersion) {
-    core.info(`start install cmake:${cmakeVersion}`)
-    await exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose'], {
-      silent: !core.isDebug()
-    })
-    core.info(`success install cmake:${cmakeVersion}`)
+  if (versions.cmakeVersion) {
+    core.info(`start install cmake:${versions.cmakeVersion}`)
+    await exec.exec(
+      'sdkmanager',
+      [`cmake;${versions.cmakeVersion}`, '--verbose'],
+      {
+        silent: !core.isDebug()
+      }
+    )
+    core.info(`success install cmake:${versions.cmakeVersion}`)
   }
-  if (ndkVersion) {
-    core.info(`start install ndk:${ndkVersion}`)
-    await exec.exec('sdkmanager', [`ndk;${ndkVersion}`, '--verbose'], {
+  if (versions.ndkVersion) {
+    core.info(`start install ndk:${versions.ndkVersion}`)
+    await exec.exec('sdkmanager', [`ndk;${versions.ndkVersion}`, '--verbose'], {
       silent: !core.isDebug()
     })
-    core.info(`success install ndk:${ndkVersion}`)
+    core.info(`success install ndk:${versions.ndkVersion}`)
   }
 }

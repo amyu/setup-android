@@ -2,12 +2,10 @@ import type {CacheEntry} from '@actions/cache'
 import * as core from '@actions/core'
 import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary'
 import {getRestoredEntry} from './cache'
+import type {Versions} from './constants'
 
 export async function renderSummary(
-  sdkVersion: string[],
-  buildToolsVersion: string,
-  ndkVersion: string,
-  cmakeVersion: string,
+  versions: Versions,
   savedCacheEntry: CacheEntry | undefined
 ): Promise<void> {
   // is supported job summary
@@ -21,9 +19,16 @@ export async function renderSummary(
       {data: 'SDK', header: true},
       {data: 'Build Tools', header: true},
       {data: 'NDK', header: true},
-      {data: 'Cmake', header: true}
+      {data: 'Cmake', header: true},
+      {data: 'Command Line Tools', header: true}
     ],
-    [sdkVersion.join(', '), buildToolsVersion, ndkVersion, cmakeVersion]
+    [
+      versions.sdkVersion.join(', '),
+      versions.buildToolsVersion,
+      versions.ndkVersion,
+      versions.cmakeVersion,
+      versions.commandLineToolsVersion
+    ]
   ])
 
   const restoredCacheEntry = getRestoredEntry()

@@ -69084,19 +69084,19 @@ function simpleHash(str) {
     }
     return Math.abs(hash).toString(16).substring(0, 8);
 }
-function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+function generateRestoreKey(versions, cacheKey) {
     const suffixVersion = 'v4';
     // https://github.com/actions/cache/issues/1127
     const dirHash = simpleHash(constants_1.ANDROID_HOME_DIR);
     const baseKey = cacheKey
         ? `${cacheKey}-${dirHash}-${suffixVersion}`
-        : `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${dirHash}-${suffixVersion}`;
+        : `${versions.sdkVersion}-${versions.buildToolsVersion}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`;
     // cache keys can't contain `,`
     return baseKey.replace(/,/g, '').toLowerCase();
 }
-function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+function restoreCache(versions, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+        const restoreKey = generateRestoreKey(versions, cacheKey);
         const restoredEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
         if (restoredEntry) {
             core.info(`Found in cache: ${restoreKey}`);
@@ -69108,9 +69108,9 @@ function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, c
         return Promise.resolve(restoredEntry);
     });
 }
-function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+function saveCache(versions, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+        const restoreKey = generateRestoreKey(versions, cacheKey);
         core.info(`checking if "${restoreKey}" is already cached ...`);
         core.info(`cacheDir: ${constants_1.ANDROID_HOME_DIR}`);
         const hasEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey, [], { lookupOnly: true });
@@ -69182,21 +69182,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_KEY = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_KEY = exports.INPUT_CACHE_DISABLED = exports.INPUT_COMMAND_LINE_TOOLS_VERSION = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(8161));
 const node_path_1 = __importDefault(__nccwpck_require__(6760));
 exports.INPUT_SDK_VERSION = 'sdk-version';
 exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
 exports.INPUT_CMAKE_VERSION = 'cmake-version';
+exports.INPUT_COMMAND_LINE_TOOLS_VERSION = 'command-line-tools-version';
 exports.INPUT_CACHE_DISABLED = 'cache-disabled';
 exports.INPUT_CACHE_KEY = 'cache-key';
 exports.INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
-exports.COMMANDLINE_TOOLS_LINUX_URL = 'https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip';
-exports.COMMANDLINE_TOOLS_MAC_URL = 'https://dl.google.com/android/repository/commandlinetools-mac-13114758_latest.zip';
-exports.COMMANDLINE_TOOLS_WINDOWS_URL = 'https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip';
+const COMMANDLINE_TOOLS_LINUX_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-linux-${version}_latest.zip`;
+exports.COMMANDLINE_TOOLS_LINUX_URL = COMMANDLINE_TOOLS_LINUX_URL;
+const COMMANDLINE_TOOLS_MAC_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`;
+exports.COMMANDLINE_TOOLS_MAC_URL = COMMANDLINE_TOOLS_MAC_URL;
+const COMMANDLINE_TOOLS_WINDOWS_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`;
+exports.COMMANDLINE_TOOLS_WINDOWS_URL = COMMANDLINE_TOOLS_WINDOWS_URL;
 exports.HOME = os.homedir();
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
 exports.ANDROID_HOME_DIR = node_path_1.default.join(exports.HOME, '.android');
@@ -69261,7 +69265,7 @@ const core = __importStar(__nccwpck_require__(7484));
 const exec = __importStar(__nccwpck_require__(5236));
 const toolCache = __importStar(__nccwpck_require__(3472));
 const constants_1 = __nccwpck_require__(7242);
-function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion) {
+function installAndroidSdk(versions) {
     return __awaiter(this, void 0, void 0, function* () {
         yield fs.rm(constants_1.ANDROID_SDK_ROOT, { recursive: true, force: true });
         yield fs.rm(path.join(constants_1.ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
@@ -69274,13 +69278,13 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
         let cmdlineToolsDownloadUrl;
         switch (process.platform) {
             case 'win32':
-                cmdlineToolsDownloadUrl = constants_1.COMMANDLINE_TOOLS_WINDOWS_URL;
+                cmdlineToolsDownloadUrl = (0, constants_1.COMMANDLINE_TOOLS_WINDOWS_URL)(versions.commandLineToolsVersion);
                 break;
             case 'darwin':
-                cmdlineToolsDownloadUrl = constants_1.COMMANDLINE_TOOLS_MAC_URL;
+                cmdlineToolsDownloadUrl = (0, constants_1.COMMANDLINE_TOOLS_MAC_URL)(versions.commandLineToolsVersion);
                 break;
             case 'linux':
-                cmdlineToolsDownloadUrl = constants_1.COMMANDLINE_TOOLS_LINUX_URL;
+                cmdlineToolsDownloadUrl = (0, constants_1.COMMANDLINE_TOOLS_LINUX_URL)(versions.commandLineToolsVersion);
                 break;
             default:
                 throw Error(`Unsupported platform: ${process.platform}`);
@@ -69326,28 +69330,28 @@ function installAndroidSdk(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersi
                 throw Error(`Unsupported platform: ${process.platform}`);
         }
         core.info('success accept licenses');
-        core.info(`start install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`);
-        const sdkVersionCommand = sdkVersion.map(version => `platforms;android-${version}`);
+        core.info(`start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
+        const sdkVersionCommand = versions.sdkVersion.map(version => `platforms;android-${version}`);
         yield exec.exec('sdkmanager', [
-            `build-tools;${buildToolsVersion}`,
+            `build-tools;${versions.buildToolsVersion}`,
             'platform-tools',
             ...sdkVersionCommand,
             '--verbose'
         ], { silent: !core.isDebug() });
-        core.info(`success install build-tools:${buildToolsVersion} and platform-tools and sdk:${sdkVersion}`);
-        if (cmakeVersion) {
-            core.info(`start install cmake:${cmakeVersion}`);
-            yield exec.exec('sdkmanager', [`cmake;${cmakeVersion}`, '--verbose'], {
+        core.info(`success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
+        if (versions.cmakeVersion) {
+            core.info(`start install cmake:${versions.cmakeVersion}`);
+            yield exec.exec('sdkmanager', [`cmake;${versions.cmakeVersion}`, '--verbose'], {
                 silent: !core.isDebug()
             });
-            core.info(`success install cmake:${cmakeVersion}`);
+            core.info(`success install cmake:${versions.cmakeVersion}`);
         }
-        if (ndkVersion) {
-            core.info(`start install ndk:${ndkVersion}`);
-            yield exec.exec('sdkmanager', [`ndk;${ndkVersion}`, '--verbose'], {
+        if (versions.ndkVersion) {
+            core.info(`start install ndk:${versions.ndkVersion}`);
+            yield exec.exec('sdkmanager', [`ndk;${versions.ndkVersion}`, '--verbose'], {
                 silent: !core.isDebug()
             });
-            core.info(`success install ndk:${ndkVersion}`);
+            core.info(`success install ndk:${versions.ndkVersion}`);
         }
     });
 }
@@ -69415,21 +69419,29 @@ function run() {
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
+            const commandLineToolsVersion = core.getInput(constants.INPUT_COMMAND_LINE_TOOLS_VERSION);
             const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
             const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
+            const versions = {
+                sdkVersion,
+                buildToolsVersion,
+                ndkVersion,
+                cmakeVersion,
+                commandLineToolsVersion
+            };
             core.startGroup('Environment details for Android SDK');
             (0, add_path_1.addPath)();
             core.endGroup();
             if (!cacheDisabled) {
                 core.startGroup('Restored Android SDK from Cache');
-                const restoreCacheEntry = yield (0, cache_1.restoreCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+                const restoreCacheEntry = yield (0, cache_1.restoreCache)(versions, cacheKey);
                 core.endGroup();
                 if (restoreCacheEntry) {
                     return Promise.resolve();
                 }
             }
             core.startGroup('Installed Android SDK');
-            yield (0, installer_1.installAndroidSdk)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion);
+            yield (0, installer_1.installAndroidSdk)(versions);
             core.endGroup();
         }
         catch (error) {
