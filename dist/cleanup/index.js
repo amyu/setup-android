@@ -48023,6 +48023,10 @@ class RpcOutputStreamController {
             cmp: [],
         };
         this._closed = false;
+        // --- RpcOutputStream async iterator API
+        // iterator state.
+        // is undefined when no iterator has been acquired yet.
+        this._itState = { q: [] };
     }
     // --- RpcOutputStream callback API
     onNext(callback) {
@@ -48122,10 +48126,6 @@ class RpcOutputStreamController {
      *   messages are queued.
      */
     [Symbol.asyncIterator]() {
-        // init the iterator state, enabling pushIt()
-        if (!this._itState) {
-            this._itState = { q: [] };
-        }
         // if we are closed, we are definitely not receiving any more messages.
         // but we can't let the iterator get stuck. we want to either:
         // a) finish the new iterator immediately, because we are completed
@@ -48158,8 +48158,6 @@ class RpcOutputStreamController {
     // this either resolves a pending promise, or enqueues the result.
     pushIt(result) {
         let state = this._itState;
-        if (!state)
-            return;
         // is the consumer waiting for us?
         if (state.p) {
             // yes, consumer is waiting for this promise.
@@ -50071,6 +50069,7 @@ const reflection_equals_1 = __nccwpck_require__(4827);
 const binary_writer_1 = __nccwpck_require__(3957);
 const binary_reader_1 = __nccwpck_require__(2889);
 const baseDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf({}));
+const messageTypeDescriptor = baseDescriptors[message_type_contract_1.MESSAGE_TYPE] = {};
 /**
  * This standard message type provides reflection-based
  * operations to work with a message.
@@ -50081,7 +50080,8 @@ class MessageType {
         this.typeName = name;
         this.fields = fields.map(reflection_info_1.normalizeFieldInfo);
         this.options = options !== null && options !== void 0 ? options : {};
-        this.messagePrototype = Object.create(null, Object.assign(Object.assign({}, baseDescriptors), { [message_type_contract_1.MESSAGE_TYPE]: { value: this } }));
+        messageTypeDescriptor.value = this;
+        this.messagePrototype = Object.create(null, baseDescriptors);
         this.refTypeCheck = new reflection_type_check_1.ReflectionTypeCheck(this);
         this.refJsonReader = new reflection_json_reader_1.ReflectionJsonReader(this);
         this.refJsonWriter = new reflection_json_writer_1.ReflectionJsonWriter(this);
@@ -51598,12 +51598,16 @@ class ReflectionJsonReader {
                         target[localName] = field.T().internalJsonRead(jsonValue, options, target[localName]);
                         break;
                     case "enum":
+                        if (jsonValue === null)
+                            continue;
                         let val = this.enum(field.T(), jsonValue, field.name, options.ignoreUnknownFields);
                         if (val === false)
                             continue;
                         target[localName] = val;
                         break;
                     case "scalar":
+                        if (jsonValue === null)
+                            continue;
                         target[localName] = this.scalar(jsonValue, field.T, field.L, field.name);
                         break;
                 }
@@ -68091,15 +68095,6 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.restoreCache = restoreCache;
 exports.saveCache = saveCache;
@@ -68121,7 +68116,7 @@ function simpleHash(str) {
     return Math.abs(hash).toString(16).substring(0, 8);
 }
 function generateRestoreKey(versions, cacheKey) {
-    const suffixVersion = 'v4';
+    const suffixVersion = 'v5';
     // https://github.com/actions/cache/issues/1127
     const dirHash = simpleHash(constants_1.ANDROID_HOME_DIR);
     const baseKey = cacheKey
@@ -68130,41 +68125,37 @@ function generateRestoreKey(versions, cacheKey) {
     // cache keys can't contain `,`
     return baseKey.replace(/,/g, '').toLowerCase();
 }
-function restoreCache(versions, cacheKey) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(versions, cacheKey);
-        const restoredEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
-        if (restoredEntry) {
-            core.info(`Found in cache: ${restoreKey}`);
-        }
-        else {
-            core.info(`Not Found cache: ${restoreKey}`);
-        }
-        core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);
-        return Promise.resolve(restoredEntry);
-    });
+async function restoreCache(versions, cacheKey) {
+    const restoreKey = generateRestoreKey(versions, cacheKey);
+    const restoredEntry = await cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
+    if (restoredEntry) {
+        core.info(`Found in cache: ${restoreKey}`);
+    }
+    else {
+        core.info(`Not Found cache: ${restoreKey}`);
+    }
+    core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);
+    return Promise.resolve(restoredEntry);
 }
-function saveCache(versions, cacheKey) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(versions, cacheKey);
-        core.info(`checking if "${restoreKey}" is already cached ...`);
-        core.info(`cacheDir: ${constants_1.ANDROID_HOME_DIR}`);
-        const hasEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey, [], { lookupOnly: true });
-        if (hasEntry) {
-            core.info(`Found in cache: ${restoreKey}`);
-            return;
+async function saveCache(versions, cacheKey) {
+    const restoreKey = generateRestoreKey(versions, cacheKey);
+    core.info(`checking if "${restoreKey}" is already cached ...`);
+    core.info(`cacheDir: ${constants_1.ANDROID_HOME_DIR}`);
+    const hasEntry = await cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey, [], { lookupOnly: true });
+    if (hasEntry) {
+        core.info(`Found in cache: ${restoreKey}`);
+        return;
+    }
+    core.info(`caching "${restoreKey}" ...`);
+    try {
+        const savedEntry = await cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
+        return Promise.resolve(savedEntry);
+    }
+    catch (error) {
+        if (error instanceof cache_1.ReserveCacheError) {
+            core.info(error.message);
         }
-        core.info(`caching "${restoreKey}" ...`);
-        try {
-            const savedEntry = yield cache.saveCache([constants_1.ANDROID_HOME_DIR], restoreKey);
-            return Promise.resolve(savedEntry);
-        }
-        catch (error) {
-            if (error instanceof cache_1.ReserveCacheError) {
-                core.info(error.message);
-            }
-        }
-    });
+    }
 }
 function getRestoredEntry() {
     const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY);
@@ -68214,15 +68205,6 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isJobStatusSuccess = isJobStatusSuccess;
 const core = __importStar(__nccwpck_require__(7484));
@@ -68230,42 +68212,40 @@ const cache_1 = __nccwpck_require__(7377);
 const constants = __importStar(__nccwpck_require__(7242));
 const constants_1 = __nccwpck_require__(7242);
 const summary_1 = __nccwpck_require__(8855);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            if (!isJobStatusSuccess()) {
-                return Promise.resolve();
-            }
-            const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION);
-            const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
-            const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
-            const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
-            const commandLineToolsVersion = core.getInput(constants.INPUT_COMMAND_LINE_TOOLS_VERSION);
-            const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
-            const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
-            const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
-            const versions = {
-                sdkVersion,
-                buildToolsVersion,
-                ndkVersion,
-                cmakeVersion,
-                commandLineToolsVersion
-            };
-            let savedCacheEntry;
-            if (!cacheDisabled) {
-                core.startGroup('Save Cache');
-                savedCacheEntry = yield (0, cache_1.saveCache)(versions, cacheKey);
-                core.endGroup();
-            }
-            if (generateJobSummary) {
-                yield (0, summary_1.renderSummary)(versions, savedCacheEntry);
-            }
+async function run() {
+    try {
+        if (!isJobStatusSuccess()) {
+            return Promise.resolve();
         }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+        const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION);
+        const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
+        const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
+        const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
+        const commandLineToolsVersion = core.getInput(constants.INPUT_COMMAND_LINE_TOOLS_VERSION);
+        const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
+        const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
+        const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
+        const versions = {
+            sdkVersion,
+            buildToolsVersion,
+            ndkVersion,
+            cmakeVersion,
+            commandLineToolsVersion
+        };
+        let savedCacheEntry;
+        if (!cacheDisabled) {
+            core.startGroup('Save Cache');
+            savedCacheEntry = await (0, cache_1.saveCache)(versions, cacheKey);
+            core.endGroup();
         }
-    });
+        if (generateJobSummary) {
+            await (0, summary_1.renderSummary)(versions, savedCacheEntry);
+        }
+    }
+    catch (error) {
+        if (error instanceof Error)
+            core.setFailed(error.message);
+    }
 }
 function isJobStatusSuccess() {
     const jobStatus = core.getInput(constants_1.INPUT_JOB_STATUS);
@@ -68384,67 +68364,56 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.renderSummary = renderSummary;
 const core = __importStar(__nccwpck_require__(7484));
 const summary_1 = __nccwpck_require__(1847);
 const cache_1 = __nccwpck_require__(7377);
-function renderSummary(versions, savedCacheEntry) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // is supported job summary
-        if (!process.env[summary_1.SUMMARY_ENV_VAR]) {
-            return Promise.resolve();
-        }
-        core.summary.addHeading('setup-android');
-        core.summary.addTable([
-            [
-                { data: 'SDK', header: true },
-                { data: 'Build Tools', header: true },
-                { data: 'NDK', header: true },
-                { data: 'Cmake', header: true },
-                { data: 'Command Line Tools', header: true }
-            ],
-            [
-                versions.sdkVersion.join(', '),
-                versions.buildToolsVersion,
-                versions.ndkVersion,
-                versions.cmakeVersion,
-                versions.commandLineToolsVersion
-            ]
-        ]);
-        const restoredCacheEntry = (0, cache_1.getRestoredEntry)();
-        core.summary.addHeading('Cached Summary', 3);
-        if (savedCacheEntry) {
-            core.summary.addRaw(`save cache key: <code>${savedCacheEntry.key}</code>`, true);
-        }
-        else {
-            core.summary.addRaw('Not saved cache', true);
-        }
-        core.summary.addBreak();
-        if (restoredCacheEntry) {
-            core.summary.addRaw(`restore cache key: <code>${restoredCacheEntry.key}</code>`, true);
-        }
-        else {
-            core.summary.addRaw('Not restored cache', true);
-        }
-        core.summary.addTable([
-            [
-                { data: 'Cached size', header: true },
-                { data: 'Restored size', header: true }
-            ],
-            [formatSize(savedCacheEntry === null || savedCacheEntry === void 0 ? void 0 : savedCacheEntry.size), formatSize(restoredCacheEntry === null || restoredCacheEntry === void 0 ? void 0 : restoredCacheEntry.size)]
-        ]);
-        yield core.summary.write();
-    });
+async function renderSummary(versions, savedCacheEntry) {
+    // is supported job summary
+    if (!process.env[summary_1.SUMMARY_ENV_VAR]) {
+        return Promise.resolve();
+    }
+    core.summary.addHeading('setup-android');
+    core.summary.addTable([
+        [
+            { data: 'SDK', header: true },
+            { data: 'Build Tools', header: true },
+            { data: 'NDK', header: true },
+            { data: 'Cmake', header: true },
+            { data: 'Command Line Tools', header: true }
+        ],
+        [
+            versions.sdkVersion.join(', '),
+            versions.buildToolsVersion,
+            versions.ndkVersion,
+            versions.cmakeVersion,
+            versions.commandLineToolsVersion
+        ]
+    ]);
+    const restoredCacheEntry = (0, cache_1.getRestoredEntry)();
+    core.summary.addHeading('Cached Summary', 3);
+    if (savedCacheEntry) {
+        core.summary.addRaw(`save cache key: <code>${savedCacheEntry.key}</code>`, true);
+    }
+    else {
+        core.summary.addRaw('Not saved cache', true);
+    }
+    core.summary.addBreak();
+    if (restoredCacheEntry) {
+        core.summary.addRaw(`restore cache key: <code>${restoredCacheEntry.key}</code>`, true);
+    }
+    else {
+        core.summary.addRaw('Not restored cache', true);
+    }
+    core.summary.addTable([
+        [
+            { data: 'Cached size', header: true },
+            { data: 'Restored size', header: true }
+        ],
+        [formatSize(savedCacheEntry?.size), formatSize(restoredCacheEntry?.size)]
+    ]);
+    await core.summary.write();
 }
 function formatSize(bytes) {
     if (bytes === undefined || bytes === 0) {

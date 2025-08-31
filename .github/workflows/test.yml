@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        sdk: [33, 34]
+        sdk: [35, 36]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.sdk }}-test
       cancel-in-progress: true
@@ -37,7 +37,7 @@ jobs:
         with:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
-          build-tools-version: 34.0.0
+          build-tools-version: 36.0.0
           cmake-version: 3.10.2.4988404
           ndk-version: 25.1.8937393
 
@@ -76,8 +76,8 @@ jobs:
         uses: ./
         with:
           cache-disabled: true
-          sdk-version: 34
-          build-tools-version: 34.0.0
+          sdk-version: 36
+          build-tools-version: 36.0.0
           cmake-version: 3.10.2.4988404
           ndk-version: 25.1.8937393
 
@@ -188,8 +188,8 @@ jobs:
         uses: ./
         with:
           sdk-version: |
-            33
-            34
+            35
+            36
 
       - run: |
           sdkmanager --list_installed
@@ -227,9 +227,6 @@ jobs:
         with:
           cache-disabled: false
           sdk-version: Baklava
-          build-tools-version: 34.0.0
-          cmake-version: 3.10.2.4988404
-          ndk-version: 25.1.8937393
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace

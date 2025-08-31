@@ -26,7 +26,7 @@ steps:
       distribution: jetbrains
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@v4
+    uses: amyu/setup-android@v5
 
   - run: ./gradlew build --stacktrace
 ```
@@ -44,7 +44,7 @@ If your project uses VersionCatalog, the following settings are recommended
     echo "sdkVersion=$version" >> $GITHUB_OUTPUT
 
 - name: Setup Android SDK
-  uses: amyu/setup-android@v4
+  uses: amyu/setup-android@v5
   with:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
@@ -53,31 +53,33 @@ If your project uses VersionCatalog, the following settings are recommended
 
 ```yaml
   - name: Setup Android SDK
-    uses: amyu/setup-android@v4
+    uses: amyu/setup-android@v5
     with:
       # default: false
       # Whether to use the cache
       cache-disabled: true
 
-      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${hashedCacheDirectory}-v4`
+      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${commandLineToolsVersion}-${hashedCacheDirectory}-v5`
       # Custom key for cache. It is invalid when `cache-disabled: true`
       cache-key: 'custom-cache-key'
 
-      # default: 34
+      # default: 36
       # sdk version
       # see https://developer.android.com/studio/releases/platforms
       # It will always be installed.
-      sdk-version: 34
+      sdk-version: 36
       # or
       sdk-version: |
-        33
-        34
+        35
+        36
+      # or set sdk-version to the value written in API Level from SDK Manager
+      sdk-version: Baklava
 
-      # default: 33.0.2
+      # default: 35.0.0
       # build tools version
       # see https://developer.android.com/studio/releases/build-tools
       # It will always be installed.
-      build-tools-version: 33.0.2
+      build-tools-version: 35.0.0
 
       # default: ''
       # cmake version
@@ -99,18 +101,6 @@ If your project uses VersionCatalog, the following settings are recommended
       # default: true
       # Whether to generate or not the job summary
       generate-job-summary: false
-```
-
-**Install Beta SDK:**
-
-Set sdk-version to the value written in API Level from SDK Manager  
-![](./screenshots/information_for_install_beta_sdk.png)
-
-```yaml
-- name: Setup Android SDK
-  uses: amyu/setup-android@v4
-  with:
-    sdk-version: VanillaIceCream
 ```
 
 # License
