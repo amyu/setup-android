@@ -1,7 +1,7 @@
 import * as cache from '@actions/cache'
 import {type CacheEntry, ReserveCacheError} from '@actions/cache'
 import * as core from '@actions/core'
-import {ANDROID_HOME_DIR} from './constants'
+import {ANDROID_HOME_DIR, type Versions} from './constants'
 
 const RESTORED_ENTRY_STATE_KEY = 'restoredEntry'
 
@@ -18,39 +18,24 @@ function simpleHash(str: string): string {
   return Math.abs(hash).toString(16).substring(0, 8)
 }
 
-function generateRestoreKey(
-  sdkVersion: string[],
-  buildToolsVersion: string,
-  ndkVersion: string,
-  cmakeVersion: string,
-  cacheKey: string
-): string {
+function generateRestoreKey(versions: Versions, cacheKey: string): string {
   const suffixVersion = 'v4'
   // https://github.com/actions/cache/issues/1127
   const dirHash = simpleHash(ANDROID_HOME_DIR)
 
   const baseKey = cacheKey
     ? `${cacheKey}-${dirHash}-${suffixVersion}`
-    : `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${dirHash}-${suffixVersion}`
+    : `${versions.sdkVersion}-${versions.buildToolsVersion}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`
 
   // cache keys can't contain `,`
   return baseKey.replace(/,/g, '').toLowerCase()
 }
 
 export async function restoreCache(
-  sdkVersion: string[],
-  buildToolsVersion: string,
-  ndkVersion: string,
-  cmakeVersion: string,
+  versions: Versions,
   cacheKey: string
 ): Promise<CacheEntry | undefined> {
-  const restoreKey = generateRestoreKey(
-    sdkVersion,
-    buildToolsVersion,
-    ndkVersion,
-    cmakeVersion,
-    cacheKey
-  )
+  const restoreKey = generateRestoreKey(versions, cacheKey)
 
   const restoredEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
   if (restoredEntry) {
@@ -63,19 +48,10 @@ export async function restoreCache(
 }
 
 export async function saveCache(
-  sdkVersion: string[],
-  buildToolsVersion: string,
-  ndkVersion: string,
-  cmakeVersion: string,
+  versions: Versions,
   cacheKey: string
 ): Promise<CacheEntry | undefined> {
-  const restoreKey = generateRestoreKey(
-    sdkVersion,
-    buildToolsVersion,
-    ndkVersion,
-    cmakeVersion,
-    cacheKey
-  )
+  const restoreKey = generateRestoreKey(versions, cacheKey)
 
   core.info(`checking if "${restoreKey}" is already cached ...`)
   core.info(`cacheDir: ${ANDROID_HOME_DIR}`)

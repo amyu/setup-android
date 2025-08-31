@@ -18,12 +18,12 @@ See [action.yml](action.yml)
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v5
   - name: Setup JDK 17
-    uses: actions/setup-java@v3
+    uses: actions/setup-java@v5
     with:
       java-version: 17
-      distribution: temurin
+      distribution: jetbrains
 
   - name: Setup Android SDK
     uses: amyu/setup-android@v4
@@ -90,6 +90,11 @@ If your project uses VersionCatalog, the following settings are recommended
       # see https://developer.android.com/studio/projects/install-ndk
       # Installed when the version is specified
       ndk-version: 23.1.7779620
+
+      # default: 13114758
+      # see https://developer.android.com/studio#command-tools
+      # ex commandlinetools-mac-${command-line-tools-version}_latest.zip
+      command-line-tools-version: 13114758
 
       # default: true
       # Whether to generate or not the job summary

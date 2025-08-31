@@ -68120,19 +68120,19 @@ function simpleHash(str) {
     }
     return Math.abs(hash).toString(16).substring(0, 8);
 }
-function generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+function generateRestoreKey(versions, cacheKey) {
     const suffixVersion = 'v4';
     // https://github.com/actions/cache/issues/1127
     const dirHash = simpleHash(constants_1.ANDROID_HOME_DIR);
     const baseKey = cacheKey
         ? `${cacheKey}-${dirHash}-${suffixVersion}`
-        : `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${dirHash}-${suffixVersion}`;
+        : `${versions.sdkVersion}-${versions.buildToolsVersion}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`;
     // cache keys can't contain `,`
     return baseKey.replace(/,/g, '').toLowerCase();
 }
-function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+function restoreCache(versions, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+        const restoreKey = generateRestoreKey(versions, cacheKey);
         const restoredEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey);
         if (restoredEntry) {
             core.info(`Found in cache: ${restoreKey}`);
@@ -68144,9 +68144,9 @@ function restoreCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, c
         return Promise.resolve(restoredEntry);
     });
 }
-function saveCache(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey) {
+function saveCache(versions, cacheKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restoreKey = generateRestoreKey(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+        const restoreKey = generateRestoreKey(versions, cacheKey);
         core.info(`checking if "${restoreKey}" is already cached ...`);
         core.info(`cacheDir: ${constants_1.ANDROID_HOME_DIR}`);
         const hasEntry = yield cache.restoreCache([constants_1.ANDROID_HOME_DIR], restoreKey, [], { lookupOnly: true });
@@ -68240,17 +68240,25 @@ function run() {
             const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
             const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
             const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
+            const commandLineToolsVersion = core.getInput(constants.INPUT_COMMAND_LINE_TOOLS_VERSION);
             const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
             const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
             const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
+            const versions = {
+                sdkVersion,
+                buildToolsVersion,
+                ndkVersion,
+                cmakeVersion,
+                commandLineToolsVersion
+            };
             let savedCacheEntry;
             if (!cacheDisabled) {
                 core.startGroup('Save Cache');
-                savedCacheEntry = yield (0, cache_1.saveCache)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, cacheKey);
+                savedCacheEntry = yield (0, cache_1.saveCache)(versions, cacheKey);
                 core.endGroup();
             }
             if (generateJobSummary) {
-                yield (0, summary_1.renderSummary)(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry);
+                yield (0, summary_1.renderSummary)(versions, savedCacheEntry);
             }
         }
         catch (error) {
@@ -68310,21 +68318,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_KEY = exports.INPUT_CACHE_DISABLED = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
+exports.ANDROID_SDK_ROOT = exports.ANDROID_HOME_DIR = exports.HOME = exports.COMMANDLINE_TOOLS_WINDOWS_URL = exports.COMMANDLINE_TOOLS_MAC_URL = exports.COMMANDLINE_TOOLS_LINUX_URL = exports.INPUT_JOB_STATUS = exports.INPUT_GENERATE_JOB_SUMMARY = exports.INPUT_CACHE_KEY = exports.INPUT_CACHE_DISABLED = exports.INPUT_COMMAND_LINE_TOOLS_VERSION = exports.INPUT_CMAKE_VERSION = exports.INPUT_NDK_VERSION = exports.INPUT_BUILD_TOOLS_VERSION = exports.INPUT_SDK_VERSION = void 0;
 const os = __importStar(__nccwpck_require__(8161));
 const node_path_1 = __importDefault(__nccwpck_require__(6760));
 exports.INPUT_SDK_VERSION = 'sdk-version';
 exports.INPUT_BUILD_TOOLS_VERSION = 'build-tools-version';
 exports.INPUT_NDK_VERSION = 'ndk-version';
 exports.INPUT_CMAKE_VERSION = 'cmake-version';
+exports.INPUT_COMMAND_LINE_TOOLS_VERSION = 'command-line-tools-version';
 exports.INPUT_CACHE_DISABLED = 'cache-disabled';
 exports.INPUT_CACHE_KEY = 'cache-key';
 exports.INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 exports.INPUT_JOB_STATUS = 'job-status';
 // https://developer.android.com/studio#command-tools
-exports.COMMANDLINE_TOOLS_LINUX_URL = 'https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip';
-exports.COMMANDLINE_TOOLS_MAC_URL = 'https://dl.google.com/android/repository/commandlinetools-mac-13114758_latest.zip';
-exports.COMMANDLINE_TOOLS_WINDOWS_URL = 'https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip';
+const COMMANDLINE_TOOLS_LINUX_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-linux-${version}_latest.zip`;
+exports.COMMANDLINE_TOOLS_LINUX_URL = COMMANDLINE_TOOLS_LINUX_URL;
+const COMMANDLINE_TOOLS_MAC_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`;
+exports.COMMANDLINE_TOOLS_MAC_URL = COMMANDLINE_TOOLS_MAC_URL;
+const COMMANDLINE_TOOLS_WINDOWS_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`;
+exports.COMMANDLINE_TOOLS_WINDOWS_URL = COMMANDLINE_TOOLS_WINDOWS_URL;
 exports.HOME = os.homedir();
 // github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
 exports.ANDROID_HOME_DIR = node_path_1.default.join(exports.HOME, '.android');
@@ -68386,7 +68398,7 @@ exports.renderSummary = renderSummary;
 const core = __importStar(__nccwpck_require__(7484));
 const summary_1 = __nccwpck_require__(1847);
 const cache_1 = __nccwpck_require__(7377);
-function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, savedCacheEntry) {
+function renderSummary(versions, savedCacheEntry) {
     return __awaiter(this, void 0, void 0, function* () {
         // is supported job summary
         if (!process.env[summary_1.SUMMARY_ENV_VAR]) {
@@ -68398,9 +68410,16 @@ function renderSummary(sdkVersion, buildToolsVersion, ndkVersion, cmakeVersion, 
                 { data: 'SDK', header: true },
                 { data: 'Build Tools', header: true },
                 { data: 'NDK', header: true },
-                { data: 'Cmake', header: true }
+                { data: 'Cmake', header: true },
+                { data: 'Command Line Tools', header: true }
             ],
-            [sdkVersion.join(', '), buildToolsVersion, ndkVersion, cmakeVersion]
+            [
+                versions.sdkVersion.join(', '),
+                versions.buildToolsVersion,
+                versions.ndkVersion,
+                versions.cmakeVersion,
+                versions.commandLineToolsVersion
+            ]
         ]);
         const restoredCacheEntry = (0, cache_1.getRestoredEntry)();
         core.summary.addHeading('Cached Summary', 3);
