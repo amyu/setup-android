@@ -24,6 +24,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
@@ -66,6 +67,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
@@ -108,6 +110,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
@@ -146,6 +149,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
@@ -184,6 +188,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
@@ -224,6 +229,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
@@ -264,6 +270,7 @@ jobs:
         run: |
           echo 'ANDROID_HOME=' >> $GITHUB_ENV
           echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
           rm -rf ~/android
 
       - name: Setup JDK 17
