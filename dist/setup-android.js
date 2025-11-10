@@ -55,7 +55,7 @@ async function run() {
             commandLineToolsVersion
         };
         core.startGroup('Environment details for Android SDK');
-        (0, add_path_1.addPath)();
+        (0, add_path_1.addPath)(versions);
         core.endGroup();
         if (!cacheDisabled) {
             core.startGroup('Restored Android SDK from Cache');

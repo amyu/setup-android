@@ -26,7 +26,7 @@ async function run(): Promise<void> {
     }
 
     core.startGroup('Environment details for Android SDK')
-    addPath()
+    addPath(versions)
     core.endGroup()
 
     if (!cacheDisabled) {
