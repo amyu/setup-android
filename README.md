@@ -2,8 +2,10 @@
 
 This action provides the following functionality for GitHub Actions users:
 
-- Optionally downloading and caching distribution of the requested sdk version or build tools version or ndk,cmake version, and adding it to the PATH
-- Runs on Mac, Linux and Windows powered by SelfHostedRunner
+- Optionally downloading and caching distribution of the requested sdk version or build tools version or ndk,cmake version.
+- Adding `ANDROID_HOME` , `ANDROID_SDK_ROOT` , and `ANDROID_NDK_ROOT` to the environmental variables.
+- Adding `$ANDROID_SDK_ROOT/platform-tools` , `$ANDROID_SDK_ROOT/ndk-bundle` , and `$ANDROID_SDK_ROOT/cmdline-tools/latest/bin` to the PATH.
+- Runs on Mac, Linux and Windows powered by SelfHostedRunner.
 
 # Motivation
 
