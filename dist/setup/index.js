@@ -69006,14 +69006,21 @@ const constants_1 = __nccwpck_require__(7242);
 function addPath({ ndkVersion }) {
     core.exportVariable('ANDROID_SDK_ROOT', constants_1.ANDROID_SDK_ROOT);
     core.exportVariable('ANDROID_HOME', constants_1.ANDROID_SDK_ROOT);
-    if (ndkVersion) {
-        core.exportVariable('ANDROID_NDK_ROOT', path.join(constants_1.ANDROID_SDK_ROOT, 'ndk', ndkVersion));
+    const ndkPath = ndkVersion
+        ? path.join(constants_1.ANDROID_SDK_ROOT, 'ndk', ndkVersion)
+        : undefined;
+    if (ndkPath) {
+        core.exportVariable('ANDROID_NDK_ROOT', ndkPath);
+        core.exportVariable('ANDROID_NDK_HOME', ndkPath);
+        core.exportVariable('ANDROID_NDK', ndkPath);
     }
     core.info('Variables');
     core.info(`  ANDROID_SDK_ROOT: ${constants_1.ANDROID_SDK_ROOT}`);
     core.info(`  ANDROID_HOME: ${constants_1.ANDROID_SDK_ROOT}`);
-    if (ndkVersion) {
-        core.info(`  ANDROID_NDK_ROOT: ${path.join(constants_1.ANDROID_SDK_ROOT, 'ndk', ndkVersion)}`);
+    if (ndkPath) {
+        core.info(`  ANDROID_NDK_ROOT: ${ndkPath}`);
+        core.info(`  ANDROID_NDK_HOME: ${ndkPath}`);
+        core.info(`  ANDROID_NDK: ${ndkPath}`);
     }
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'platform-tools'));
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'ndk-bundle'));

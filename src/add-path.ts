@@ -5,19 +5,21 @@ import {ANDROID_SDK_ROOT} from './constants'
 export function addPath({ndkVersion}: {ndkVersion?: string}): void {
   core.exportVariable('ANDROID_SDK_ROOT', ANDROID_SDK_ROOT)
   core.exportVariable('ANDROID_HOME', ANDROID_SDK_ROOT)
-  if (ndkVersion) {
-    core.exportVariable(
-      'ANDROID_NDK_ROOT',
-      path.join(ANDROID_SDK_ROOT, 'ndk', ndkVersion)
-    )
+  const ndkPath = ndkVersion
+    ? path.join(ANDROID_SDK_ROOT, 'ndk', ndkVersion)
+    : undefined
+  if (ndkPath) {
+    core.exportVariable('ANDROID_NDK_ROOT', ndkPath)
+    core.exportVariable('ANDROID_NDK_HOME', ndkPath)
+    core.exportVariable('ANDROID_NDK', ndkPath)
   }
   core.info('Variables')
   core.info(`  ANDROID_SDK_ROOT: ${ANDROID_SDK_ROOT}`)
   core.info(`  ANDROID_HOME: ${ANDROID_SDK_ROOT}`)
-  if (ndkVersion) {
-    core.info(
-      `  ANDROID_NDK_ROOT: ${path.join(ANDROID_SDK_ROOT, 'ndk', ndkVersion)}`
-    )
+  if (ndkPath) {
+    core.info(`  ANDROID_NDK_ROOT: ${ndkPath}`)
+    core.info(`  ANDROID_NDK_HOME: ${ndkPath}`)
+    core.info(`  ANDROID_NDK: ${ndkPath}`)
   }
   core.addPath(path.join(ANDROID_SDK_ROOT, 'platform-tools'))
   core.addPath(path.join(ANDROID_SDK_ROOT, 'ndk-bundle'))
