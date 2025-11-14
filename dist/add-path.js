@@ -37,17 +37,30 @@ exports.addPath = addPath;
 const path = __importStar(require("node:path"));
 const core = __importStar(require("@actions/core"));
 const constants_1 = require("./constants");
-function addPath({ ndkVersion }) {
+function addPath({ ndkVersion, cmakeVersion }) {
     core.exportVariable('ANDROID_SDK_ROOT', constants_1.ANDROID_SDK_ROOT);
     core.exportVariable('ANDROID_HOME', constants_1.ANDROID_SDK_ROOT);
-    if (ndkVersion) {
-        core.exportVariable('ANDROID_NDK_ROOT', path.join(constants_1.ANDROID_SDK_ROOT, 'ndk', ndkVersion));
+    const ndkPath = ndkVersion
+        ? path.join(constants_1.ANDROID_SDK_ROOT, 'ndk', ndkVersion)
+        : undefined;
+    if (ndkPath) {
+        core.exportVariable('ANDROID_NDK_ROOT', ndkPath);
+        core.exportVariable('ANDROID_NDK_HOME', ndkPath);
+        core.exportVariable('ANDROID_NDK', ndkPath);
+    }
+    if (cmakeVersion) {
+        core.exportVariable('CMAKE_VERSION', cmakeVersion);
     }
     core.info('Variables');
     core.info(`  ANDROID_SDK_ROOT: ${constants_1.ANDROID_SDK_ROOT}`);
     core.info(`  ANDROID_HOME: ${constants_1.ANDROID_SDK_ROOT}`);
-    if (ndkVersion) {
-        core.info(`  ANDROID_NDK_ROOT: ${path.join(constants_1.ANDROID_SDK_ROOT, 'ndk', ndkVersion)}`);
+    if (ndkPath) {
+        core.info(`  ANDROID_NDK_ROOT: ${ndkPath}`);
+        core.info(`  ANDROID_NDK_HOME: ${ndkPath}`);
+        core.info(`  ANDROID_NDK: ${ndkPath}`);
+    }
+    if (cmakeVersion) {
+        core.info(`  CMAKE_VERSION: ${cmakeVersion}`);
     }
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'platform-tools'));
     core.addPath(path.join(constants_1.ANDROID_SDK_ROOT, 'ndk-bundle'));
