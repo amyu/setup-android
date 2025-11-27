@@ -17,7 +17,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -62,7 +62,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -107,7 +107,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -148,7 +148,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -189,7 +189,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -232,7 +232,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
@@ -275,7 +275,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: remove android sdk from ubuntu-latest
         shell: bash
