@@ -8,7 +8,9 @@ import {installAndroidSdk} from './installer'
 async function run(): Promise<void> {
   try {
     const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION)
-    const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION)
+    const buildToolsVersion = core.getMultilineInput(
+      constants.INPUT_BUILD_TOOLS_VERSION
+    )
     const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION)
     const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION)
     const commandLineToolsVersion = core.getInput(

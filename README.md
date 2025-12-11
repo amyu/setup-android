@@ -91,6 +91,11 @@ If your project uses VersionCatalog, the following settings are recommended
       # see https://developer.android.com/studio/releases/build-tools
       # It will always be installed.
       build-tools-version: 35.0.0
+      # or
+      build-tools-version: |
+        30.0.3
+        31.0.0
+        35.0.0
 
       # default: ''
       # cmake version

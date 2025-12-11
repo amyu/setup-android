@@ -29,7 +29,7 @@ export const ANDROID_SDK_ROOT = path.join(ANDROID_HOME_DIR, 'sdk')
 
 export type Versions = {
   sdkVersion: string[]
-  buildToolsVersion: string
+  buildToolsVersion: string[]
   ndkVersion: string
   cmakeVersion: string
   commandLineToolsVersion: string

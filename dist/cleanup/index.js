@@ -68218,7 +68218,7 @@ async function run() {
             return Promise.resolve();
         }
         const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION);
-        const buildToolsVersion = core.getInput(constants.INPUT_BUILD_TOOLS_VERSION);
+        const buildToolsVersion = core.getMultilineInput(constants.INPUT_BUILD_TOOLS_VERSION);
         const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
         const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
         const commandLineToolsVersion = core.getInput(constants.INPUT_COMMAND_LINE_TOOLS_VERSION);
@@ -68385,7 +68385,7 @@ async function renderSummary(versions, savedCacheEntry) {
         ],
         [
             versions.sdkVersion.join(', '),
-            versions.buildToolsVersion,
+            versions.buildToolsVersion.join(', '),
             versions.ndkVersion,
             versions.cmakeVersion,
             versions.commandLineToolsVersion
