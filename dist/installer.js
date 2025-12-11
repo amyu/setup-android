@@ -106,12 +106,8 @@ async function installAndroidSdk(versions) {
     core.info('success accept licenses');
     core.info(`start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
     const sdkVersionCommand = versions.sdkVersion.map(version => `platforms;android-${version}`);
-    await exec.exec('sdkmanager', [
-        `build-tools;${versions.buildToolsVersion}`,
-        'platform-tools',
-        ...sdkVersionCommand,
-        '--verbose'
-    ], { silent: !core.isDebug() });
+    const buildToolsVersion = versions.buildToolsVersion.map(version => `build-tools;${version}`);
+    await exec.exec('sdkmanager', [...buildToolsVersion, 'platform-tools', ...sdkVersionCommand, '--verbose'], { silent: !core.isDebug() });
     core.info(`success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
     if (versions.cmakeVersion) {
         core.info(`start install cmake:${versions.cmakeVersion}`);

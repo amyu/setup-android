@@ -100,14 +100,12 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
   const sdkVersionCommand = versions.sdkVersion.map(
     version => `platforms;android-${version}`
   )
+  const buildToolsVersion = versions.buildToolsVersion.map(
+    version => `build-tools;${version}`
+  )
   await exec.exec(
     'sdkmanager',
-    [
-      `build-tools;${versions.buildToolsVersion}`,
-      'platform-tools',
-      ...sdkVersionCommand,
-      '--verbose'
-    ],
+    [...buildToolsVersion, 'platform-tools', ...sdkVersionCommand, '--verbose'],
     {silent: !core.isDebug()}
   )
   core.info(

@@ -53,7 +53,7 @@ async function renderSummary(versions, savedCacheEntry) {
         ],
         [
             versions.sdkVersion.join(', '),
-            versions.buildToolsVersion,
+            versions.buildToolsVersion.join(', '),
             versions.ndkVersion,
             versions.cmakeVersion,
             versions.commandLineToolsVersion

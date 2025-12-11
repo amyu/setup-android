@@ -24,7 +24,7 @@ export async function renderSummary(
     ],
     [
       versions.sdkVersion.join(', '),
-      versions.buildToolsVersion,
+      versions.buildToolsVersion.join(', '),
       versions.ndkVersion,
       versions.cmakeVersion,
       versions.commandLineToolsVersion
