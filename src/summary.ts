@@ -1,8 +1,8 @@
 import type {CacheEntry} from '@actions/cache'
 import * as core from '@actions/core'
-import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary'
-import {getRestoredEntry} from './cache'
-import type {Versions} from './constants'
+import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary.js'
+import {getRestoredEntry} from './cache.js'
+import type {Versions} from './constants.js'
 
 export async function renderSummary(
   versions: Versions,

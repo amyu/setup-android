@@ -1,9 +1,9 @@
 import type {CacheEntry} from '@actions/cache'
 import * as core from '@actions/core'
-import {saveCache} from './cache'
-import * as constants from './constants'
-import {INPUT_JOB_STATUS, type Versions} from './constants'
-import {renderSummary} from './summary'
+import {saveCache} from './cache.js'
+import * as constants from './constants.js'
+import {INPUT_JOB_STATUS, type Versions} from './constants.js'
+import {renderSummary} from './summary.js'
 
 async function run(): Promise<void> {
   try {
