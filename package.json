@@ -2,6 +2,7 @@
   "name": "setup-android",
   "version": "5",
   "description": "setup-android for self hosted runner",
+  "type": "module",
   "main": "dist/setup/index.js",
   "scripts": {
     "postinstall": "patch-package",
@@ -9,7 +10,7 @@
     "lint": "biome check ./src/",
     "lint-fix": "biome check --write --unsafe ./src/",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "ncc build -o dist/setup src/setup-android.ts && ncc build -o dist/cleanup src/cleanup-android.ts",
+    "package": "npx rimraf ./dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "all": "npm run postinstall && npm run build && npm run lint && npm run package"
   },
   "repository": {
@@ -28,15 +29,19 @@
   "author": "amyu",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "^4.0.0",
+    "@actions/cache": "^5.0.1",
     "@actions/core": "^2.0.0",
     "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
-    "@types/node": "^24.1.0",
-    "@vercel/ncc": "^0.38.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.1",
+    "@types/node": "^24.4.0",
     "patch-package": "8.0.1",
+    "rollup": "^4.28.1",
     "typescript": "^5.2.2"
   },
   "engines": {

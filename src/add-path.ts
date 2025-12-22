@@ -1,6 +1,6 @@
 import * as path from 'node:path'
 import * as core from '@actions/core'
-import {ANDROID_SDK_ROOT} from './constants'
+import {ANDROID_SDK_ROOT} from './constants.js'
 
 export function addPath({
   ndkVersion,

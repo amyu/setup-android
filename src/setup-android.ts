@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
-import {addPath} from './add-path'
-import {restoreCache} from './cache'
-import type {Versions} from './constants'
-import * as constants from './constants'
-import {installAndroidSdk} from './installer'
+import {addPath} from './add-path.js'
+import {restoreCache} from './cache.js'
+import type {Versions} from './constants.js'
+import * as constants from './constants.js'
+import {installAndroidSdk} from './installer.js'
 
 async function run(): Promise<void> {
   try {

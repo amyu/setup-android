@@ -9,7 +9,7 @@ import {
   COMMANDLINE_TOOLS_MAC_URL,
   COMMANDLINE_TOOLS_WINDOWS_URL,
   type Versions
-} from './constants'
+} from './constants.js'
 
 export async function installAndroidSdk(versions: Versions): Promise<void> {
   await fs.rm(ANDROID_SDK_ROOT, {recursive: true, force: true})
