@@ -10,7 +10,7 @@
     "lint": "biome check ./src/",
     "lint-fix": "biome check --write --unsafe ./src/",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "package": "npx rimraf ./dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "all": "npm run postinstall && npm run build && npm run lint && npm run package"
   },
   "repository": {
