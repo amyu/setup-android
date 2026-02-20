@@ -91075,6 +91075,8 @@ async function restoreCache(versions, cacheKey) {
 
 var execExports = requireExec();
 
+var ioExports = requireIo();
+
 var __awaiter$6 = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -95779,11 +95781,22 @@ async function installAndroidSdk(versions) {
     info('start accept licenses');
     // https://github.com/actions/toolkit/issues/359 pipes workaround
     switch (process.platform) {
-        case 'win32':
-            await execExports.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
-                silent: !isDebug()
-            });
+        case 'win32': {
+            const yesPath = await ioExports.which('yes');
+            if (yesPath !== '') {
+                await execExports.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
+                    silent: !isDebug()
+                });
+            }
+            else {
+                const licenseInput = Buffer.from(Array(100).fill('y').join('\n'));
+                await execExports.exec('sdkmanager', ['--licenses'], {
+                    input: licenseInput,
+                    silent: !isDebug()
+                });
+            }
             break;
+        }
         case 'darwin':
             await execExports.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
                 silent: !isDebug()
