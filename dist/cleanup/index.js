@@ -33353,11 +33353,17 @@ function requireIoUtil () {
 		};
 		var _a;
 		Object.defineProperty(exports$1, "__esModule", { value: true });
-		exports$1.getCmdPath = exports$1.tryGetExecutablePath = exports$1.isRooted = exports$1.isDirectory = exports$1.exists = exports$1.IS_WINDOWS = exports$1.unlink = exports$1.symlink = exports$1.stat = exports$1.rmdir = exports$1.rename = exports$1.readlink = exports$1.readdir = exports$1.mkdir = exports$1.lstat = exports$1.copyFile = exports$1.chmod = void 0;
+		exports$1.getCmdPath = exports$1.tryGetExecutablePath = exports$1.isRooted = exports$1.isDirectory = exports$1.exists = exports$1.READONLY = exports$1.UV_FS_O_EXLOCK = exports$1.IS_WINDOWS = exports$1.unlink = exports$1.symlink = exports$1.stat = exports$1.rmdir = exports$1.rm = exports$1.rename = exports$1.readlink = exports$1.readdir = exports$1.open = exports$1.mkdir = exports$1.lstat = exports$1.copyFile = exports$1.chmod = void 0;
 		const fs = __importStar(fs__default);
 		const path$1 = __importStar(path);
-		_a = fs.promises, exports$1.chmod = _a.chmod, exports$1.copyFile = _a.copyFile, exports$1.lstat = _a.lstat, exports$1.mkdir = _a.mkdir, exports$1.readdir = _a.readdir, exports$1.readlink = _a.readlink, exports$1.rename = _a.rename, exports$1.rmdir = _a.rmdir, exports$1.stat = _a.stat, exports$1.symlink = _a.symlink, exports$1.unlink = _a.unlink;
+		_a = fs.promises
+		// export const {open} = 'fs'
+		, exports$1.chmod = _a.chmod, exports$1.copyFile = _a.copyFile, exports$1.lstat = _a.lstat, exports$1.mkdir = _a.mkdir, exports$1.open = _a.open, exports$1.readdir = _a.readdir, exports$1.readlink = _a.readlink, exports$1.rename = _a.rename, exports$1.rm = _a.rm, exports$1.rmdir = _a.rmdir, exports$1.stat = _a.stat, exports$1.symlink = _a.symlink, exports$1.unlink = _a.unlink;
+		// export const {open} = 'fs'
 		exports$1.IS_WINDOWS = process.platform === 'win32';
+		// See https://github.com/nodejs/node/blob/d0153aee367422d0858105abec186da4dff0a0c5/deps/uv/include/uv/win.h#L691
+		exports$1.UV_FS_O_EXLOCK = 0x10000000;
+		exports$1.READONLY = fs.constants.O_RDONLY;
 		function exists(fsPath) {
 		    return __awaiter(this, void 0, void 0, function* () {
 		        try {
@@ -33539,12 +33545,8 @@ function requireIo () {
 	Object.defineProperty(io, "__esModule", { value: true });
 	io.findInPath = io.which = io.mkdirP = io.rmRF = io.mv = io.cp = void 0;
 	const assert_1 = require$$0$b;
-	const childProcess = __importStar(require$$2$1);
 	const path$1 = __importStar(path);
-	const util_1 = require$$6;
 	const ioUtil = __importStar(requireIoUtil());
-	const exec = util_1.promisify(childProcess.exec);
-	const execFile = util_1.promisify(childProcess.execFile);
 	/**
 	 * Copies a file or folder.
 	 * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
@@ -33625,61 +33627,23 @@ function requireIo () {
 	function rmRF(inputPath) {
 	    return __awaiter(this, void 0, void 0, function* () {
 	        if (ioUtil.IS_WINDOWS) {
-	            // Node doesn't provide a delete operation, only an unlink function. This means that if the file is being used by another
-	            // program (e.g. antivirus), it won't be deleted. To address this, we shell out the work to rd/del.
 	            // Check for invalid characters
 	            // https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 	            if (/[*"<>|]/.test(inputPath)) {
 	                throw new Error('File path must not contain `*`, `"`, `<`, `>` or `|` on Windows');
 	            }
-	            try {
-	                const cmdPath = ioUtil.getCmdPath();
-	                if (yield ioUtil.isDirectory(inputPath, true)) {
-	                    yield exec(`${cmdPath} /s /c "rd /s /q "%inputPath%""`, {
-	                        env: { inputPath }
-	                    });
-	                }
-	                else {
-	                    yield exec(`${cmdPath} /s /c "del /f /a "%inputPath%""`, {
-	                        env: { inputPath }
-	                    });
-	                }
-	            }
-	            catch (err) {
-	                // if you try to delete a file that doesn't exist, desired result is achieved
-	                // other errors are valid
-	                if (err.code !== 'ENOENT')
-	                    throw err;
-	            }
-	            // Shelling out fails to remove a symlink folder with missing source, this unlink catches that
-	            try {
-	                yield ioUtil.unlink(inputPath);
-	            }
-	            catch (err) {
-	                // if you try to delete a file that doesn't exist, desired result is achieved
-	                // other errors are valid
-	                if (err.code !== 'ENOENT')
-	                    throw err;
-	            }
 	        }
-	        else {
-	            let isDir = false;
-	            try {
-	                isDir = yield ioUtil.isDirectory(inputPath);
-	            }
-	            catch (err) {
-	                // if you try to delete a file that doesn't exist, desired result is achieved
-	                // other errors are valid
-	                if (err.code !== 'ENOENT')
-	                    throw err;
-	                return;
-	            }
-	            if (isDir) {
-	                yield execFile(`rm`, [`-rf`, `${inputPath}`]);
-	            }
-	            else {
-	                yield ioUtil.unlink(inputPath);
-	            }
+	        try {
+	            // note if path does not exist, error is silent
+	            yield ioUtil.rm(inputPath, {
+	                force: true,
+	                maxRetries: 3,
+	                recursive: true,
+	                retryDelay: 300
+	            });
+	        }
+	        catch (err) {
+	            throw new Error(`File was unable to be removed ${err}`);
 	        }
 	    });
 	}
