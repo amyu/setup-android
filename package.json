@@ -31,6 +31,7 @@
   "dependencies": {
     "@actions/cache": "^5.0.3",
     "@actions/core": "^3.0.0",
+    "@actions/io": "^1.1.1",
     "@actions/tool-cache": "^4.0.0"
   },
   "devDependencies": {

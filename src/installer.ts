@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import * as io from '@actions/io'
 import * as toolCache from '@actions/tool-cache'
 import {
   ANDROID_SDK_ROOT,
@@ -73,17 +74,34 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
 
   core.info('start accept licenses')
   // https://github.com/actions/toolkit/issues/359 pipes workaround
-  if (process.platform === 'win32') {
-    // `yes` is not available on Windows, so use input buffer instead
-    const licenseInput = Buffer.from(Array(100).fill('y').join('\n'))
-    await exec.exec('sdkmanager', ['--licenses'], {
-      input: licenseInput,
-      silent: !core.isDebug()
-    })
-  } else {
-    await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-      silent: !core.isDebug()
-    })
+  switch (process.platform) {
+    case 'win32': {
+      const yesPath = await io.which('yes')
+      if (yesPath !== '') {
+        await exec.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
+          silent: !core.isDebug()
+        })
+      } else {
+        const licenseInput = Buffer.from(Array(100).fill('y').join('\n'))
+        await exec.exec('sdkmanager', ['--licenses'], {
+          input: licenseInput,
+          silent: !core.isDebug()
+        })
+      }
+      break
+    }
+    case 'darwin':
+      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
+        silent: !core.isDebug()
+      })
+      break
+    case 'linux':
+      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
+        silent: !core.isDebug()
+      })
+      break
+    default:
+      throw Error(`Unsupported platform: ${process.platform}`)
   }
   core.info('success accept licenses')
 
