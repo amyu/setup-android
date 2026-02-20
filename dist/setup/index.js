@@ -95777,26 +95777,12 @@ async function installAndroidSdk(versions) {
     }
     info(`success rename ${from} to ${to}`);
     info('start accept licenses');
-    // https://github.com/actions/toolkit/issues/359 pipes workaround
-    switch (process.platform) {
-        case 'win32':
-            await execExports.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
-                silent: !isDebug()
-            });
-            break;
-        case 'darwin':
-            await execExports.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-                silent: !isDebug()
-            });
-            break;
-        case 'linux':
-            await execExports.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-                silent: !isDebug()
-            });
-            break;
-        default:
-            throw Error(`Unsupported platform: ${process.platform}`);
-    }
+    // Provide enough 'y' responses to accept all possible SDK license prompts
+    const licenseInput = Buffer.from(Array(100).fill('y').join('\n'));
+    await execExports.exec('sdkmanager', ['--licenses'], {
+        input: licenseInput,
+        silent: !isDebug()
+    });
     info('success accept licenses');
     info(`start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
     const sdkVersionCommand = versions.sdkVersion.map(version => `platforms;android-${version}`);

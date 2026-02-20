@@ -72,26 +72,12 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
   core.info(`success rename ${from} to ${to}`)
 
   core.info('start accept licenses')
-  // https://github.com/actions/toolkit/issues/359 pipes workaround
-  switch (process.platform) {
-    case 'win32':
-      await exec.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug()
-      })
-      break
-    case 'darwin':
-      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug()
-      })
-      break
-    case 'linux':
-      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug()
-      })
-      break
-    default:
-      throw Error(`Unsupported platform: ${process.platform}`)
-  }
+  // Provide enough 'y' responses to accept all possible SDK license prompts
+  const licenseInput = Buffer.from(Array(100).fill('y').join('\n'))
+  await exec.exec('sdkmanager', ['--licenses'], {
+    input: licenseInput,
+    silent: !core.isDebug()
+  })
   core.info('success accept licenses')
 
   core.info(
