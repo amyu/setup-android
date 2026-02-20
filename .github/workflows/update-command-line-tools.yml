@@ -1,0 +1,60 @@
+name: Update command-line-tools version
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday at 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update-command-line-tools-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Get latest command-line-tools version
+        id: get-version
+        run: |
+          PAGE_CONTENT=$(curl -s "https://developer.android.com/studio")
+          VERSION=$(echo "$PAGE_CONTENT" | grep -oP 'commandlinetools-linux-\K[0-9]+(?=_latest\.zip)' | head -1)
+          if [ -z "$VERSION" ]; then
+            echo "Failed to extract command-line-tools version"
+            exit 1
+          fi
+          echo "Latest version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update action.yml
+        run: |
+          python3 - <<'EOF'
+          import re, os
+          version = os.environ['VERSION']
+          with open('action.yml', 'r') as f:
+              content = f.read()
+          new_content = re.sub(
+              r'(  command-line-tools-version:.*?default: ")[^"]*(")',
+              rf'\g<1>{version}\g<2>',
+              content,
+              flags=re.DOTALL
+          )
+          with open('action.yml', 'w') as f:
+              f.write(new_content)
+          print(f'Updated command-line-tools-version default to {version}')
+          EOF
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: 'Update command-line-tools version to ${{ steps.get-version.outputs.version }}'
+          body: |
+            Update default `command-line-tools-version` to `${{ steps.get-version.outputs.version }}`.
+
+            See https://developer.android.com/studio#command-line-tools-only
+          commit-message: 'Update command-line-tools version to ${{ steps.get-version.outputs.version }}'
+          branch: update-command-line-tools-version
+          delete-branch: true
