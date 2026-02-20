@@ -1,8 +1,9 @@
 import type {CacheEntry} from '@actions/cache'
 import * as core from '@actions/core'
-import {SUMMARY_ENV_VAR} from '@actions/core/lib/summary.js'
 import {getRestoredEntry} from './cache.js'
 import type {Versions} from './constants.js'
+
+const SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY'
 
 export async function renderSummary(
   versions: Versions,
