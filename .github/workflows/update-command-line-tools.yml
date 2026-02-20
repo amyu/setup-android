@@ -47,14 +47,47 @@ jobs:
         env:
           VERSION: ${{ steps.get-version.outputs.version }}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          title: 'Update command-line-tools version to ${{ steps.get-version.outputs.version }}'
-          body: |
-            Update default `command-line-tools-version` to `${{ steps.get-version.outputs.version }}`.
+      - name: Commit and push changes
+        id: push
+        run: |
+          BRANCH="update-command-line-tools-version"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add action.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Update command-line-tools version to ${{ steps.get-version.outputs.version }}"
+            git push origin "$BRANCH" --force-with-lease
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-            See https://developer.android.com/studio#command-line-tools-only
-          commit-message: 'Update command-line-tools version to ${{ steps.get-version.outputs.version }}'
-          branch: update-command-line-tools-version
-          delete-branch: true
+      - name: Create Pull Request
+        if: steps.push.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ steps.push.outputs.branch }}';
+            const version = '${{ steps.get-version.outputs.version }}';
+            const { data: pulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open',
+            });
+            if (pulls.length > 0) {
+              console.log(`PR already exists: ${pulls[0].html_url}`);
+            } else {
+              const { data: pr } = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Update command-line-tools version to ${version}`,
+                body: `Update default \`command-line-tools-version\` to \`${version}\`.\n\nSee https://developer.android.com/studio#command-line-tools-only`,
+                head: branch,
+                base: context.payload.repository.default_branch,
+              });
+              console.log(`Created PR: ${pr.html_url}`);
+            }
