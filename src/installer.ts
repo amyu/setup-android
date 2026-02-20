@@ -72,12 +72,19 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
   core.info(`success rename ${from} to ${to}`)
 
   core.info('start accept licenses')
-  // Provide enough 'y' responses to accept all possible SDK license prompts
-  const licenseInput = Buffer.from(Array(100).fill('y').join('\n'))
-  await exec.exec('sdkmanager', ['--licenses'], {
-    input: licenseInput,
-    silent: !core.isDebug()
-  })
+  // https://github.com/actions/toolkit/issues/359 pipes workaround
+  if (process.platform === 'win32') {
+    // `yes` is not available on Windows, so use input buffer instead
+    const licenseInput = Buffer.from(Array(100).fill('y').join('\n'))
+    await exec.exec('sdkmanager', ['--licenses'], {
+      input: licenseInput,
+      silent: !core.isDebug()
+    })
+  } else {
+    await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
+      silent: !core.isDebug()
+    })
+  }
   core.info('success accept licenses')
 
   core.info(
