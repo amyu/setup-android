@@ -27,7 +27,7 @@ jobs:
           echo "Latest version: $VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Update action.yml
+      - name: Update action.yml and README.md
         run: |
           python3 - <<'EOF'
           import re, os
@@ -42,7 +42,22 @@ jobs:
           )
           with open('action.yml', 'w') as f:
               f.write(new_content)
-          print(f'Updated command-line-tools-version default to {version}')
+          print(f'Updated action.yml command-line-tools-version default to {version}')
+          with open('README.md', 'r') as f:
+              content = f.read()
+          new_content = re.sub(
+              r'(command-line-tools-version: )\d+',
+              rf'\g<1>{version}',
+              content
+          )
+          new_content = re.sub(
+              r'(# default: )\d+(?=\s*\n\s*# see https://developer\.android\.com/studio#command-tools)',
+              rf'\g<1>{version}',
+              new_content
+          )
+          with open('README.md', 'w') as f:
+              f.write(new_content)
+          print(f'Updated README.md command-line-tools-version to {version}')
           EOF
         env:
           VERSION: ${{ steps.get-version.outputs.version }}
@@ -54,7 +69,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
-          git add action.yml
+          git add action.yml README.md
           if git diff --cached --quiet; then
             echo "No changes to commit"
             echo "changed=false" >> "$GITHUB_OUTPUT"
