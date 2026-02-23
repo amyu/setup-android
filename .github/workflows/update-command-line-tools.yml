@@ -29,17 +29,29 @@ jobs:
 
       - name: Update action.yml and README.md
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
+          node - <<'EOF'
+          const fs = require('fs');
+          const version = process.env.VERSION;
 
-          # Update command-line-tools-version default in action.yml
-          sed -i -E "/command-line-tools-version:/,/default:/ s/(default: \")[^\"]+\"/\1${VERSION}\"/" action.yml
-          echo "Updated action.yml command-line-tools-version to ${VERSION}"
+          let actionYml = fs.readFileSync('action.yml', 'utf8');
+          actionYml = actionYml.replace(
+            /(  command-line-tools-version:[\s\S]*?default: ")[^"]*"/,
+            `$1${version}"`
+          );
+          fs.writeFileSync('action.yml', actionYml);
+          console.log(`Updated action.yml command-line-tools-version to ${version}`);
 
-          # Update command-line-tools-version value in README.md
-          sed -i -E "s/(command-line-tools-version: )[0-9]+/\1${VERSION}/" README.md
-          # Update the # default: comment for command-line-tools in README.md
-          sed -i -E "/# default: [0-9]+/{ N; s/(# default: )[0-9]+(\n[^\n]*command-tools)/\1${VERSION}\2/ }" README.md
-          echo "Updated README.md command-line-tools-version to ${VERSION}"
+          let readme = fs.readFileSync('README.md', 'utf8');
+          readme = readme.replace(/(command-line-tools-version: )\d+/, `$1${version}`);
+          readme = readme.replace(
+            /(# default: )\d+(\n\s*# see https:\/\/developer\.android\.com\/studio#command-tools)/,
+            `$1${version}$2`
+          );
+          fs.writeFileSync('README.md', readme);
+          console.log(`Updated README.md command-line-tools-version to ${version}`);
+          EOF
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
 
       - name: Commit and push changes
         id: push
