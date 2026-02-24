@@ -27,22 +27,28 @@ jobs:
           echo "Latest version: $VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Update action.yml
+      - name: Update action.yml and README.md
         run: |
-          python3 - <<'EOF'
-          import re, os
-          version = os.environ['VERSION']
-          with open('action.yml', 'r') as f:
-              content = f.read()
-          new_content = re.sub(
-              r'(  command-line-tools-version:.*?default: ")[^"]*(")',
-              rf'\g<1>{version}\g<2>',
-              content,
-              flags=re.DOTALL
-          )
-          with open('action.yml', 'w') as f:
-              f.write(new_content)
-          print(f'Updated command-line-tools-version default to {version}')
+          node - <<'EOF'
+          const fs = require('fs');
+          const version = process.env.VERSION;
+
+          let actionYml = fs.readFileSync('action.yml', 'utf8');
+          actionYml = actionYml.replace(
+            /(  command-line-tools-version:[\s\S]*?default: ")[^"]*"/,
+            `$1${version}"`
+          );
+          fs.writeFileSync('action.yml', actionYml);
+          console.log(`Updated action.yml command-line-tools-version to ${version}`);
+
+          let readme = fs.readFileSync('README.md', 'utf8');
+          readme = readme.replace(/(command-line-tools-version: )\d+/, `$1${version}`);
+          readme = readme.replace(
+            /(# default: )\d+(\n\s*# see https:\/\/developer\.android\.com\/studio#command-tools)/,
+            `$1${version}$2`
+          );
+          fs.writeFileSync('README.md', readme);
+          console.log(`Updated README.md command-line-tools-version to ${version}`);
           EOF
         env:
           VERSION: ${{ steps.get-version.outputs.version }}
@@ -54,7 +60,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
-          git add action.yml
+          git add action.yml README.md
           if git diff --cached --quiet; then
             echo "No changes to commit"
             echo "changed=false" >> "$GITHUB_OUTPUT"

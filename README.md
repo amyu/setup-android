@@ -109,10 +109,10 @@ If your project uses VersionCatalog, the following settings are recommended
       # Installed when the version is specified
       ndk-version: 23.1.7779620
 
-      # default: 13114758
+      # default: 14742923
       # see https://developer.android.com/studio#command-tools
       # ex commandlinetools-mac-${command-line-tools-version}_latest.zip
-      command-line-tools-version: 13114758
+      command-line-tools-version: 14742923
 
       # default: true
       # Whether to generate or not the job summary
