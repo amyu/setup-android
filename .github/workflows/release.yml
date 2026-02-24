@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v5.4)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format. Expected format: v<major>.<minor> (e.g. v5.4)"
+            exit 1
+          fi
+
+      - name: Create and push tags
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const version = '${{ github.event.inputs.version }}';
+            const major = version.split('.')[0]; // e.g. "v5"
+
+            const { data: ref } = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'heads/main',
+            });
+            const sha = ref.object.sha;
+            console.log(`main branch SHA: ${sha}`);
+
+            // Create or update the full version tag (e.g. v5.4)
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${version}`,
+                sha,
+              });
+              console.log(`Created tag ${version}`);
+            } catch (e) {
+              if (e.status === 422) {
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `tags/${version}`,
+                  sha,
+                  force: true,
+                });
+                console.log(`Updated tag ${version}`);
+              } else {
+                throw e;
+              }
+            }
+
+            // Create or force-update the major version tag (e.g. v5)
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${major}`,
+                sha,
+              });
+              console.log(`Created tag ${major}`);
+            } catch (e) {
+              if (e.status === 422) {
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `tags/${major}`,
+                  sha,
+                  force: true,
+                });
+                console.log(`Updated tag ${major}`);
+              } else {
+                throw e;
+              }
+            }
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const version = '${{ github.event.inputs.version }}';
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: version,
+              generate_release_notes: true,
+            });
+            console.log(`Created release: ${release.html_url}`);
