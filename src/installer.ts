@@ -105,23 +105,38 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
   }
   core.info('success accept licenses')
 
-  core.info(
-    `start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
-  )
   const sdkVersionCommand = versions.sdkVersion.map(
     version => `platforms;android-${version}`
   )
-  const buildToolsVersion = versions.buildToolsVersion.map(
+  const buildToolsVersionCommand = versions.buildToolsVersion.map(
     version => `build-tools;${version}`
   )
-  await exec.exec(
-    'sdkmanager',
-    [...buildToolsVersion, 'platform-tools', ...sdkVersionCommand, '--verbose'],
-    {silent: !core.isDebug()}
-  )
-  core.info(
-    `success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
-  )
+  const packages = [
+    ...buildToolsVersionCommand,
+    'platform-tools',
+    ...sdkVersionCommand,
+    '--verbose'
+  ]
+
+  if (versions.buildToolsVersion.length > 0) {
+    core.info(
+      `start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
+    )
+  } else {
+    core.info(
+      `start install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`
+    )
+  }
+  await exec.exec('sdkmanager', packages, {silent: !core.isDebug()})
+  if (versions.buildToolsVersion.length > 0) {
+    core.info(
+      `success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
+    )
+  } else {
+    core.info(
+      `success install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`
+    )
+  }
 
   if (versions.cmakeVersion) {
     core.info(`start install cmake:${versions.cmakeVersion}`)

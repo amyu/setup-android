@@ -86,16 +86,18 @@ If your project uses VersionCatalog, the following settings are recommended
       # or set sdk-version to the value written in API Level from SDK Manager
       sdk-version: Baklava
 
-      # default: 35.0.0
+      # default: ''
       # build tools version
       # see https://developer.android.com/studio/releases/build-tools
-      # It will always be installed.
-      build-tools-version: 35.0.0
+      # Optional. If omitted, this action does not preinstall build-tools.
+      # In typical Android/Gradle projects, prefer letting AGP manage the required version.
+      # Set this only when you need to preinstall a specific version in CI.
+      build-tools-version: 36.0.0
       # or
       build-tools-version: |
         30.0.3
         31.0.0
-        35.0.0
+        36.0.0
 
       # default: ''
       # cmake version
