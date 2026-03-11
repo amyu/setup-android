@@ -91197,10 +91197,10 @@ async function renderSummary(versions, savedCacheEntry) {
             { data: 'Command Line Tools', header: true }
         ],
         [
-            versions.sdkVersion.join(', '),
-            versions.buildToolsVersion.join(', '),
-            versions.ndkVersion,
-            versions.cmakeVersion,
+            formatList(versions.sdkVersion),
+            formatList(versions.buildToolsVersion),
+            formatValue(versions.ndkVersion),
+            formatValue(versions.cmakeVersion),
             versions.commandLineToolsVersion
         ]
     ]);
@@ -91233,6 +91233,12 @@ function formatSize(bytes) {
         return 'X';
     }
     return `${Math.round(bytes / (1024 * 1024))} MB (${bytes} B)`;
+}
+function formatList(values) {
+    return values.length > 0 ? values.join(', ') : 'Not specified';
+}
+function formatValue(value) {
+    return value || 'Not specified';
 }
 
 async function run() {

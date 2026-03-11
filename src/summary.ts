@@ -24,10 +24,10 @@ export async function renderSummary(
       {data: 'Command Line Tools', header: true}
     ],
     [
-      versions.sdkVersion.join(', '),
-      versions.buildToolsVersion.join(', '),
-      versions.ndkVersion,
-      versions.cmakeVersion,
+      formatList(versions.sdkVersion),
+      formatList(versions.buildToolsVersion),
+      formatValue(versions.ndkVersion),
+      formatValue(versions.cmakeVersion),
       versions.commandLineToolsVersion
     ]
   ])
@@ -68,4 +68,12 @@ function formatSize(bytes: number | undefined): string {
     return 'X'
   }
   return `${Math.round(bytes / (1024 * 1024))} MB (${bytes} B)`
+}
+
+function formatList(values: string[]): string {
+  return values.length > 0 ? values.join(', ') : 'Not specified'
+}
+
+function formatValue(value: string): string {
+  return value || 'Not specified'
 }

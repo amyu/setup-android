@@ -95749,11 +95749,27 @@ async function installAndroidSdk(versions) {
             throw Error(`Unsupported platform: ${process.platform}`);
     }
     info('success accept licenses');
-    info(`start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
     const sdkVersionCommand = versions.sdkVersion.map(version => `platforms;android-${version}`);
-    const buildToolsVersion = versions.buildToolsVersion.map(version => `build-tools;${version}`);
-    await execExports.exec('sdkmanager', [...buildToolsVersion, 'platform-tools', ...sdkVersionCommand, '--verbose'], { silent: !isDebug() });
-    info(`success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
+    const buildToolsVersionCommand = versions.buildToolsVersion.map(version => `build-tools;${version}`);
+    const packages = [
+        ...buildToolsVersionCommand,
+        'platform-tools',
+        ...sdkVersionCommand,
+        '--verbose'
+    ];
+    if (versions.buildToolsVersion.length > 0) {
+        info(`start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
+    }
+    else {
+        info(`start install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`);
+    }
+    await execExports.exec('sdkmanager', packages, { silent: !isDebug() });
+    if (versions.buildToolsVersion.length > 0) {
+        info(`success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
+    }
+    else {
+        info(`success install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`);
+    }
     if (versions.cmakeVersion) {
         info(`start install cmake:${versions.cmakeVersion}`);
         await execExports.exec('sdkmanager', [`cmake;${versions.cmakeVersion}`, '--verbose'], {

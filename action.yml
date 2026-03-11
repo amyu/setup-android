@@ -9,7 +9,6 @@ inputs:
   build-tools-version:
     required: false
     description: "build tools version"
-    default: "35.0.0"
   ndk-version:
     required: false
     description: "ndk version"
