@@ -19,6 +19,7 @@
     "strict": true,
     "strictNullChecks": true,
     "target": "ES2022",
+    "rootDir": "./src",
     "outDir": "./dist"
   },
   "exclude": ["dist", "node_modules"],
