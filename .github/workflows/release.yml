@@ -27,7 +27,7 @@ jobs:
           fi
 
       - name: Create and push tags
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const version = '${{ github.event.inputs.version }}';
@@ -90,7 +90,7 @@ jobs:
             }
 
       - name: Create GitHub Release
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const version = '${{ github.event.inputs.version }}';
