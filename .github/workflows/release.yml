@@ -13,9 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: main
 
@@ -27,7 +28,7 @@ jobs:
           fi
 
       - name: Create and push tags
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const version = '${{ github.event.inputs.version }}';
@@ -90,7 +91,7 @@ jobs:
             }
 
       - name: Create GitHub Release
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const version = '${{ github.event.inputs.version }}';
@@ -102,3 +103,49 @@ jobs:
               generate_release_notes: true,
             });
             console.log(`Created release: ${release.html_url}`);
+
+      - name: Update README and create PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ github.event.inputs.version }}';
+
+            // Get the SHA of the main branch (which the new tag points to)
+            const { data: ref } = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'heads/main',
+            });
+            const sha = ref.object.sha;
+            console.log(`main branch SHA: ${sha}`);
+
+            // Update README.md: replace all amyu/setup-android@<hash> # v* references
+            let readme = fs.readFileSync('README.md', 'utf8');
+            readme = readme.replace(
+              /amyu\/setup-android@[a-f0-9]+ # v[\d.]+/g,
+              `amyu/setup-android@${sha} # ${version}`
+            );
+            fs.writeFileSync('README.md', readme);
+            console.log(`Updated README.md to amyu/setup-android@${sha} # ${version}`);
+
+            // Commit and push to a new branch
+            const branch = `release/update-readme-${version}`;
+            const { execSync } = require('child_process');
+            execSync(`git config user.name "github-actions[bot]"`);
+            execSync(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
+            execSync(`git checkout -b ${branch}`);
+            execSync(`git add README.md`);
+            execSync(`git commit -m "docs: update README for ${version}"`);
+            execSync(`git push origin ${branch}`);
+
+            // Create a PR
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `docs: update README for ${version}`,
+              body: `Update \`amyu/setup-android\` references in README to \`@${sha} # ${version}\`.`,
+              head: branch,
+              base: context.payload.repository.default_branch,
+            });
+            console.log(`Created PR: ${pr.html_url}`);
