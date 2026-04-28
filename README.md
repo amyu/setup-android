@@ -29,15 +29,15 @@ See [action.yml](action.yml)
 
 ```yaml
 steps:
-  - uses: actions/checkout@v5
+  - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
   - name: Setup JDK 17
-    uses: actions/setup-java@v5
+    uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
     with:
       java-version: 17
       distribution: jetbrains
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@v5
+    uses: amyu/setup-android@5ac8b5f29c062b092e0fa43d373b7bc9e45e3b1b # v5
 
   - run: ./gradlew build --stacktrace
 ```
@@ -55,7 +55,7 @@ If your project uses VersionCatalog, the following settings are recommended
     echo "sdkVersion=$version" >> $GITHUB_OUTPUT
 
 - name: Setup Android SDK
-  uses: amyu/setup-android@v5
+  uses: amyu/setup-android@5ac8b5f29c062b092e0fa43d373b7bc9e45e3b1b # v5
   with:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
@@ -64,7 +64,7 @@ If your project uses VersionCatalog, the following settings are recommended
 
 ```yaml
   - name: Setup Android SDK
-    uses: amyu/setup-android@v5
+    uses: amyu/setup-android@5ac8b5f29c062b092e0fa43d373b7bc9e45e3b1b # v5
     with:
       # default: false
       # Whether to use the cache
