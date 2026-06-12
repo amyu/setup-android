@@ -75,10 +75,14 @@ If your project uses VersionCatalog, the following settings are recommended
       cache-key: 'custom-cache-key'
 
       # default: 36
-      # sdk version
+      # sdk version. Supports major and major.minor API levels.
       # see https://developer.android.com/studio/releases/platforms
+      # API level 37 and later use minor versions in SDK Manager. A bare major
+      # version such as 37 is installed as 37.0 with a warning.
       # It will always be installed.
       sdk-version: 36
+      # or
+      sdk-version: 37.0
       # or
       sdk-version: |
         35

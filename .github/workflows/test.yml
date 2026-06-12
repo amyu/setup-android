@@ -135,6 +135,48 @@ jobs:
       - run: |
           sdkmanager --install "system-images;android-31;default;x86_64"
 
+  test_android_minor_sdk_version:
+    name: run test android minor sdk version ${{ matrix.sdk }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [37, "37.0"]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.sdk }}-test_android_minor_sdk_version
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: remove android sdk from ubuntu-latest
+        shell: bash
+        run: |
+          echo 'ANDROID_HOME=' >> $GITHUB_ENV
+          echo 'ANDROID_SDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_ROOT=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK_HOME=' >> $GITHUB_ENV
+          echo 'ANDROID_NDK=' >> $GITHUB_ENV
+          rm -rf ~/android
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: 17
+          distribution: jetbrains
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Android SDK
+        uses: ./
+        with:
+          cache-disabled: true
+          sdk-version: ${{ matrix.sdk }}
+
+      - run: |
+          sdkmanager --list_installed | grep "platforms;android-37.0"
+
   test_custom_cache_key:
     name: run test custom cache key ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

@@ -3,6 +3,7 @@ import * as core from '@actions/core'
 import {saveCache} from './cache.js'
 import * as constants from './constants.js'
 import {INPUT_JOB_STATUS, type Versions} from './constants.js'
+import {normalizeSdkVersions} from './sdk-version.js'
 import {renderSummary} from './summary.js'
 
 async function run(): Promise<void> {
@@ -11,7 +12,9 @@ async function run(): Promise<void> {
       return Promise.resolve()
     }
 
-    const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION)
+    const sdkVersion = normalizeSdkVersions(
+      core.getMultilineInput(constants.INPUT_SDK_VERSION)
+    )
     const buildToolsVersion = core.getMultilineInput(
       constants.INPUT_BUILD_TOOLS_VERSION
     )
