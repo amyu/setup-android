@@ -37,7 +37,7 @@ steps:
       distribution: jetbrains
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@5ac8b5f29c062b092e0fa43d373b7bc9e45e3b1b # v5
+    uses: amyu/setup-android@dd20604d00311747ada5db85ecdf4d7577fab4f9 # v5.6
 
   - run: ./gradlew build --stacktrace
 ```
@@ -55,7 +55,7 @@ If your project uses VersionCatalog, the following settings are recommended
     echo "sdkVersion=$version" >> $GITHUB_OUTPUT
 
 - name: Setup Android SDK
-  uses: amyu/setup-android@5ac8b5f29c062b092e0fa43d373b7bc9e45e3b1b # v5
+  uses: amyu/setup-android@dd20604d00311747ada5db85ecdf4d7577fab4f9 # v5.6
   with:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
@@ -64,7 +64,7 @@ If your project uses VersionCatalog, the following settings are recommended
 
 ```yaml
   - name: Setup Android SDK
-    uses: amyu/setup-android@5ac8b5f29c062b092e0fa43d373b7bc9e45e3b1b # v5
+    uses: amyu/setup-android@dd20604d00311747ada5db85ecdf4d7577fab4f9 # v5.6
     with:
       # default: false
       # Whether to use the cache
