@@ -91181,6 +91181,27 @@ function getRestoredEntry() {
     }
 }
 
+const FIRST_ANDROID_MINOR_API_LEVEL = 37;
+const MAJOR_ONLY_API_LEVEL = /^\d+$/;
+function normalizeSdkVersion(version, options = {}) {
+    const trimmedVersion = version.trim();
+    if (!MAJOR_ONLY_API_LEVEL.test(trimmedVersion)) {
+        return trimmedVersion;
+    }
+    const apiLevel = Number.parseInt(trimmedVersion, 10);
+    if (apiLevel < FIRST_ANDROID_MINOR_API_LEVEL) {
+        return trimmedVersion;
+    }
+    const normalizedVersion = `${apiLevel}.0`;
+    options.warn?.(`Android SDK API level ${trimmedVersion} uses minor version package ` +
+        `names. Installing sdk-version: ${normalizedVersion}. Specify ` +
+        `${normalizedVersion} explicitly to remove this warning.`);
+    return normalizedVersion;
+}
+function normalizeSdkVersions(versions, options = {}) {
+    return versions.map(version => normalizeSdkVersion(version, options));
+}
+
 const SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
 async function renderSummary(versions, savedCacheEntry) {
     // is supported job summary
@@ -91246,7 +91267,7 @@ async function run() {
         if (!isJobStatusSuccess()) {
             return Promise.resolve();
         }
-        const sdkVersion = getMultilineInput(INPUT_SDK_VERSION);
+        const sdkVersion = normalizeSdkVersions(getMultilineInput(INPUT_SDK_VERSION));
         const buildToolsVersion = getMultilineInput(INPUT_BUILD_TOOLS_VERSION);
         const ndkVersion = getInput(INPUT_NDK_VERSION);
         const cmakeVersion = getInput(INPUT_CMAKE_VERSION);

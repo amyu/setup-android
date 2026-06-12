@@ -28379,6 +28379,14 @@ function error$2(message, properties = {}) {
     issueCommand('error', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
+ * Adds a warning issue
+ * @param message warning issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function warning(message, properties = {}) {
+    issueCommand('warning', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+/**
  * Writes info to log with console.log.
  * @param message info message
  */
@@ -95786,9 +95794,30 @@ async function installAndroidSdk(versions) {
     }
 }
 
+const FIRST_ANDROID_MINOR_API_LEVEL = 37;
+const MAJOR_ONLY_API_LEVEL = /^\d+$/;
+function normalizeSdkVersion(version, options = {}) {
+    const trimmedVersion = version.trim();
+    if (!MAJOR_ONLY_API_LEVEL.test(trimmedVersion)) {
+        return trimmedVersion;
+    }
+    const apiLevel = Number.parseInt(trimmedVersion, 10);
+    if (apiLevel < FIRST_ANDROID_MINOR_API_LEVEL) {
+        return trimmedVersion;
+    }
+    const normalizedVersion = `${apiLevel}.0`;
+    options.warn?.(`Android SDK API level ${trimmedVersion} uses minor version package ` +
+        `names. Installing sdk-version: ${normalizedVersion}. Specify ` +
+        `${normalizedVersion} explicitly to remove this warning.`);
+    return normalizedVersion;
+}
+function normalizeSdkVersions(versions, options = {}) {
+    return versions.map(version => normalizeSdkVersion(version, options));
+}
+
 async function run() {
     try {
-        const sdkVersion = getMultilineInput(INPUT_SDK_VERSION);
+        const sdkVersion = normalizeSdkVersions(getMultilineInput(INPUT_SDK_VERSION), { warn: message => warning(message) });
         const buildToolsVersion = getMultilineInput(INPUT_BUILD_TOOLS_VERSION);
         const ndkVersion = getInput(INPUT_NDK_VERSION);
         const cmakeVersion = getInput(INPUT_CMAKE_VERSION);

@@ -4,10 +4,14 @@ import {restoreCache} from './cache.js'
 import type {Versions} from './constants.js'
 import * as constants from './constants.js'
 import {installAndroidSdk} from './installer.js'
+import {normalizeSdkVersions} from './sdk-version.js'
 
 async function run(): Promise<void> {
   try {
-    const sdkVersion = core.getMultilineInput(constants.INPUT_SDK_VERSION)
+    const sdkVersion = normalizeSdkVersions(
+      core.getMultilineInput(constants.INPUT_SDK_VERSION),
+      {warn: message => core.warning(message)}
+    )
     const buildToolsVersion = core.getMultilineInput(
       constants.INPUT_BUILD_TOOLS_VERSION
     )
