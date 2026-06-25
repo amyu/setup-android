@@ -87,8 +87,8 @@ If your project uses VersionCatalog, the following settings are recommended
       sdk-version: |
         35
         36
-      # or set sdk-version to the value written in API Level from SDK Manager
-      sdk-version: Baklava
+      # or set sdk-version to a codename-based platform package from SDK Manager
+      sdk-version: CinnamonBun
 
       # default: ''
       # build tools version
