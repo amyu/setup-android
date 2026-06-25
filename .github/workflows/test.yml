@@ -261,8 +261,8 @@ jobs:
       - run: |
           sdkmanager --list_installed
 
-  test_Baklava:
-    name: run test ${{ matrix.os }} sdkversion Baklava
+  test_CinnamonBun:
+    name: run test ${{ matrix.os }} sdkversion CinnamonBun
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
@@ -270,7 +270,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-Baklava-test
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-CinnamonBun-test
       cancel-in-progress: true
 
     steps:
@@ -298,7 +298,7 @@ jobs:
         uses: ./
         with:
           cache-disabled: false
-          sdk-version: Baklava
+          sdk-version: CinnamonBun
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
