@@ -29,9 +29,9 @@ See [action.yml](action.yml)
 
 ```yaml
 steps:
-  - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+  - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
   - name: Setup JDK 17
-    uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+    uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
     with:
       java-version: 17
       distribution: jetbrains
