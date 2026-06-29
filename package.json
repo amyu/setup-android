@@ -4,14 +4,15 @@
   "description": "setup-android for self hosted runner",
   "type": "module",
   "main": "dist/setup/index.js",
+  "packageManager": "pnpm@11.7.0",
   "scripts": {
     "postinstall": "patch-package",
     "build": "tsc",
     "lint": "biome check ./src/",
     "lint-fix": "biome check --write --unsafe ./src/",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "npx rimraf ./dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "all": "npm run postinstall && npm run build && npm run lint && npm run package"
+    "package": "pnpm dlx rimraf ./dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "all": "pnpm run postinstall && pnpm run build && pnpm run lint && pnpm run package"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
   "dependencies": {
     "@actions/cache": "^6.1.0",
     "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
     "@actions/io": "^3.0.0",
     "@actions/tool-cache": "^4.0.0"
   },
