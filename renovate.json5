@@ -4,14 +4,8 @@
     'customManagers:biomeVersions',
   ],
   timezone: 'Asia/Tokyo',
-  major: {
-    minimumReleaseAge: '7 days',
-  },
-  minor: {
-    minimumReleaseAge: '3 days',
-  },
+  minimumReleaseAge: '7 days',
   patch: {
-    minimumReleaseAge: '2 days',
     automerge: true,
   },
   packageRules: [
