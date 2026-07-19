@@ -29765,7 +29765,7 @@ const COMMANDLINE_TOOLS_LINUX_URL = (version) => `https://dl.google.com/android/
 const COMMANDLINE_TOOLS_MAC_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`;
 const COMMANDLINE_TOOLS_WINDOWS_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`;
 const HOME = os$1.homedir();
-// github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
+// Avoid the existing Android directory on GitHub-hosted Ubuntu runners.
 const ANDROID_HOME_DIR = path__default.join(HOME, '.android');
 // https://developer.android.com/studio/command-line/variables
 const ANDROID_SDK_ROOT = path__default.join(ANDROID_HOME_DIR, 'sdk');

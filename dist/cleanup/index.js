@@ -77790,7 +77790,7 @@ const INPUT_CACHE_KEY = 'cache-key';
 const INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary';
 const INPUT_JOB_STATUS = 'job-status';
 const HOME = os$1.homedir();
-// github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
+// Avoid the existing Android directory on GitHub-hosted Ubuntu runners.
 const ANDROID_HOME_DIR = path$1.join(HOME, '.android');
 // https://developer.android.com/studio/command-line/variables
 path$1.join(ANDROID_HOME_DIR, 'sdk');
