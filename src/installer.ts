@@ -127,7 +127,27 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
       `start install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`
     )
   }
-  await exec.exec('sdkmanager', packages, {silent: !core.isDebug()})
+  try {
+    await exec.exec('sdkmanager', packages, {silent: !core.isDebug()})
+  } catch (error) {
+    const codenamePackages = versions.sdkVersion
+      .filter(version => !/^\d+(?:\.\d+)?$/.test(version))
+      .map(version => `"platforms;android-${version}"`)
+
+    if (codenamePackages.length === 0) {
+      throw error
+    }
+
+    const originalError =
+      error instanceof Error ? ` Original error: ${error.message}` : ''
+    throw new Error(
+      'sdkmanager failed while installing packages that include the ' +
+        `codename-based Android SDK platform ${codenamePackages.join(', ')}. ` +
+        'Verify that the package ID is still listed by "sdkmanager --list", ' +
+        'then set "sdk-version" to an available exact suffix (for example, ' +
+        `"37.0").${originalError}`
+    )
+  }
   if (versions.buildToolsVersion.length > 0) {
     core.info(
       `success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
