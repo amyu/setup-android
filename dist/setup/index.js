@@ -76733,7 +76733,23 @@ async function installAndroidSdk(versions) {
     else {
         info(`start install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`);
     }
-    await exec('sdkmanager', packages, { silent: !isDebug() });
+    try {
+        await exec('sdkmanager', packages, { silent: !isDebug() });
+    }
+    catch (error) {
+        const codenamePackages = versions.sdkVersion
+            .filter(version => !/^\d+(?:\.\d+)?$/.test(version))
+            .map(version => `"platforms;android-${version}"`);
+        if (codenamePackages.length === 0) {
+            throw error;
+        }
+        const originalError = error instanceof Error ? ` Original error: ${error.message}` : '';
+        throw new Error('sdkmanager failed while installing packages that include the ' +
+            `codename-based Android SDK platform ${codenamePackages.join(', ')}. ` +
+            'Verify that the package ID is still listed by "sdkmanager --list", ' +
+            'then set "sdk-version" to an available exact suffix (for example, ' +
+            `"37.0").${originalError}`);
+    }
     if (versions.buildToolsVersion.length > 0) {
         info(`success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
     }
