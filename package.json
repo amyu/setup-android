@@ -4,7 +4,7 @@
   "description": "setup-android for self hosted runner",
   "type": "module",
   "main": "dist/setup/index.js",
-  "packageManager": "pnpm@11.10.0",
+  "packageManager": "pnpm@11.11.0",
   "scripts": {
     "postinstall": "patch-package",
     "build": "tsc",
