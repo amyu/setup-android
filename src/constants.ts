@@ -21,7 +21,7 @@ export const COMMANDLINE_TOOLS_WINDOWS_URL = (version: string) =>
   `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`
 
 export const HOME = os.homedir()
-// github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
+// Avoid the existing Android directory on GitHub-hosted Ubuntu runners.
 export const ANDROID_HOME_DIR = path.join(HOME, '.android')
 
 // https://developer.android.com/studio/command-line/variables
