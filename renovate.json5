@@ -22,5 +22,13 @@
         'com.android.application{/,}**',
       ],
     },
+    {
+      groupName: 'Biome',
+      groupSlug: 'biome',
+      groupSingleUpdates: true,
+      matchDepNames: [
+        '@biomejs/biome',
+      ],
+    },
   ],
 }
