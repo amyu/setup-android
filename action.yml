@@ -18,7 +18,7 @@ inputs:
   command-line-tools-version:
     required: false
     description: "command line tools version"
-    default: "14742923"
+    default: "15859902"
   cache-disabled:
     required: false
     description: "disabled cache"
