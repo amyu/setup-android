@@ -29761,8 +29761,22 @@ const INPUT_COMMAND_LINE_TOOLS_VERSION = 'command-line-tools-version';
 const INPUT_CACHE_DISABLED = 'cache-disabled';
 const INPUT_CACHE_KEY = 'cache-key';
 // https://developer.android.com/studio#command-tools
+const MACOS_ARCH_SPECIFIC_COMMAND_LINE_TOOLS_VERSION = 15859902;
 const COMMANDLINE_TOOLS_LINUX_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-linux-${version}_latest.zip`;
-const COMMANDLINE_TOOLS_MAC_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`;
+const COMMANDLINE_TOOLS_MAC_URL = (version, architecture = process.arch) => {
+    // macOS archives became architecture-specific starting with this release.
+    if (Number(version) >= MACOS_ARCH_SPECIFIC_COMMAND_LINE_TOOLS_VERSION) {
+        switch (architecture) {
+            case 'arm64':
+                return `https://dl.google.com/android/repository/commandlinetools-mac_arm64-${version}_latest.zip`;
+            case 'x64':
+                return `https://dl.google.com/android/repository/commandlinetools-mac_x86_64-${version}_latest.zip`;
+            default:
+                throw new Error(`Unsupported macOS architecture: ${architecture}`);
+        }
+    }
+    return `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`;
+};
 const COMMANDLINE_TOOLS_WINDOWS_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`;
 const HOME = os$1.homedir();
 // Avoid the existing Android directory on GitHub-hosted Ubuntu runners.

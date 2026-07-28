@@ -117,7 +117,7 @@ If your project uses VersionCatalog, the following settings are recommended
 
       # default: 15859902
       # see https://developer.android.com/studio#command-tools
-      # ex commandlinetools-mac-${command-line-tools-version}_latest.zip
+      # ex commandlinetools-mac_arm64-${command-line-tools-version}_latest.zip
       command-line-tools-version: 15859902
 
       # default: true
