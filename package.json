@@ -49,6 +49,6 @@
     "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": "24.18.0"
   }
 }

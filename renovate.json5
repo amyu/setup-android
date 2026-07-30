@@ -36,5 +36,17 @@
         '@biomejs/biome',
       ],
     },
+    {
+      groupName: 'Node.js',
+      matchDatasources: [
+        'node-version',
+      ],
+      matchDepNames: [
+        'node',
+      ],
+      ignoreUnstable: true,
+      rangeStrategy: 'pin',
+      versioning: 'node',
+    },
   ],
 }
