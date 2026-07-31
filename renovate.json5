@@ -10,6 +10,12 @@
   },
   packageRules: [
     {
+      matchManagers: [
+        'npm',
+      ],
+      rangeStrategy: 'pin',
+    },
+    {
       enabled: false,
       matchPackageNames: [
         '/@actions/cache/',
@@ -21,6 +27,26 @@
         'com.android.library{/,}**',
         'com.android.application{/,}**',
       ],
+    },
+    {
+      groupName: 'Biome',
+      groupSlug: 'biome',
+      groupSingleUpdates: true,
+      matchDepNames: [
+        '@biomejs/biome',
+      ],
+    },
+    {
+      groupName: 'Node.js',
+      matchDatasources: [
+        'node-version',
+      ],
+      matchDepNames: [
+        'node',
+      ],
+      ignoreUnstable: true,
+      rangeStrategy: 'pin',
+      versioning: 'node',
     },
   ],
 }

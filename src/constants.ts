@@ -13,15 +13,33 @@ export const INPUT_GENERATE_JOB_SUMMARY = 'generate-job-summary'
 export const INPUT_JOB_STATUS = 'job-status'
 
 // https://developer.android.com/studio#command-tools
+const MACOS_ARCH_SPECIFIC_COMMAND_LINE_TOOLS_VERSION = 15859902
+
 export const COMMANDLINE_TOOLS_LINUX_URL = (version: string) =>
   `https://dl.google.com/android/repository/commandlinetools-linux-${version}_latest.zip`
-export const COMMANDLINE_TOOLS_MAC_URL = (version: string) =>
-  `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`
+export const COMMANDLINE_TOOLS_MAC_URL = (
+  version: string,
+  architecture: NodeJS.Architecture = process.arch
+) => {
+  // macOS archives became architecture-specific starting with this release.
+  if (Number(version) >= MACOS_ARCH_SPECIFIC_COMMAND_LINE_TOOLS_VERSION) {
+    switch (architecture) {
+      case 'arm64':
+        return `https://dl.google.com/android/repository/commandlinetools-mac_arm64-${version}_latest.zip`
+      case 'x64':
+        return `https://dl.google.com/android/repository/commandlinetools-mac_x86_64-${version}_latest.zip`
+      default:
+        throw new Error(`Unsupported macOS architecture: ${architecture}`)
+    }
+  }
+
+  return `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`
+}
 export const COMMANDLINE_TOOLS_WINDOWS_URL = (version: string) =>
   `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`
 
 export const HOME = os.homedir()
-// github hosted runnerのubuntu-latestではすでにandroid directoryが存在しているため.をつけて回避
+// Avoid the existing Android directory on GitHub-hosted Ubuntu runners.
 export const ANDROID_HOME_DIR = path.join(HOME, '.android')
 
 // https://developer.android.com/studio/command-line/variables
