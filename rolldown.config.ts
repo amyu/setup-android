@@ -1,13 +1,13 @@
 import {defineConfig} from 'rolldown'
 
-const createConfig = (input, file) => ({
+const createConfig = (input: string, file: string) => ({
   input,
   output: {
     file,
-    format: 'esm',
+    format: 'esm' as const,
     sourcemap: true
   },
-  platform: 'node',
+  platform: 'node' as const,
   tsconfig: 'tsconfig.json'
 })
 

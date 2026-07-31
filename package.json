@@ -11,7 +11,7 @@
     "lint": "biome check ./src/",
     "lint-fix": "biome check --write --unsafe ./src/",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "pnpm dlx rimraf ./dist && pnpm run typecheck && rolldown --config rolldown.config.js",
+    "package": "pnpm dlx rimraf ./dist && pnpm run typecheck && rolldown --config rolldown.config.ts",
     "all": "pnpm run postinstall && pnpm run lint && pnpm run package"
   },
   "repository": {
