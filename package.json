@@ -8,8 +8,10 @@
   "scripts": {
     "postinstall": "patch-package",
     "build": "tsc",
-    "lint": "biome check ./src/",
-    "lint-fix": "biome check --write --unsafe ./src/",
+    "format": "oxfmt --write ./src/",
+    "format-check": "oxfmt --check ./src/",
+    "lint": "oxlint ./src/ && pnpm run format-check",
+    "lint-fix": "oxlint --fix ./src/ && pnpm run format",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
     "package": "pnpm dlx rimraf ./dist && pnpm run typecheck && rolldown --config rolldown.config.ts",
     "all": "pnpm run postinstall && pnpm run lint && pnpm run package"
@@ -37,8 +39,10 @@
     "@actions/tool-cache": "4.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.5",
     "@types/node": "24.13.3",
+    "oxfmt": "0.60.0",
+    "oxlint": "1.75.0",
+    "oxlint-tsgolint": "7.0.2001",
     "patch-package": "8.0.1",
     "rolldown": "1.2.0",
     "typescript": "7.0.2"

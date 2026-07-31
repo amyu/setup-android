@@ -1,85 +1,85 @@
-import * as cache from '@actions/cache'
-import {type CacheEntry, ReserveCacheError} from '@actions/cache'
-import * as core from '@actions/core'
-import {ANDROID_HOME_DIR, type Versions} from './constants.js'
+import * as cache from "@actions/cache";
+import { type CacheEntry, ReserveCacheError } from "@actions/cache";
+import * as core from "@actions/core";
 
-const RESTORED_ENTRY_STATE_KEY = 'restoredEntry'
+import { ANDROID_HOME_DIR, type Versions } from "./constants.js";
+
+const RESTORED_ENTRY_STATE_KEY = "restoredEntry";
 
 function simpleHash(str: string): string {
-  let hash = 0
-  if (str.length === 0) return hash.toString(16)
+  let hash = 0;
+  if (str.length === 0) return hash.toString(16);
 
   for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32bit integer
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
   }
 
-  return Math.abs(hash).toString(16).substring(0, 8)
+  return Math.abs(hash).toString(16).substring(0, 8);
 }
 
 function generateRestoreKey(versions: Versions, cacheKey: string): string {
-  const suffixVersion = 'v5'
+  const suffixVersion = "v5";
   // https://github.com/actions/cache/issues/1127
-  const dirHash = simpleHash(ANDROID_HOME_DIR)
+  const dirHash = simpleHash(ANDROID_HOME_DIR);
 
   const baseKey = cacheKey
     ? `${cacheKey}-${dirHash}-${suffixVersion}`
-    : `${versions.sdkVersion}-${versions.buildToolsVersion}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`
+    : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`;
 
   // cache keys can't contain `,`
-  return baseKey.replace(/,/g, '').toLowerCase()
+  return baseKey.replace(/,/g, "").toLowerCase();
 }
 
 export async function restoreCache(
   versions: Versions,
-  cacheKey: string
+  cacheKey: string,
 ): Promise<CacheEntry | undefined> {
-  const restoreKey = generateRestoreKey(versions, cacheKey)
+  const restoreKey = generateRestoreKey(versions, cacheKey);
 
-  const restoredEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey)
+  const restoredEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey);
   if (restoredEntry) {
-    core.info(`Found in cache: ${restoreKey}`)
+    core.info(`Found in cache: ${restoreKey}`);
   } else {
-    core.info(`Not Found cache: ${restoreKey}`)
+    core.info(`Not Found cache: ${restoreKey}`);
   }
-  core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry)
-  return Promise.resolve(restoredEntry)
+  core.saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);
+  return Promise.resolve(restoredEntry);
 }
 
 export async function saveCache(
   versions: Versions,
-  cacheKey: string
+  cacheKey: string,
 ): Promise<CacheEntry | undefined> {
-  const restoreKey = generateRestoreKey(versions, cacheKey)
+  const restoreKey = generateRestoreKey(versions, cacheKey);
 
-  core.info(`checking if "${restoreKey}" is already cached ...`)
-  core.info(`cacheDir: ${ANDROID_HOME_DIR}`)
-  const hasEntry = await cache.restoreCache(
-    [ANDROID_HOME_DIR],
-    restoreKey,
-    [],
-    {lookupOnly: true}
-  )
+  core.info(`checking if "${restoreKey}" is already cached ...`);
+  core.info(`cacheDir: ${ANDROID_HOME_DIR}`);
+  const hasEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey, [], {
+    lookupOnly: true,
+  });
   if (hasEntry) {
-    core.info(`Found in cache: ${restoreKey}`)
-    return
+    core.info(`Found in cache: ${restoreKey}`);
+    return undefined;
   }
 
-  core.info(`caching "${restoreKey}" ...`)
+  core.info(`caching "${restoreKey}" ...`);
   try {
-    const savedEntry = await cache.saveCache([ANDROID_HOME_DIR], restoreKey)
-    return Promise.resolve(savedEntry)
+    const savedEntry = await cache.saveCache([ANDROID_HOME_DIR], restoreKey);
+    return Promise.resolve(savedEntry);
   } catch (error) {
     if (error instanceof ReserveCacheError) {
-      core.info(error.message)
+      core.info(error.message);
     }
   }
+  return undefined;
 }
 
 export function getRestoredEntry(): CacheEntry | undefined {
-  const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY)
+  const restoredEntryJson = core.getState(RESTORED_ENTRY_STATE_KEY);
   if (restoredEntryJson) {
-    return JSON.parse(restoredEntryJson)
+    return JSON.parse(restoredEntryJson);
   }
+  return undefined;
 }

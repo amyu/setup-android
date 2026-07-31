@@ -57335,7 +57335,7 @@ function simpleHash(str) {
 function generateRestoreKey(versions, cacheKey) {
 	const suffixVersion = "v5";
 	const dirHash = simpleHash(ANDROID_HOME_DIR);
-	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion}-${versions.buildToolsVersion}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
+	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
 }
 async function saveCache(versions, cacheKey) {
 	const restoreKey = generateRestoreKey(versions, cacheKey);

@@ -1,7 +1,6 @@
 {
   extends: [
     'config:recommended',
-    'customManagers:biomeVersions',
   ],
   timezone: 'Asia/Tokyo',
   minimumReleaseAge: '7 days',
@@ -29,11 +28,13 @@
       ],
     },
     {
-      groupName: 'Biome',
-      groupSlug: 'biome',
+      groupName: 'Oxc',
+      groupSlug: 'oxc',
       groupSingleUpdates: true,
       matchDepNames: [
-        '@biomejs/biome',
+        'oxfmt',
+        'oxlint',
+        'oxlint-tsgolint',
       ],
     },
     {

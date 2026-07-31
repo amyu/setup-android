@@ -56288,7 +56288,7 @@ function simpleHash(str) {
 function generateRestoreKey(versions, cacheKey) {
 	const suffixVersion = "v5";
 	const dirHash = simpleHash(ANDROID_HOME_DIR);
-	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion}-${versions.buildToolsVersion}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
+	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
 }
 async function restoreCache(versions, cacheKey) {
 	const restoreKey = generateRestoreKey(versions, cacheKey);
@@ -56612,7 +56612,7 @@ async function installAndroidSdk(versions) {
 		case "linux":
 			await exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], { silent: !isDebug() });
 			break;
-		default: throw Error(`Unsupported platform: ${process.platform}`);
+		default: throw Error("Unsupported platform");
 	}
 	info("success accept licenses");
 	const sdkVersionCommand = versions.sdkVersion.map((version) => `platforms;android-${version}`);
@@ -56622,18 +56622,18 @@ async function installAndroidSdk(versions) {
 		...sdkVersionCommand,
 		"--verbose"
 	];
-	if (versions.buildToolsVersion.length > 0) info(`start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
-	else info(`start install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`);
+	if (versions.buildToolsVersion.length > 0) info(`start install build-tools:${versions.buildToolsVersion.join(",")} and platform-tools and sdk:${versions.sdkVersion.join(",")}`);
+	else info(`start install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`);
 	try {
 		await exec("sdkmanager", packages, { silent: !isDebug() });
 	} catch (error) {
 		const codenamePackages = versions.sdkVersion.filter((version) => !/^\d+(?:\.\d+)?$/.test(version)).map((version) => `"platforms;android-${version}"`);
 		if (codenamePackages.length === 0) throw error;
 		const originalError = error instanceof Error ? ` Original error: ${error.message}` : "";
-		throw new Error(`sdkmanager failed while installing packages that include the codename-based Android SDK platform ${codenamePackages.join(", ")}. Verify that the package ID is still listed by "sdkmanager --list", then set "sdk-version" to an available exact suffix (for example, "37.0").${originalError}`);
+		throw new Error(`sdkmanager failed while installing packages that include the codename-based Android SDK platform ${codenamePackages.join(", ")}. Verify that the package ID is still listed by "sdkmanager --list", then set "sdk-version" to an available exact suffix (for example, "37.0").${originalError}`, { cause: error });
 	}
-	if (versions.buildToolsVersion.length > 0) info(`success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`);
-	else info(`success install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`);
+	if (versions.buildToolsVersion.length > 0) info(`success install build-tools:${versions.buildToolsVersion.join(",")} and platform-tools and sdk:${versions.sdkVersion.join(",")}`);
+	else info(`success install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`);
 	if (versions.cmakeVersion) {
 		info(`start install cmake:${versions.cmakeVersion}`);
 		await exec("sdkmanager", [`cmake;${versions.cmakeVersion}`, "--verbose"], { silent: !isDebug() });

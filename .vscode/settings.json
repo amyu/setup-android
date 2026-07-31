@@ -1,11 +1,10 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
+    "source.fixAll.oxc": "always"
   },
   "[javascript][typescript][javascriptreact][typescriptreact][json][jsonc]": {
     "editor.tabSize": 2,
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   }
 }
