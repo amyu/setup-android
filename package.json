@@ -11,8 +11,8 @@
     "lint": "biome check ./src/",
     "lint-fix": "biome check --write --unsafe ./src/",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "pnpm dlx rimraf ./dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "all": "pnpm run postinstall && pnpm run build && pnpm run lint && pnpm run package"
+    "package": "pnpm dlx rimraf ./dist && pnpm run typecheck && rolldown --config rolldown.config.js",
+    "all": "pnpm run postinstall && pnpm run lint && pnpm run package"
   },
   "repository": {
     "type": "git",
@@ -38,15 +38,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
-    "@rollup/plugin-commonjs": "^29.0.0",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "^24.4.0",
-    "@typescript/native": "npm:typescript@^7.0.0",
     "patch-package": "8.0.1",
-    "rollup": "^4.54.0",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "rolldown": "^1.2.0",
+    "typescript": "^7.0.0"
   },
   "engines": {
     "node": ">=24.0.0"
