@@ -1,179 +1,163 @@
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import * as io from '@actions/io'
-import * as toolCache from '@actions/tool-cache'
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
+
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
+import * as io from "@actions/io";
+import * as toolCache from "@actions/tool-cache";
+
 import {
   ANDROID_SDK_ROOT,
   COMMANDLINE_TOOLS_LINUX_URL,
   COMMANDLINE_TOOLS_MAC_URL,
   COMMANDLINE_TOOLS_WINDOWS_URL,
-  type Versions
-} from './constants.js'
+  type Versions,
+} from "./constants.js";
 
 export async function installAndroidSdk(versions: Versions): Promise<void> {
-  await fs.rm(ANDROID_SDK_ROOT, {recursive: true, force: true})
-  await fs.rm(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', 'latest'), {
+  await fs.rm(ANDROID_SDK_ROOT, { recursive: true, force: true });
+  await fs.rm(path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest"), {
     recursive: true,
-    force: true
-  })
-  core.info('success cleanup')
+    force: true,
+  });
+  core.info("success cleanup");
 
-  await fs.mkdir(ANDROID_SDK_ROOT, {recursive: true})
-  core.info('success create directory')
+  await fs.mkdir(ANDROID_SDK_ROOT, { recursive: true });
+  core.info("success create directory");
 
-  let cmdlineToolsDownloadUrl: string
+  let cmdlineToolsDownloadUrl: string;
   switch (process.platform) {
-    case 'win32':
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_WINDOWS_URL(
-        versions.commandLineToolsVersion
-      )
-      break
-    case 'darwin':
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_MAC_URL(
-        versions.commandLineToolsVersion
-      )
-      break
-    case 'linux':
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_LINUX_URL(
-        versions.commandLineToolsVersion
-      )
-      break
+    case "win32":
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_WINDOWS_URL(versions.commandLineToolsVersion);
+      break;
+    case "darwin":
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_MAC_URL(versions.commandLineToolsVersion);
+      break;
+    case "linux":
+      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_LINUX_URL(versions.commandLineToolsVersion);
+      break;
     default:
-      throw Error(`Unsupported platform: ${process.platform}`)
+      throw Error(`Unsupported platform: ${process.platform}`);
   }
-  core.info(`start download cmdline-tools url: ${cmdlineToolsDownloadUrl}`)
-  const downloadedCmdlineToolsPath = await toolCache.downloadTool(
-    cmdlineToolsDownloadUrl
-  )
-  core.info(
-    `success download cmdline-tools path: ${downloadedCmdlineToolsPath}`
-  )
-  core.info('start extract cmdline-tools.zip')
+  core.info(`start download cmdline-tools url: ${cmdlineToolsDownloadUrl}`);
+  const downloadedCmdlineToolsPath = await toolCache.downloadTool(cmdlineToolsDownloadUrl);
+  core.info(`success download cmdline-tools path: ${downloadedCmdlineToolsPath}`);
+  core.info("start extract cmdline-tools.zip");
   const extractedCmdlineToolPath = await toolCache.extractZip(
     downloadedCmdlineToolsPath,
-    path.join(ANDROID_SDK_ROOT, 'cmdline-tools')
-  )
-  core.info(
-    `success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`
-  )
+    path.join(ANDROID_SDK_ROOT, "cmdline-tools"),
+  );
+  core.info(`success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`);
 
-  const from = path.join(extractedCmdlineToolPath, 'cmdline-tools')
-  const to = 'latest'
-  core.info(`start rename ${from} to ${to}`)
-  if (process.platform === 'win32') {
-    await exec.exec(`cmd /c "rename ${from} ${to}"`)
+  const from = path.join(extractedCmdlineToolPath, "cmdline-tools");
+  const to = "latest";
+  core.info(`start rename ${from} to ${to}`);
+  if (process.platform === "win32") {
+    await exec.exec(`cmd /c "rename ${from} ${to}"`);
   } else {
-    await fs.mkdir(path.join(ANDROID_SDK_ROOT, 'cmdline-tools', to), {
-      recursive: true
-    })
-    await fs.rename(from, path.join(ANDROID_SDK_ROOT, 'cmdline-tools', to))
+    await fs.mkdir(path.join(ANDROID_SDK_ROOT, "cmdline-tools", to), {
+      recursive: true,
+    });
+    await fs.rename(from, path.join(ANDROID_SDK_ROOT, "cmdline-tools", to));
   }
-  core.info(`success rename ${from} to ${to}`)
+  core.info(`success rename ${from} to ${to}`);
 
-  core.info('start accept licenses')
+  core.info("start accept licenses");
   // https://github.com/actions/toolkit/issues/359 pipes workaround
   switch (process.platform) {
-    case 'win32': {
-      const yesPath = await io.which('yes')
-      if (yesPath !== '') {
+    case "win32": {
+      const yesPath = await io.which("yes");
+      if (yesPath !== "") {
         await exec.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
-          silent: !core.isDebug()
-        })
+          silent: !core.isDebug(),
+        });
       } else {
-        const licenseInput = Buffer.from(Array(100).fill('y').join('\n'))
-        await exec.exec('sdkmanager', ['--licenses'], {
+        const licenseInput = Buffer.from(Array(100).fill("y").join("\n"));
+        await exec.exec("sdkmanager", ["--licenses"], {
           input: licenseInput,
-          silent: !core.isDebug()
-        })
+          silent: !core.isDebug(),
+        });
       }
-      break
+      break;
     }
-    case 'darwin':
+    case "darwin":
       await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug()
-      })
-      break
-    case 'linux':
+        silent: !core.isDebug(),
+      });
+      break;
+    case "linux":
       await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug()
-      })
-      break
+        silent: !core.isDebug(),
+      });
+      break;
     default:
-      throw Error(`Unsupported platform: ${process.platform}`)
+      throw Error("Unsupported platform");
   }
-  core.info('success accept licenses')
+  core.info("success accept licenses");
 
-  const sdkVersionCommand = versions.sdkVersion.map(
-    version => `platforms;android-${version}`
-  )
+  const sdkVersionCommand = versions.sdkVersion.map((version) => `platforms;android-${version}`);
   const buildToolsVersionCommand = versions.buildToolsVersion.map(
-    version => `build-tools;${version}`
-  )
+    (version) => `build-tools;${version}`,
+  );
   const packages = [
     ...buildToolsVersionCommand,
-    'platform-tools',
+    "platform-tools",
     ...sdkVersionCommand,
-    '--verbose'
-  ]
+    "--verbose",
+  ];
 
   if (versions.buildToolsVersion.length > 0) {
     core.info(
-      `start install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
-    )
+      `start install build-tools:${versions.buildToolsVersion.join(",")} and platform-tools and sdk:${versions.sdkVersion.join(",")}`,
+    );
   } else {
     core.info(
-      `start install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`
-    )
+      `start install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`,
+    );
   }
   try {
-    await exec.exec('sdkmanager', packages, {silent: !core.isDebug()})
+    await exec.exec("sdkmanager", packages, { silent: !core.isDebug() });
   } catch (error) {
     const codenamePackages = versions.sdkVersion
-      .filter(version => !/^\d+(?:\.\d+)?$/.test(version))
-      .map(version => `"platforms;android-${version}"`)
+      .filter((version) => !/^\d+(?:\.\d+)?$/.test(version))
+      .map((version) => `"platforms;android-${version}"`);
 
     if (codenamePackages.length === 0) {
-      throw error
+      throw error;
     }
 
-    const originalError =
-      error instanceof Error ? ` Original error: ${error.message}` : ''
+    const originalError = error instanceof Error ? ` Original error: ${error.message}` : "";
     throw new Error(
-      'sdkmanager failed while installing packages that include the ' +
-        `codename-based Android SDK platform ${codenamePackages.join(', ')}. ` +
+      "sdkmanager failed while installing packages that include the " +
+        `codename-based Android SDK platform ${codenamePackages.join(", ")}. ` +
         'Verify that the package ID is still listed by "sdkmanager --list", ' +
         'then set "sdk-version" to an available exact suffix (for example, ' +
-        `"37.0").${originalError}`
-    )
+        `"37.0").${originalError}`,
+      { cause: error },
+    );
   }
   if (versions.buildToolsVersion.length > 0) {
     core.info(
-      `success install build-tools:${versions.buildToolsVersion} and platform-tools and sdk:${versions.sdkVersion}`
-    )
+      `success install build-tools:${versions.buildToolsVersion.join(",")} and platform-tools and sdk:${versions.sdkVersion.join(",")}`,
+    );
   } else {
     core.info(
-      `success install platform-tools and sdk:${versions.sdkVersion} (build-tools skipped)`
-    )
+      `success install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`,
+    );
   }
 
   if (versions.cmakeVersion) {
-    core.info(`start install cmake:${versions.cmakeVersion}`)
-    await exec.exec(
-      'sdkmanager',
-      [`cmake;${versions.cmakeVersion}`, '--verbose'],
-      {
-        silent: !core.isDebug()
-      }
-    )
-    core.info(`success install cmake:${versions.cmakeVersion}`)
+    core.info(`start install cmake:${versions.cmakeVersion}`);
+    await exec.exec("sdkmanager", [`cmake;${versions.cmakeVersion}`, "--verbose"], {
+      silent: !core.isDebug(),
+    });
+    core.info(`success install cmake:${versions.cmakeVersion}`);
   }
   if (versions.ndkVersion) {
-    core.info(`start install ndk:${versions.ndkVersion}`)
-    await exec.exec('sdkmanager', [`ndk;${versions.ndkVersion}`, '--verbose'], {
-      silent: !core.isDebug()
-    })
-    core.info(`success install ndk:${versions.ndkVersion}`)
+    core.info(`start install ndk:${versions.ndkVersion}`);
+    await exec.exec("sdkmanager", [`ndk;${versions.ndkVersion}`, "--verbose"], {
+      silent: !core.isDebug(),
+    });
+    core.info(`success install ndk:${versions.ndkVersion}`);
   }
 }

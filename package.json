@@ -8,11 +8,13 @@
   "scripts": {
     "postinstall": "patch-package",
     "build": "tsc",
-    "lint": "biome check ./src/",
-    "lint-fix": "biome check --write --unsafe ./src/",
+    "format": "oxfmt --write ./src/",
+    "format-check": "oxfmt --check ./src/",
+    "lint": "oxlint ./src/ && pnpm run format-check",
+    "lint-fix": "oxlint --fix ./src/ && pnpm run format",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "pnpm dlx rimraf ./dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "all": "pnpm run postinstall && pnpm run build && pnpm run lint && pnpm run package"
+    "package": "pnpm dlx rimraf ./dist && pnpm run typecheck && rolldown --config rolldown.config.ts",
+    "all": "pnpm run postinstall && pnpm run lint && pnpm run package"
   },
   "repository": {
     "type": "git",
@@ -37,16 +39,13 @@
     "@actions/tool-cache": "4.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.5",
-    "@rollup/plugin-commonjs": "29.0.3",
-    "@rollup/plugin-json": "6.1.0",
-    "@rollup/plugin-node-resolve": "16.0.3",
-    "@rollup/plugin-typescript": "12.3.0",
     "@types/node": "24.13.3",
-    "@typescript/native": "npm:typescript@7.0.2",
+    "oxfmt": "0.60.0",
+    "oxlint": "1.75.0",
+    "oxlint-tsgolint": "7.0.2001",
     "patch-package": "8.0.1",
-    "rollup": "4.62.2",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
+    "rolldown": "1.2.0",
+    "typescript": "7.0.2"
   },
   "engines": {
     "node": "24.18.1"
