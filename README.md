@@ -63,6 +63,16 @@ the action dynamically:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
 
+### Codename-based preview platforms
+
+Codename-based SDK platforms are supported when they are published in Google's
+SDK repository. Pass the exact suffix shown after `platforms;android-` by
+[`sdkmanager --list`](https://developer.android.com/tools/sdkmanager#list_installed_and_available_packages).
+For example, a package named
+`platforms;android-<codename>` is selected with `sdk-version: <codename>`.
+Availability depends on the current SDK repository; when no codename package is
+listed, use an available numeric platform suffix instead.
+
 ### Configuration examples
 
 ```yaml
@@ -78,7 +88,8 @@ the action dynamically:
       cache-key: 'custom-cache-key'
 
       # default: 37.0
-      # Android SDK API level. Supports major and major.minor values.
+      # Android SDK platform suffix. Supports major, major.minor, and published
+      # codename-based values.
       # See https://developer.android.com/studio/releases/platforms
       # API level 37 and later use minor versions in SDK Manager. A bare major
       # version such as 37 is installed as 37.0 with a warning.

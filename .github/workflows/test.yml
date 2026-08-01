@@ -177,8 +177,8 @@ jobs:
       - run: |
           sdkmanager --list_installed | grep "platforms;android-37.0"
 
-  test_removed_codename_sdk_version_error:
-    name: run test removed codename sdk version error
+  test_unavailable_codename_sdk_version_error:
+    name: run test unavailable codename sdk version error
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -193,12 +193,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify removed codename SDK version error
+      - name: Verify unavailable codename SDK version error
         shell: bash
         run: |
           set +e
           env \
-            'INPUT_SDK-VERSION=CinnamonBun' \
+            'INPUT_SDK-VERSION=UnavailableCodenameForTest' \
             'INPUT_CACHE-DISABLED=true' \
             'INPUT_COMMAND-LINE-TOOLS-VERSION=15859902' \
             node dist/setup/index.js 2>&1 | tee "$RUNNER_TEMP/setup-android.log"
@@ -206,7 +206,9 @@ jobs:
           set -e
 
           test "$status" -ne 0
-          grep -F 'codename-based Android SDK platform "platforms;android-CinnamonBun"' \
+          grep -F 'codename-based Android SDK platform "platforms;android-UnavailableCodenameForTest"' \
+            "$RUNNER_TEMP/setup-android.log"
+          grep -F 'Codename values are supported when their exact package IDs are published' \
             "$RUNNER_TEMP/setup-android.log"
 
   test_custom_cache_key:

@@ -4,7 +4,7 @@ author: "amyu"
 inputs:
   sdk-version:
     required: false
-    description: "Android SDK API level(s) to install. Supports major and major.minor values."
+    description: "Android SDK API level(s) or published codename-based platform suffix(es) to install"
     default: "37.0"
   build-tools-version:
     required: false
