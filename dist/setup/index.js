@@ -17437,12 +17437,12 @@ function addPath({ ndkVersion, cmakeVersion }) {
 		info(`  ANDROID_NDK: ${ndkPath}`);
 	}
 	if (cmakeVersion) info(`  CMAKE_VERSION: ${cmakeVersion}`);
+	if (ndkPath) addPath$1(ndkPath);
 	addPath$1(path$2.join(ANDROID_SDK_ROOT, "platform-tools"));
-	addPath$1(path$2.join(ANDROID_SDK_ROOT, "ndk-bundle"));
 	addPath$1(path$2.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin"));
 	info("Path");
+	if (ndkPath) info(`  ${ndkPath}`);
 	info(`  ${path$2.join(ANDROID_SDK_ROOT, "platform-tools")}`);
-	info(`  ${path$2.join(ANDROID_SDK_ROOT, "ndk-bundle")}`);
 	info(`  ${path$2.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin")}`);
 }
 process.platform;
@@ -56286,7 +56286,7 @@ function simpleHash(str) {
 	return Math.abs(hash).toString(16).substring(0, 8);
 }
 function generateRestoreKey(versions, cacheKey) {
-	const suffixVersion = "v5";
+	const suffixVersion = "v6";
 	const dirHash = simpleHash(ANDROID_HOME_DIR);
 	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
 }

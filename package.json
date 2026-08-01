@@ -1,7 +1,7 @@
 {
   "name": "setup-android",
-  "version": "5",
-  "description": "setup-android for self hosted runner",
+  "version": "6",
+  "description": "Install and cache Android SDK components on self-hosted GitHub Actions runners",
   "type": "module",
   "main": "dist/setup/index.js",
   "packageManager": "pnpm@11.17.0",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/amyu/setup-android.git"
   },
   "keywords": [
     "setup-android",

@@ -1,35 +1,35 @@
-name: "setup android sdk for self hosted runner"
-description: "setup-android for self hosted runner"
+name: "Setup Android SDK for self-hosted runners"
+description: "Install and cache Android SDK components on self-hosted GitHub Actions runners"
 author: "amyu"
 inputs:
   sdk-version:
     required: false
-    description: "sdk version. Supports major and major.minor API levels."
-    default: "36"
+    description: "Android SDK API level(s) to install. Supports major and major.minor values."
+    default: "37.0"
   build-tools-version:
     required: false
-    description: "build tools version"
+    description: "Android SDK Build Tools version(s) to install"
   ndk-version:
     required: false
-    description: "ndk version"
+    description: "Android NDK version to install"
   cmake-version:
     required: false
-    description: "cmake version"
+    description: "CMake version to install"
   command-line-tools-version:
     required: false
-    description: "command line tools version"
+    description: "Android command-line tools package revision"
     default: "15859902"
   cache-disabled:
     required: false
-    description: "disabled cache"
+    description: "Disable Android SDK caching"
     default: "false"
   cache-key:
     required: false
-    description: "cache key"
+    description: "Custom Android SDK cache key"
     default: ""
   generate-job-summary:
     required: false
-    description: "display job summary"
+    description: "Generate an Android SDK job summary"
     default: "true"
   job-status:
     description: "Workaround to pass job status to post job step. This variable is not intended for manual setting"

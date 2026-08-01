@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. v5.4)'
+        description: 'Release version (e.g. v6.0)'
         required: true
         type: string
 
@@ -23,16 +23,15 @@ jobs:
       - name: Validate version format
         run: |
           if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version format. Expected format: v<major>.<minor> (e.g. v5.4)"
+            echo "Invalid version format. Expected format: v<major>.<minor> (e.g. v6.0)"
             exit 1
           fi
 
-      - name: Create and push tags
+      - name: Create or update release tag
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const version = '${{ github.event.inputs.version }}';
-            const major = version.split('.')[0]; // e.g. "v5"
 
             const { data: ref } = await github.rest.git.getRef({
               owner: context.repo.owner,
@@ -42,7 +41,7 @@ jobs:
             const sha = ref.object.sha;
             console.log(`main branch SHA: ${sha}`);
 
-            // Create or update the full version tag (e.g. v5.4)
+            // Create or update the release tag (e.g. v6.0)
             try {
               await github.rest.git.createRef({
                 owner: context.repo.owner,
@@ -61,30 +60,6 @@ jobs:
                   force: true,
                 });
                 console.log(`Updated tag ${version}`);
-              } else {
-                throw e;
-              }
-            }
-
-            // Create or force-update the major version tag (e.g. v5)
-            try {
-              await github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `refs/tags/${major}`,
-                sha,
-              });
-              console.log(`Created tag ${major}`);
-            } catch (e) {
-              if (e.status === 422) {
-                await github.rest.git.updateRef({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  ref: `tags/${major}`,
-                  sha,
-                  force: true,
-                });
-                console.log(`Updated tag ${major}`);
               } else {
                 throw e;
               }

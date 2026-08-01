@@ -21,7 +21,7 @@ export async function renderSummary(
       { data: "SDK", header: true },
       { data: "Build Tools", header: true },
       { data: "NDK", header: true },
-      { data: "Cmake", header: true },
+      { data: "CMake", header: true },
       { data: "Command Line Tools", header: true },
     ],
     [

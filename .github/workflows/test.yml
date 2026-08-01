@@ -43,8 +43,8 @@ jobs:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
           build-tools-version: 36.0.0
-          cmake-version: 3.10.2.4988404
-          ndk-version: 25.1.8937393
+          cmake-version: 3.31.6
+          ndk-version: 28.2.13676358
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
@@ -86,10 +86,10 @@ jobs:
         uses: ./
         with:
           cache-disabled: true
-          sdk-version: 36
+          sdk-version: "37.0"
           build-tools-version: 36.0.0
-          cmake-version: 3.10.2.4988404
-          ndk-version: 25.1.8937393
+          cmake-version: 3.31.6
+          ndk-version: 28.2.13676358
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
@@ -200,7 +200,7 @@ jobs:
           env \
             'INPUT_SDK-VERSION=CinnamonBun' \
             'INPUT_CACHE-DISABLED=true' \
-            'INPUT_COMMAND-LINE-TOOLS-VERSION=14742923' \
+            'INPUT_COMMAND-LINE-TOOLS-VERSION=15859902' \
             node dist/setup/index.js 2>&1 | tee "$RUNNER_TEMP/setup-android.log"
           status=${PIPESTATUS[0]}
           set -e
@@ -287,8 +287,8 @@ jobs:
         uses: ./
         with:
           sdk-version: |
-            35
             36
+            37.0
 
       - run: |
           sdkmanager --list_installed
@@ -387,7 +387,7 @@ jobs:
         run: |
           test "$(node -p process.arch)" = "$EXPECTED_NODE_ARCHITECTURE"
           env \
-            'INPUT_SDK-VERSION=36' \
+            'INPUT_SDK-VERSION=37.0' \
             'INPUT_CACHE-DISABLED=true' \
             'INPUT_COMMAND-LINE-TOOLS-VERSION=15859902' \
             node dist/setup/index.js 2>&1 | tee "$RUNNER_TEMP/setup-android.log"
@@ -434,9 +434,9 @@ jobs:
         uses: ./
         with:
           build-tools-version: |
-            30.0.3
-            31.0.0
+            34.0.0
             35.0.0
+            36.0.0
 
       - run: |
           sdkmanager --list_installed

@@ -3,27 +3,27 @@ plugins {
 }
 
 android {
-    namespace 'com.example.sample_android_project'
+    namespace = 'com.example.sample_android_project'
 
-    compileSdk 33
+    compileSdk = 37
 
     defaultConfig {
-        applicationId "com.example.sample_android_project"
-        minSdk 29
-        targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        applicationId = "com.example.sample_android_project"
+        minSdk = 29
+        targetSdk = 37
+        versionCode = 1
+        versionName = "1.0"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

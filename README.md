@@ -1,37 +1,39 @@
 # setup-android
 
-This action provides the following functionality for GitHub Actions users:
+`setup-android` installs Android SDK components on self-hosted GitHub Actions runners.
 
-- Optionally downloading and caching distribution of the requested sdk version or build tools version or ndk,cmake version.
-- Runs on Mac, Linux and Windows powered by SelfHostedRunner.
-- Exporting environment variables:
+- Downloads the Android command-line tools for Linux, macOS, and Windows.
+- Installs requested Android SDK platforms and optional Build Tools, NDK, and CMake versions.
+- Optionally caches the installed Android SDK.
+- Exports the following environment variables:
   + `ANDROID_SDK_ROOT`
   + `ANDROID_HOME`
   + `ANDROID_NDK_ROOT` (when `ndk-version` is specified)
   + `ANDROID_NDK_HOME` (when `ndk-version` is specified)
   + `ANDROID_NDK` (when `ndk-version` is specified)
   + `CMAKE_VERSION` (when `cmake-version` is specified)
-- Adding to PATH:
+- Adds the following directories to `PATH`:
   + `$ANDROID_SDK_ROOT/platform-tools`
-  + `$ANDROID_SDK_ROOT/ndk-bundle`
   + `$ANDROID_SDK_ROOT/cmdline-tools/latest/bin`
+  + `$ANDROID_SDK_ROOT/ndk/<version>` (when `ndk-version` is specified)
 
-# Motivation
+## When to use this action
 
-This Action is provided for SelfHostedRunner.  
-GithubHostedRunner does not need this Action as it already has the SDK set up.
+GitHub-hosted runners already include the Android SDK. This action is primarily
+intended for self-hosted runners or jobs that require a clean, customized SDK
+installation.
 
-# Usage
+## Usage
 
-See [action.yml](action.yml)
+See [action.yml](action.yml) for the complete input reference.
 
-**Basic:**
+### Basic usage
 
 ```yaml
 steps:
-  - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   - name: Setup JDK 17
-    uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
+    uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
     with:
       java-version: 17
       distribution: jetbrains
@@ -42,17 +44,18 @@ steps:
   - run: ./gradlew build --stacktrace
 ```
 
-**Recommend:**
+### Read the SDK version from a version catalog
 
-If your project uses VersionCatalog, the following settings are recommended
+If your project uses a Gradle version catalog, the SDK version can be passed to
+the action dynamically:
 
 ```yaml
 - name: "Get sdkVersion from versions.toml"
   id: read_version
   shell: bash
   run: |
-    version=`perl -nlE 'say if s/compileSdkVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml`
-    echo "sdkVersion=$version" >> $GITHUB_OUTPUT
+    version=$(perl -nlE 'say if s/compileSdkVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml)
+    echo "sdkVersion=$version" >> "$GITHUB_OUTPUT"
 
 - name: Setup Android SDK
   uses: amyu/setup-android@3fe49086b1abd7c9ef865120d5d4d486fe55ba98 # v5.7
@@ -60,75 +63,66 @@ If your project uses VersionCatalog, the following settings are recommended
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
 
-**More Information:**
+### Configuration examples
 
 ```yaml
   - name: Setup Android SDK
     uses: amyu/setup-android@3fe49086b1abd7c9ef865120d5d4d486fe55ba98 # v5.7
     with:
       # default: false
-      # Whether to use the cache
-      cache-disabled: true
+      # Disable Android SDK caching.
+      cache-disabled: false
 
-      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${commandLineToolsVersion}-${hashedCacheDirectory}-v5`
-      # Custom key for cache. It is invalid when `cache-disabled: true`
+      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${commandLineToolsVersion}-${hashedCacheDirectory}-v6`
+      # Custom cache key. Ignored when `cache-disabled` is true.
       cache-key: 'custom-cache-key'
 
-      # default: 36
-      # sdk version. Supports major and major.minor API levels.
-      # see https://developer.android.com/studio/releases/platforms
+      # default: 37.0
+      # Android SDK API level. Supports major and major.minor values.
+      # See https://developer.android.com/studio/releases/platforms
       # API level 37 and later use minor versions in SDK Manager. A bare major
       # version such as 37 is installed as 37.0 with a warning.
-      # It will always be installed.
-      sdk-version: 36
-      # or
-      sdk-version: 37.0
-      # or
+      sdk-version: "37.0"
+      # Install multiple SDK platforms.
       sdk-version: |
-        35
         36
-      # or set sdk-version to a codename-based platform package from SDK Manager
-      sdk-version: CinnamonBun
+        37.0
 
       # default: ''
-      # build tools version
-      # see https://developer.android.com/studio/releases/build-tools
-      # Optional. If omitted, this action does not preinstall build-tools.
-      # In typical Android/Gradle projects, prefer letting AGP manage the required version.
-      # Set this only when you need to preinstall a specific version in CI.
+      # Android SDK Build Tools version. If omitted, Build Tools are not
+      # preinstalled. Prefer letting AGP select the required version unless a
+      # specific version must be available in CI.
+      # See https://developer.android.com/studio/releases/build-tools
       build-tools-version: 36.0.0
-      # or
+      # Install multiple Build Tools versions.
       build-tools-version: |
-        30.0.3
-        31.0.0
+        35.0.0
         36.0.0
 
       # default: ''
-      # cmake version
-      # see https://developer.android.com/studio/projects/install-ndk
-      # Installed when the version is specified
-      cmake-version: 3.10.2.4988404
+      # CMake version to install.
+      # See https://developer.android.com/studio/projects/install-ndk
+      cmake-version: 3.31.6
 
       # default: ''
-      # cmake version
-      # see https://developer.android.com/studio/projects/install-ndk
-      # Installed when the version is specified
-      ndk-version: 23.1.7779620
+      # Android NDK version to install.
+      # See https://developer.android.com/ndk/downloads
+      ndk-version: 28.2.13676358
 
       # default: 15859902
-      # see https://developer.android.com/studio#command-tools
-      # ex commandlinetools-mac_arm64-${command-line-tools-version}_latest.zip
+      # Android command-line tools package revision.
+      # See https://developer.android.com/studio#command-line-tools-only
       command-line-tools-version: 15859902
 
       # default: true
-      # Whether to generate or not the job summary
+      # Generate a job summary.
       generate-job-summary: false
 ```
 
-# License
+## License
 
-The scripts and documentation in this project are released under the [MIT License](LICENSE)
+The scripts and documentation in this project are released under the [MIT License](LICENSE).
 
-# Contributions
+## Contributing
 
 Contributions are welcome!
