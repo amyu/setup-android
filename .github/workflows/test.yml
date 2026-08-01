@@ -43,8 +43,8 @@ jobs:
           cache-disabled: false
           sdk-version: ${{ matrix.sdk }}
           build-tools-version: 36.0.0
-          cmake-version: 3.10.2.4988404
-          ndk-version: 25.1.8937393
+          cmake-version: 3.31.6
+          ndk-version: 28.2.13676358
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
@@ -86,10 +86,10 @@ jobs:
         uses: ./
         with:
           cache-disabled: true
-          sdk-version: 36
+          sdk-version: "37.0"
           build-tools-version: 36.0.0
-          cmake-version: 3.10.2.4988404
-          ndk-version: 25.1.8937393
+          cmake-version: 3.31.6
+          ndk-version: 28.2.13676358
 
       - run: |
           ./sample-android-project/gradlew -p sample-android-project assembleDebug --stacktrace
@@ -177,8 +177,8 @@ jobs:
       - run: |
           sdkmanager --list_installed | grep "platforms;android-37.0"
 
-  test_removed_codename_sdk_version_error:
-    name: run test removed codename sdk version error
+  test_unavailable_codename_sdk_version_error:
+    name: run test unavailable codename sdk version error
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -193,20 +193,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify removed codename SDK version error
+      - name: Verify unavailable codename SDK version error
         shell: bash
         run: |
           set +e
           env \
-            'INPUT_SDK-VERSION=CinnamonBun' \
+            'INPUT_SDK-VERSION=UnavailableCodenameForTest' \
             'INPUT_CACHE-DISABLED=true' \
-            'INPUT_COMMAND-LINE-TOOLS-VERSION=14742923' \
+            'INPUT_COMMAND-LINE-TOOLS-VERSION=15859902' \
             node dist/setup/index.js 2>&1 | tee "$RUNNER_TEMP/setup-android.log"
           status=${PIPESTATUS[0]}
           set -e
 
           test "$status" -ne 0
-          grep -F 'codename-based Android SDK platform "platforms;android-CinnamonBun"' \
+          grep -F 'codename-based Android SDK platform "platforms;android-UnavailableCodenameForTest"' \
+            "$RUNNER_TEMP/setup-android.log"
+          grep -F 'Codename values are supported when their exact package IDs are published' \
             "$RUNNER_TEMP/setup-android.log"
 
   test_custom_cache_key:
@@ -287,8 +289,8 @@ jobs:
         uses: ./
         with:
           sdk-version: |
-            35
             36
+            37.0
 
       - run: |
           sdkmanager --list_installed
@@ -387,7 +389,7 @@ jobs:
         run: |
           test "$(node -p process.arch)" = "$EXPECTED_NODE_ARCHITECTURE"
           env \
-            'INPUT_SDK-VERSION=36' \
+            'INPUT_SDK-VERSION=37.0' \
             'INPUT_CACHE-DISABLED=true' \
             'INPUT_COMMAND-LINE-TOOLS-VERSION=15859902' \
             node dist/setup/index.js 2>&1 | tee "$RUNNER_TEMP/setup-android.log"
@@ -434,9 +436,9 @@ jobs:
         uses: ./
         with:
           build-tools-version: |
-            30.0.3
-            31.0.0
+            34.0.0
             35.0.0
+            36.0.0
 
       - run: |
           sdkmanager --list_installed

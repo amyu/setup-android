@@ -33,11 +33,15 @@ export function addPath({
   if (cmakeVersion) {
     core.info(`  CMAKE_VERSION: ${cmakeVersion}`);
   }
+  if (ndkPath) {
+    core.addPath(ndkPath);
+  }
   core.addPath(path.join(ANDROID_SDK_ROOT, "platform-tools"));
-  core.addPath(path.join(ANDROID_SDK_ROOT, "ndk-bundle"));
   core.addPath(path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin"));
   core.info("Path");
+  if (ndkPath) {
+    core.info(`  ${ndkPath}`);
+  }
   core.info(`  ${path.join(ANDROID_SDK_ROOT, "platform-tools")}`);
-  core.info(`  ${path.join(ANDROID_SDK_ROOT, "ndk-bundle")}`);
   core.info(`  ${path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin")}`);
 }

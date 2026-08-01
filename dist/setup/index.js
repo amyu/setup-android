@@ -17437,12 +17437,12 @@ function addPath({ ndkVersion, cmakeVersion }) {
 		info(`  ANDROID_NDK: ${ndkPath}`);
 	}
 	if (cmakeVersion) info(`  CMAKE_VERSION: ${cmakeVersion}`);
+	if (ndkPath) addPath$1(ndkPath);
 	addPath$1(path$2.join(ANDROID_SDK_ROOT, "platform-tools"));
-	addPath$1(path$2.join(ANDROID_SDK_ROOT, "ndk-bundle"));
 	addPath$1(path$2.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin"));
 	info("Path");
+	if (ndkPath) info(`  ${ndkPath}`);
 	info(`  ${path$2.join(ANDROID_SDK_ROOT, "platform-tools")}`);
-	info(`  ${path$2.join(ANDROID_SDK_ROOT, "ndk-bundle")}`);
 	info(`  ${path$2.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin")}`);
 }
 process.platform;
@@ -56286,7 +56286,7 @@ function simpleHash(str) {
 	return Math.abs(hash).toString(16).substring(0, 8);
 }
 function generateRestoreKey(versions, cacheKey) {
-	const suffixVersion = "v5";
+	const suffixVersion = "v6";
 	const dirHash = simpleHash(ANDROID_HOME_DIR);
 	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
 }
@@ -56630,7 +56630,7 @@ async function installAndroidSdk(versions) {
 		const codenamePackages = versions.sdkVersion.filter((version) => !/^\d+(?:\.\d+)?$/.test(version)).map((version) => `"platforms;android-${version}"`);
 		if (codenamePackages.length === 0) throw error;
 		const originalError = error instanceof Error ? ` Original error: ${error.message}` : "";
-		throw new Error(`sdkmanager failed while installing packages that include the codename-based Android SDK platform ${codenamePackages.join(", ")}. Verify that the package ID is still listed by "sdkmanager --list", then set "sdk-version" to an available exact suffix (for example, "37.0").${originalError}`, { cause: error });
+		throw new Error(`sdkmanager failed while installing packages that include the codename-based Android SDK platform ${codenamePackages.join(", ")}. Codename values are supported when their exact package IDs are published by SDK Manager. Verify the ID with "sdkmanager --list", then pass the suffix after "platforms;android-" to "sdk-version". If no codename package is listed, use an available numeric suffix.${originalError}`, { cause: error });
 	}
 	if (versions.buildToolsVersion.length > 0) info(`success install build-tools:${versions.buildToolsVersion.join(",")} and platform-tools and sdk:${versions.sdkVersion.join(",")}`);
 	else info(`success install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`);

@@ -20,7 +20,7 @@ function simpleHash(str: string): string {
 }
 
 function generateRestoreKey(versions: Versions, cacheKey: string): string {
-  const suffixVersion = "v5";
+  const suffixVersion = "v6";
   // https://github.com/actions/cache/issues/1127
   const dirHash = simpleHash(ANDROID_HOME_DIR);
 

@@ -130,9 +130,10 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
     throw new Error(
       "sdkmanager failed while installing packages that include the " +
         `codename-based Android SDK platform ${codenamePackages.join(", ")}. ` +
-        'Verify that the package ID is still listed by "sdkmanager --list", ' +
-        'then set "sdk-version" to an available exact suffix (for example, ' +
-        `"37.0").${originalError}`,
+        "Codename values are supported when their exact package IDs are " +
+        'published by SDK Manager. Verify the ID with "sdkmanager --list", ' +
+        'then pass the suffix after "platforms;android-" to "sdk-version". ' +
+        `If no codename package is listed, use an available numeric suffix.${originalError}`,
       { cause: error },
     );
   }
