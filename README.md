@@ -39,7 +39,7 @@ steps:
       distribution: jetbrains
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@3fe49086b1abd7c9ef865120d5d4d486fe55ba98 # v5.7
+    uses: amyu/setup-android@09345fc2cbed5b3a92beea84d843a22eac6cc841 # v6.0
 
   - run: ./gradlew build --stacktrace
 ```
@@ -58,7 +58,7 @@ the action dynamically:
     echo "sdkVersion=$version" >> "$GITHUB_OUTPUT"
 
 - name: Setup Android SDK
-  uses: amyu/setup-android@3fe49086b1abd7c9ef865120d5d4d486fe55ba98 # v5.7
+  uses: amyu/setup-android@09345fc2cbed5b3a92beea84d843a22eac6cc841 # v6.0
   with:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
@@ -67,7 +67,7 @@ the action dynamically:
 
 ```yaml
   - name: Setup Android SDK
-    uses: amyu/setup-android@3fe49086b1abd7c9ef865120d5d4d486fe55ba98 # v5.7
+    uses: amyu/setup-android@09345fc2cbed5b3a92beea84d843a22eac6cc841 # v6.0
     with:
       # default: false
       # Disable Android SDK caching.
