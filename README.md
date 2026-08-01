@@ -63,16 +63,6 @@ the action dynamically:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
 
-### Codename-based preview platforms
-
-Codename-based SDK platforms are supported when they are published in Google's
-SDK repository. Pass the exact suffix shown after `platforms;android-` by
-[`sdkmanager --list`](https://developer.android.com/tools/sdkmanager#list_installed_and_available_packages).
-For example, a package named
-`platforms;android-<codename>` is selected with `sdk-version: <codename>`.
-Availability depends on the current SDK repository; when no codename package is
-listed, use an available numeric platform suffix instead.
-
 ### Configuration examples
 
 ```yaml
@@ -129,6 +119,16 @@ listed, use an available numeric platform suffix instead.
       # Generate a job summary.
       generate-job-summary: false
 ```
+
+### Codename-based preview platforms
+
+Codename-based SDK platforms are supported when they are published in Google's
+SDK repository. Pass the exact suffix shown after `platforms;android-` by
+[`sdkmanager --list`](https://developer.android.com/tools/sdkmanager#list_installed_and_available_packages).
+For example, a package named
+`platforms;android-<codename>` is selected with `sdk-version: <codename>`.
+Availability depends on the current SDK repository; when no codename package is
+listed, use an available numeric platform suffix instead.
 
 ## License
 
