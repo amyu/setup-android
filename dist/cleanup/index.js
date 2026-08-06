@@ -58,7 +58,7 @@ var __copyProps = (to, from, except, desc) => {
 	}
 	return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
 	value: mod,
 	enumerable: true
 }) : target, mod));
@@ -1933,7 +1933,7 @@ var require_dispatcher_base = /* @__PURE__ */ __commonJSMin(((exports, module) =
 			}
 			if (callback === void 0) return new Promise((resolve, reject) => {
 				this.destroy(err, (err, data) => {
-					return err ? reject(err) : resolve(data);
+					return err ? /* istanbul ignore next: should never error */ reject(err) : resolve(data);
 				});
 			});
 			if (typeof callback !== "function") throw new InvalidArgumentError("invalid callback");
@@ -2403,7 +2403,7 @@ var require_connect = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				assert$25(!httpSocket, "httpSocket can only be sent on TLS update");
 				port = port || 80;
 				socket = net$4.connect({
-					highWaterMark: 64 * 1024,
+					highWaterMark: 65536,
 					...options,
 					localAddress,
 					port,
@@ -3882,10 +3882,7 @@ var require_util$6 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				case "strict-origin-when-cross-origin":
 					if (request.origin && urlHasHttpsScheme(request.origin) && !urlHasHttpsScheme(requestCurrentURL(request))) serializedOrigin = null;
 					break;
-				case "same-origin":
-					if (!sameOrigin(request, requestCurrentURL(request))) serializedOrigin = null;
-					break;
-				default:
+				case "same-origin": if (!sameOrigin(request, requestCurrentURL(request))) serializedOrigin = null;
 			}
 			request.headersList.append("origin", serializedOrigin, true);
 		}
@@ -4167,9 +4164,7 @@ var require_util$6 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					case "value":
 						result = value;
 						break;
-					case "key+value":
-						result = [key, value];
-						break;
+					case "key+value": result = [key, value];
 				}
 				return {
 					value: result,
@@ -6873,7 +6868,7 @@ var require_client = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#region node_modules/.pnpm/undici@6.23.0/node_modules/undici/lib/dispatcher/fixed-queue.js
 var require_fixed_queue = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const kSize = 2048;
-	const kMask = kSize - 1;
+	const kMask = 2047;
 	var FixedCircularBuffer = class {
 		constructor() {
 			this.bottom = 0;
@@ -7658,7 +7653,7 @@ var require_retry_handler = /* @__PURE__ */ __commonJSMin(((exports, module) => 
 			this.retryOpts = {
 				retry: retryFn ?? RetryHandler[kRetryHandlerDefaultRetry],
 				retryAfter: retryAfter ?? true,
-				maxTimeout: maxTimeout ?? 30 * 1e3,
+				maxTimeout: maxTimeout ?? 3e4,
 				minTimeout: minTimeout ?? 500,
 				timeoutFactor: timeoutFactor ?? 2,
 				maxRetries: maxRetries ?? 5,
@@ -7902,7 +7897,7 @@ var require_readable = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const kContentLength = Symbol("kContentLength");
 	const noop = () => {};
 	var BodyReadable = class extends Readable$4 {
-		constructor({ resume, abort, contentType = "", contentLength, highWaterMark = 64 * 1024 }) {
+		constructor({ resume, abort, contentType = "", contentLength, highWaterMark = 65536 }) {
 			super({
 				autoDestroy: true,
 				read: resume,
@@ -7981,7 +7976,7 @@ var require_readable = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			return this[kBody];
 		}
 		async dump(opts) {
-			let limit = Number.isFinite(opts?.limit) ? opts.limit : 128 * 1024;
+			let limit = Number.isFinite(opts?.limit) ? opts.limit : 131072;
 			const signal = opts?.signal;
 			if (signal != null && (typeof signal !== "object" || !("aborted" in signal))) throw new InvalidArgumentError("signal must be an AbortSignal");
 			signal?.throwIfAborted();
@@ -8120,7 +8115,7 @@ var require_util$5 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const assert$14 = __require("node:assert");
 	const { ResponseStatusCodeError } = require_errors();
 	const { chunksDecode } = require_readable();
-	const CHUNK_LIMIT = 128 * 1024;
+	const CHUNK_LIMIT = 131072;
 	async function getResolveErrorBodyCallback({ callback, body, contentType, statusCode, statusMessage, headers }) {
 		assert$14(body);
 		let chunks = [];
@@ -9619,7 +9614,7 @@ var require_dump = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const { InvalidArgumentError, RequestAbortedError } = require_errors();
 	const DecoratorHandler = require_decorator_handler();
 	var DumpHandler = class extends DecoratorHandler {
-		#maxSize = 1024 * 1024;
+		#maxSize = 1048576;
 		#abort = null;
 		#dumped = false;
 		#aborted = false;
@@ -9669,7 +9664,7 @@ var require_dump = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			this.#handler.onComplete(trailers);
 		}
 	};
-	function createDumpInterceptor({ maxSize: defaultMaxSize } = { maxSize: 1024 * 1024 }) {
+	function createDumpInterceptor({ maxSize: defaultMaxSize } = { maxSize: 1048576 }) {
 		return (dispatch) => {
 			return function Intercept(opts, handler) {
 				const { dumpMaxSize = defaultMaxSize } = opts;
@@ -9840,9 +9835,7 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					this.#handler.onError(err);
 					return;
 				case "ENOTFOUND": this.#state.deleteRecord(this.#origin);
-				default:
-					this.#handler.onError(err);
-					break;
+				default: this.#handler.onError(err);
 			}
 		}
 	};
@@ -15162,7 +15155,6 @@ var require_eventsource_stream = /* @__PURE__ */ __commonJSMin(((exports, module
 				default:
 					if (this.buffer[0] === BOM[0] && this.buffer[1] === BOM[1] && this.buffer[2] === BOM[2]) this.buffer = this.buffer.subarray(3);
 					this.checkBOM = false;
-					break;
 			}
 			while (this.pos < this.buffer.length) {
 				if (this.eventEndCheck) {
@@ -15228,9 +15220,7 @@ var require_eventsource_stream = /* @__PURE__ */ __commonJSMin(((exports, module
 				case "id":
 					if (isValidLastEventId(value)) event[field] = value;
 					break;
-				case "event":
-					if (value.length > 0) event[field] = value;
-					break;
+				case "event": if (value.length > 0) event[field] = value;
 			}
 		}
 		/**
@@ -16025,7 +16015,7 @@ var HttpClient = class {
 		req.on("socket", (sock) => {
 			socket = sock;
 		});
-		req.setTimeout(this._socketTimeout || 3 * 6e4, () => {
+		req.setTimeout(this._socketTimeout || 18e4, () => {
 			if (socket) socket.end();
 			handleResult(/* @__PURE__ */ new Error(`Request timeout: ${info.options.path}`));
 		});
@@ -17906,7 +17896,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 		if (options.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) return [pattern];
 		return expand(pattern);
 	}
-	var MAX_PATTERN_LENGTH = 1024 * 64;
+	var MAX_PATTERN_LENGTH = 65536;
 	var assertValidPattern = function(pattern) {
 		if (typeof pattern !== "string") throw new TypeError("invalid pattern");
 		if (pattern.length > MAX_PATTERN_LENGTH) throw new TypeError("pattern is too long");
@@ -17941,9 +17931,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 						re += qmark;
 						hasMagic = true;
 						break;
-					default:
-						re += "\\" + stateChar;
-						break;
+					default: re += "\\" + stateChar;
 				}
 				self.debug("clearStateChar %j %j", stateChar, re);
 				stateChar = false;
@@ -18107,7 +18095,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 		var flags = options.nocase ? "i" : "";
 		try {
 			var regExp = new RegExp("^" + re + "$", flags);
-		} catch (er) 		/* istanbul ignore next - should be impossible */ {
+		} catch (er) /* istanbul ignore next - should be impossible */ {
 			return /* @__PURE__ */ new RegExp("$.");
 		}
 		regExp._glob = pattern;
@@ -18137,7 +18125,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 		if (this.negate) re = "^(?!" + re + ").*$";
 		try {
 			this.regexp = new RegExp(re, flags);
-		} catch (ex) 		/* istanbul ignore next - should be impossible */ {
+		} catch (ex) /* istanbul ignore next - should be impossible */ {
 			this.regexp = false;
 		}
 		return this.regexp;
@@ -18720,14 +18708,12 @@ function create(patterns, options) {
 //#endregion
 //#region node_modules/.pnpm/semver@7.7.4/node_modules/semver/internal/constants.js
 var require_constants = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const SEMVER_SPEC_VERSION = "2.0.0";
-	const MAX_LENGTH = 256;
-	const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
 	module.exports = {
-		MAX_LENGTH,
+		MAX_LENGTH: 256,
 		MAX_SAFE_COMPONENT_LENGTH: 16,
-		MAX_SAFE_BUILD_LENGTH: MAX_LENGTH - 6,
-		MAX_SAFE_INTEGER,
+		MAX_SAFE_BUILD_LENGTH: 250,
+		MAX_SAFE_INTEGER: Number.MAX_SAFE_INTEGER || 
+		/* istanbul ignore next */ 9007199254740991,
 		RELEASE_TYPES: [
 			"major",
 			"premajor",
@@ -18737,7 +18723,7 @@ var require_constants = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			"prepatch",
 			"prerelease"
 		],
-		SEMVER_SPEC_VERSION,
+		SEMVER_SPEC_VERSION: "2.0.0",
 		FLAG_INCLUDE_PRERELEASE: 1,
 		FLAG_LOOSE: 2
 	};
@@ -21534,7 +21520,7 @@ function throttlingRetryStrategy() {
 //#endregion
 //#region node_modules/.pnpm/@typespec+ts-http-runtime@0.3.2_supports-color@7.2.0/node_modules/@typespec/ts-http-runtime/dist/esm/retryStrategies/exponentialRetryStrategy.js
 const DEFAULT_CLIENT_RETRY_INTERVAL = 1e3;
-const DEFAULT_CLIENT_MAX_RETRY_INTERVAL = 1e3 * 64;
+const DEFAULT_CLIENT_MAX_RETRY_INTERVAL = 64e3;
 /**
 * A retry strategy that retries with an exponentially increasing delay in these two cases:
 * - When there are errors in the underlying transport layer (e.g. DNS lookup failures).
@@ -24188,7 +24174,7 @@ function createPipelineRequest(options) {
 const DEFAULT_CYCLER_OPTIONS = {
 	forcedRefreshWindowInMs: 1e3,
 	retryIntervalInMs: 3e3,
-	refreshWindowInMs: 1e3 * 60 * 2
+	refreshWindowInMs: 12e4
 };
 /**
 * Converts an an unreliable access token getter (which may resolve with null)
@@ -25323,7 +25309,8 @@ function handleErrorResponse(parsedResponse, operationSpec, responseSpec, option
 		shouldReturnResponse: false
 	};
 	const errorResponseSpec = responseSpec ?? operationSpec.responses.default;
-	const error = new RestError(parsedResponse.request.streamResponseStatusCodes?.has(parsedResponse.status) ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText, {
+	const initialErrorMessage = parsedResponse.request.streamResponseStatusCodes?.has(parsedResponse.status) ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText;
+	const error = new RestError(initialErrorMessage, {
 		statusCode: parsedResponse.status,
 		request: parsedResponse.request,
 		response: parsedResponse
@@ -25373,8 +25360,10 @@ async function parse(jsonContentTypes, xmlContentTypes, operationResponse, opts,
 				return operationResponse;
 			}
 		} catch (err) {
-			throw new RestError(`Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`, {
-				code: err.code || RestError.PARSE_ERROR,
+			const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
+			const errCode = err.code || RestError.PARSE_ERROR;
+			throw new RestError(msg, {
+				code: errCode,
 				statusCode: operationResponse.status,
 				request: operationResponse.request,
 				response: operationResponse
@@ -30033,9 +30022,7 @@ var NativeCRC64 = (() => {
 					case 4:
 						offset >>>= 2;
 						break;
-					case 8:
-						offset >>>= 3;
-						break;
+					case 8: offset >>>= 3;
 				}
 				for (var i = 0; i < array.length; i++) view[offset + i] = array[i];
 			}
@@ -30141,7 +30128,7 @@ var StorageCRC64Calculator = class StorageCRC64Calculator {
 function signalStreamEnd(pushData) {
 	pushData(null);
 }
-const MAX_SEGMENT_CONTENT_LENGTH = 4 * 1024 * 1024;
+const MAX_SEGMENT_CONTENT_LENGTH = 4194304;
 var SMRegion$1;
 (function(SMRegion) {
 	SMRegion[SMRegion["StreamHeader"] = 0] = "StreamHeader";
@@ -31508,9 +31495,9 @@ var StorageRetryPolicyType;
 //#endregion
 //#region node_modules/.pnpm/@azure+storage-common@12.4.0_supports-color@7.2.0/node_modules/@azure/storage-common/dist/esm/policies/StorageRetryPolicy.js
 const DEFAULT_RETRY_OPTIONS$1 = {
-	maxRetryDelayInMs: 120 * 1e3,
+	maxRetryDelayInMs: 12e4,
 	maxTries: 4,
-	retryDelayInMs: 4 * 1e3,
+	retryDelayInMs: 4e3,
 	retryPolicyType: StorageRetryPolicyType.EXPONENTIAL,
 	secondaryHost: "",
 	tryTimeoutInMs: void 0
@@ -31648,9 +31635,7 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
 			case StorageRetryPolicyType.EXPONENTIAL:
 				delayTimeInMs = Math.min((Math.pow(2, attempt - 1) - 1) * this.retryOptions.retryDelayInMs, this.retryOptions.maxRetryDelayInMs);
 				break;
-			case StorageRetryPolicyType.FIXED:
-				delayTimeInMs = this.retryOptions.retryDelayInMs;
-				break;
+			case StorageRetryPolicyType.FIXED: delayTimeInMs = this.retryOptions.retryDelayInMs;
 		}
 		else delayTimeInMs = Math.random() * 1e3;
 		logger.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
@@ -31729,9 +31714,9 @@ function storageCorrectContentLengthPolicy() {
 */
 const storageRetryPolicyName = "storageRetryPolicy";
 const DEFAULT_RETRY_OPTIONS = {
-	maxRetryDelayInMs: 120 * 1e3,
+	maxRetryDelayInMs: 12e4,
 	maxTries: 4,
-	retryDelayInMs: 4 * 1e3,
+	retryDelayInMs: 4e3,
 	retryPolicyType: StorageRetryPolicyType.EXPONENTIAL,
 	secondaryHost: "",
 	tryTimeoutInMs: void 0
@@ -31802,9 +31787,7 @@ function storageRetryPolicy(options = {}) {
 			case StorageRetryPolicyType.EXPONENTIAL:
 				delayTimeInMs = Math.min((Math.pow(2, attempt - 1) - 1) * retryDelayInMs, maxRetryDelayInMs);
 				break;
-			case StorageRetryPolicyType.FIXED:
-				delayTimeInMs = retryDelayInMs;
-				break;
+			case StorageRetryPolicyType.FIXED: delayTimeInMs = retryDelayInMs;
 		}
 		else delayTimeInMs = Math.random() * 1e3;
 		logger.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
@@ -32022,12 +32005,12 @@ var UserDelegationKeyCredential = class {
 //#region node_modules/.pnpm/@azure+storage-blob@12.32.0_supports-color@7.2.0/node_modules/@azure/storage-blob/dist/esm/utils/constants.js
 const SDK_VERSION = "12.32.0";
 const SERVICE_VERSION = "2026-04-06";
-const BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
-const BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
+const BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 268435456;
+const BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4194304e3;
 const BLOCK_BLOB_MAX_BLOCKS = 5e4;
-const DEFAULT_BLOCK_BUFFER_SIZE_BYTES = 8 * 1024 * 1024;
-const DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES = 4 * 1024 * 1024;
-const REQUEST_TIMEOUT = 100 * 1e3;
+const DEFAULT_BLOCK_BUFFER_SIZE_BYTES = 8388608;
+const DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES = 4194304;
+const REQUEST_TIMEOUT = 1e5;
 const URLConstants = { Parameters: {
 	FORCE_BROWSER_NO_CACHE: "_",
 	SIGNATURE: "sig",
@@ -44169,7 +44152,7 @@ function base64encode(content) {
 */
 function generateBlockID(blockIDPrefix, blockIndex) {
 	const maxSourceStringLength = 48;
-	const maxAllowedBlockIDPrefixLength = maxSourceStringLength - 6;
+	const maxAllowedBlockIDPrefixLength = 42;
 	if (blockIDPrefix.length > maxAllowedBlockIDPrefixLength) blockIDPrefix = blockIDPrefix.slice(0, maxAllowedBlockIDPrefixLength);
 	return base64encode(blockIDPrefix + padStart(blockIndex.toString(), maxSourceStringLength - blockIDPrefix.length, "0"));
 }
@@ -45115,9 +45098,7 @@ var SASQueryParameters = class {
 			case "srh":
 				this.tryAppendQueryParameter(queries, param, this.requestHeaderKeys);
 				break;
-			case "srq":
-				this.tryAppendQueryParameter(queries, param, this.requestQueryParameterKeys);
-				break;
+			case "srq": this.tryAppendQueryParameter(queries, param, this.requestQueryParameterKeys);
 		}
 		return queries.join("&");
 	}
@@ -50749,7 +50730,7 @@ var UploadProgress = class {
 		const transferredBytes = this.sentBytes;
 		const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
 		const elapsedTime = Date.now() - this.startTime;
-		const uploadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
+		const uploadSpeed = (transferredBytes / 1048576 / (elapsedTime / 1e3)).toFixed(1);
 		info(`Sent ${transferredBytes} of ${this.contentLength} (${percentage}%), ${uploadSpeed} MBs/sec`);
 		if (this.isDone()) this.displayedComplete = true;
 	}
@@ -50805,7 +50786,7 @@ function uploadCacheArchiveSDK(signedUploadURL, archivePath, options) {
 		const uploadOptions = {
 			blockSize: options === null || options === void 0 ? void 0 : options.uploadChunkSize,
 			concurrency: options === null || options === void 0 ? void 0 : options.uploadConcurrency,
-			maxSingleShotSize: 128 * 1024 * 1024,
+			maxSingleShotSize: 134217728,
 			onProgress: uploadProgress.onProgress()
 		};
 		try {
@@ -51019,7 +51000,7 @@ var DownloadProgress = class {
 		const transferredBytes = this.segmentOffset + this.receivedBytes;
 		const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
 		const elapsedTime = Date.now() - this.startTime;
-		const downloadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
+		const downloadSpeed = (transferredBytes / 1048576 / (elapsedTime / 1e3)).toFixed(1);
 		info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
 		if (this.isDone()) this.displayedComplete = true;
 	}
@@ -51104,7 +51085,7 @@ function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options
 			const length = parseInt(lengthHeader);
 			if (Number.isNaN(length)) throw new Error(`Could not interpret Content-Length: ${length}`);
 			const downloads = [];
-			const blockSize = 4 * 1024 * 1024;
+			const blockSize = 4194304;
 			for (let offset = 0; offset < length; offset += blockSize) {
 				const count = Math.min(blockSize, length - offset);
 				downloads.push({
@@ -51235,7 +51216,7 @@ function getUploadOptions(copy) {
 	const result = {
 		useAzureSdk: false,
 		uploadConcurrency: 4,
-		uploadChunkSize: 32 * 1024 * 1024
+		uploadChunkSize: 33554432
 	};
 	if (copy) {
 		if (typeof copy.useAzureSdk === "boolean") result.useAzureSdk = copy.useAzureSdk;
@@ -51246,7 +51227,7 @@ function getUploadOptions(copy) {
 	* Add env var overrides
 	*/
 	result.uploadConcurrency = !isNaN(Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) ? Math.min(32, Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) : result.uploadConcurrency;
-	result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(128 * 1024 * 1024, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
+	result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(134217728, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
 	debug(`Use Azure SDK: ${result.useAzureSdk}`);
 	debug(`Upload concurrency: ${result.uploadConcurrency}`);
 	debug(`Upload chunk size: ${result.uploadChunkSize}`);
@@ -51552,7 +51533,7 @@ function saveCache$2(cacheId, archivePath, signedUploadURL, options) {
 			yield uploadFile(httpClient, cacheId, archivePath, options);
 			debug("Commiting cache");
 			const cacheSize = getArchiveFileSizeInBytes(archivePath);
-			info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
+			info(`Cache Size: ~${Math.round(cacheSize / 1048576)} MB (${cacheSize} B)`);
 			const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
 			if (!isSuccessStatusCode(commitCacheResponse.statusCode)) throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
 			info("Cache saved successfully");
@@ -51639,7 +51620,6 @@ var require_base64 = /* @__PURE__ */ __commonJSMin(((exports) => {
 				case 3:
 					bytes[bytePos++] = (p & 3) << 6 | b;
 					groupPos = 0;
-					break;
 			}
 		}
 		if (groupPos == 1) throw Error(`invalid base64 string.`);
@@ -51670,7 +51650,6 @@ var require_base64 = /* @__PURE__ */ __commonJSMin(((exports) => {
 					base64 += encTable[p | b >> 6];
 					base64 += encTable[b & 63];
 					groupPos = 0;
-					break;
 			}
 		}
 		if (groupPos) {
@@ -51888,7 +51867,7 @@ var require_goog_varint = /* @__PURE__ */ __commonJSMin(((exports) => {
 		bytes.push(hi >>> 31 & 1);
 	}
 	exports.varint64write = varint64write;
-	const TWO_PWR_32_DBL = 65536 * 65536;
+	const TWO_PWR_32_DBL = 4294967296;
 	/**
 	* Parse decimal string of 64 bit integer value as two JS numbers.
 	*
@@ -52982,9 +52961,7 @@ var require_reflection_type_check = /* @__PURE__ */ __commonJSMin(((exports) => 
 					case "message":
 						if (field.repeat) req.push(field.localName);
 						break;
-					case "map":
-						req.push(field.localName);
-						break;
+					case "map": req.push(field.localName);
 				}
 			}
 			this.data = {
@@ -53061,7 +53038,6 @@ var require_reflection_type_check = /* @__PURE__ */ __commonJSMin(((exports) => 
 						case "enum": return this.scalars(Object.values(arg), reflection_info_1.ScalarType.INT32, depth);
 						case "message": return this.messages(Object.values(arg), field.V.T(), allowExcessProperties, depth);
 					}
-					break;
 			}
 			return true;
 		}
@@ -53222,9 +53198,7 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 								val = this.enum(field.V.T(), jsonObjValue, field.name, options.ignoreUnknownFields);
 								if (val === false) continue;
 								break;
-							case "scalar":
-								val = this.scalar(jsonObjValue, field.V.T, field.V.L, field.name);
-								break;
+							case "scalar": val = this.scalar(jsonObjValue, field.V.T, field.V.L, field.name);
 						}
 						this.assert(val !== void 0, field.name + " map value", jsonObjValue);
 						let key = jsonObjKey;
@@ -53247,9 +53221,7 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 								val = this.enum(field.T(), jsonItem, field.name, options.ignoreUnknownFields);
 								if (val === false) continue;
 								break;
-							case "scalar":
-								val = this.scalar(jsonItem, field.T, field.L, field.name);
-								break;
+							case "scalar": val = this.scalar(jsonItem, field.T, field.L, field.name);
 						}
 						this.assert(val !== void 0, field.name, jsonValue);
 						fieldArr.push(val);
@@ -53271,7 +53243,6 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 					case "scalar":
 						if (jsonValue === null) continue;
 						target[localName] = this.scalar(jsonValue, field.T, field.L, field.name);
-						break;
 				}
 			}
 		}
@@ -53446,7 +53417,6 @@ var require_reflection_json_writer = /* @__PURE__ */ __commonJSMin(((exports) =>
 							assert_1.assert(val !== void 0);
 							jsonObj[entryKey.toString()] = val;
 						}
-						break;
 				}
 				if (options.emitDefaultValues || Object.keys(jsonObj).length > 0) jsonValue = jsonObj;
 			} else if (field.repeat) {
@@ -53476,7 +53446,6 @@ var require_reflection_json_writer = /* @__PURE__ */ __commonJSMin(((exports) =>
 							assert_1.assert(val !== void 0);
 							jsonArr.push(val);
 						}
-						break;
 				}
 				if (options.emitDefaultValues || jsonArr.length > 0 || options.emitDefaultValues) jsonValue = jsonArr;
 			} else switch (field.kind) {
@@ -53486,9 +53455,7 @@ var require_reflection_json_writer = /* @__PURE__ */ __commonJSMin(((exports) =>
 				case "enum":
 					jsonValue = this.enum(field.T(), value, field.name, field.opt, options.emitDefaultValues, options.enumAsInteger);
 					break;
-				case "message":
-					jsonValue = this.message(field.T(), value, field.name, options);
-					break;
+				case "message": jsonValue = this.message(field.T(), value, field.name, options);
 			}
 			return jsonValue;
 		}
@@ -53670,7 +53637,6 @@ var require_reflection_binary_reader = /* @__PURE__ */ __commonJSMin(((exports) 
 					case "map":
 						let [mapKey, mapVal] = this.mapEntry(field, reader, options);
 						target[localName][mapKey] = mapVal;
-						break;
 				}
 			}
 		}
@@ -53697,9 +53663,7 @@ var require_reflection_binary_reader = /* @__PURE__ */ __commonJSMin(((exports) 
 							case "enum":
 								val = reader.int32();
 								break;
-							case "message":
-								val = field.V.T().internalBinaryRead(reader, reader.uint32(), options);
-								break;
+							case "message": val = field.V.T().internalBinaryRead(reader, reader.uint32(), options);
 						}
 						break;
 					default: throw new Error(`Unknown field ${fieldNo} (wire type ${wireType}) in map entry for ${this.info.typeName}#${field.name}`);
@@ -53804,7 +53768,6 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 					case "map":
 						assert_1.assert(typeof value == "object" && value !== null);
 						for (const [key, val] of Object.entries(value)) this.mapEntry(writer, options, field, key, val);
-						break;
 				}
 			}
 			let u = options.writeUnknownFields;
@@ -53825,7 +53788,6 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 				case reflection_info_1.ScalarType.BOOL:
 					assert_1.assert(key == "true" || key == "false");
 					keyValue = key == "true";
-					break;
 			}
 			this.scalar(writer, field.K, 1, keyValue, true);
 			switch (field.V.kind) {
@@ -53835,9 +53797,7 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 				case "enum":
 					this.scalar(writer, reflection_info_1.ScalarType.INT32, 2, value, true);
 					break;
-				case "message":
-					this.message(writer, options, field.V.T(), 2, value);
-					break;
+				case "message": this.message(writer, options, field.V.T(), 2, value);
 			}
 			writer.join();
 		}
@@ -53944,7 +53904,6 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 				case reflection_info_1.ScalarType.SINT64:
 					d = i || pb_long_1.PbLong.from(value).isZero();
 					m = "sint64";
-					break;
 			}
 			return [
 				t,
@@ -54058,18 +54017,15 @@ var require_reflection_merge_partial = /* @__PURE__ */ __commonJSMin(((exports) 
 					else if (output[name] === void 0) output[name] = T.create(fieldValue);
 					else T.mergePartial(output[name], fieldValue);
 					break;
-				case "map":
-					switch (field.V.kind) {
-						case "scalar":
-						case "enum":
-							Object.assign(output[name], fieldValue);
-							break;
-						case "message":
-							let T = field.V.T();
-							for (let k of Object.keys(fieldValue)) output[name][k] = T.create(fieldValue[k]);
-							break;
-					}
-					break;
+				case "map": switch (field.V.kind) {
+					case "scalar":
+					case "enum":
+						Object.assign(output[name], fieldValue);
+						break;
+					case "message":
+						let T = field.V.T();
+						for (let k of Object.keys(fieldValue)) output[name][k] = T.create(fieldValue[k]);
+				}
 			}
 		}
 	}
@@ -54106,7 +54062,6 @@ var require_reflection_equals = /* @__PURE__ */ __commonJSMin(((exports) => {
 				case "message":
 					let T = field.T();
 					if (!(field.repeat ? repeatedMsgEq(T, val_a, val_b) : T.equals(val_a, val_b))) return false;
-					break;
 			}
 		}
 		return true;
@@ -54882,9 +54837,7 @@ var require_rpc_options = /* @__PURE__ */ __commonJSMin(((exports) => {
 					copy(defaults.meta, o.meta);
 					copy(options.meta, o.meta);
 					break;
-				case "interceptors":
-					o.interceptors = defaults.interceptors ? defaults.interceptors.concat(val) : val.concat();
-					break;
+				case "interceptors": o.interceptors = defaults.interceptors ? defaults.interceptors.concat(val) : val.concat();
 			}
 		}
 		return o;
@@ -56824,7 +56777,6 @@ function getTarPath() {
 					type: ArchiveToolType.BSD
 				};
 			}
-			default: break;
 		}
 		return {
 			path: yield which("tar", true),
@@ -56846,17 +56798,13 @@ function getTarArgs(tarPath_1, compressionMethod_1, type_1) {
 			case "extract":
 				args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"));
 				break;
-			case "list":
-				args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P");
-				break;
+			case "list": args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P");
 		}
 		if (tarPath.type === ArchiveToolType.GNU) switch (process.platform) {
 			case "win32":
 				args.push("--force-local");
 				break;
-			case "darwin":
-				args.push("--delay-directory-restore");
-				break;
+			case "darwin": args.push("--delay-directory-restore");
 		}
 		return args;
 	});
@@ -57083,7 +57031,7 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 			yield downloadCache(cacheEntry.archiveLocation, archivePath, options);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
-			info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+			info(`Cache Size: ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B)`);
 			yield extractTar(archivePath, compressionMethod);
 			info("Cache restored successfully");
 			return new CacheEntry(cacheEntry.cacheKey, archiveFileSize);
@@ -57140,7 +57088,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 			debug(`Starting download of archive to: ${archivePath}`);
 			yield downloadCache(response.signedDownloadUrl, archivePath, options);
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
-			info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+			info(`Cache Size: ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B)`);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
 			yield extractTar(archivePath, compressionMethod);
 			info("Cache restored successfully");
@@ -57199,10 +57147,10 @@ function saveCacheV1(paths_1, key_1, options_1) {
 		try {
 			yield createTar(archiveFolder, cachePaths, compressionMethod);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
-			const fileSizeLimit = 10 * 1024 * 1024 * 1024;
+			const fileSizeLimit = 10737418240;
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
 			debug(`File Size: ${archiveFileSize}`);
-			if (archiveFileSize > fileSizeLimit && !isGhes()) throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
+			if (archiveFileSize > fileSizeLimit && !isGhes()) throw new Error(`Cache size of ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
 			debug("Reserving Cache");
 			const reserveCacheResponse = yield reserveCache(key, paths, {
 				compressionMethod,
@@ -57210,7 +57158,7 @@ function saveCacheV1(paths_1, key_1, options_1) {
 				cacheSize: archiveFileSize
 			});
 			if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) cacheId = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b === void 0 ? void 0 : _b.cacheId;
-			else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
+			else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
 			else {
 				const detailMessage = (_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message;
 				if (detailMessage === null || detailMessage === void 0 ? void 0 : detailMessage.startsWith("cache write denied:")) throw new CacheWriteDeniedError(`Unable to reserve cache with key ${key}. More details: ${detailMessage}`);
@@ -57241,7 +57189,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 	return __awaiter(this, arguments, void 0, function* (paths, key, options, enableCrossOsArchive = false) {
 		var _a;
 		options = Object.assign(Object.assign({}, options), {
-			uploadChunkSize: 64 * 1024 * 1024,
+			uploadChunkSize: 67108864,
 			uploadConcurrency: 8,
 			useAzureSdk: true
 		});
@@ -57425,7 +57373,7 @@ async function renderSummary(versions, savedCacheEntry) {
 }
 function formatSize(bytes) {
 	if (bytes === void 0 || bytes === 0) return "X";
-	return `${Math.round(bytes / (1024 * 1024))} MB (${bytes} B)`;
+	return `${Math.round(bytes / 1048576)} MB (${bytes} B)`;
 }
 function formatList(values) {
 	return values.length > 0 ? values.join(", ") : "Not specified";
