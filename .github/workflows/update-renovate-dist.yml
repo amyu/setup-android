@@ -65,9 +65,6 @@ jobs:
           path: dist/
           retention-days: 1
 
-  # GITHUB_TOKEN pushes do not start another workflow run. The read-only build
-  # job therefore performs the complete lint, typecheck, and package validation
-  # before this write-enabled job commits its artifact.
   update:
     needs: build
     if: needs.build.outputs.changed == 'true'
