@@ -13,7 +13,7 @@
     "lint": "oxlint ./src/ && pnpm run format-check",
     "lint-fix": "oxlint --fix ./src/ && pnpm run format",
     "typecheck": "tsc --project tsconfig.json --pretty --noEmit --incremental false",
-    "package": "pnpm dlx rimraf ./dist && pnpm run typecheck && rolldown --config rolldown.config.ts",
+    "package": "node --eval \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && pnpm run typecheck && rolldown --config rolldown.config.ts",
     "all": "pnpm run postinstall && pnpm run lint && pnpm run package"
   },
   "repository": {

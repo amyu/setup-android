@@ -21,6 +21,15 @@
       ],
     },
     {
+      automerge: false,
+      matchManagers: [
+        'npm',
+      ],
+      matchPackageNames: [
+        'rolldown',
+      ],
+    },
+    {
       groupName: 'Android Gradle Plugin',
       matchPackageNames: [
         'com.android.library{/,}**',
