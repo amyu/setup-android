@@ -1,8 +1,5 @@
 name: Update Renovate dist
 
-# Add a RENOVATE_DIST_TOKEN repository secret containing a fine-grained
-# personal access token with Contents read/write access so pushes rerun CI.
-
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -68,6 +65,9 @@ jobs:
           path: dist/
           retention-days: 1
 
+  # GITHUB_TOKEN pushes do not start another workflow run. The read-only build
+  # job therefore performs the complete lint, typecheck, and package validation
+  # before this write-enabled job commits its artifact.
   update:
     needs: build
     if: needs.build.outputs.changed == 'true'
@@ -76,22 +76,10 @@ jobs:
       contents: write
 
     steps:
-      - name: Require update token
-        shell: bash
-        env:
-          RENOVATE_DIST_TOKEN: ${{ secrets.RENOVATE_DIST_TOKEN }}
-        run: |
-          if [ -z "$RENOVATE_DIST_TOKEN" ]; then
-            echo "The RENOVATE_DIST_TOKEN repository secret is required."
-            echo "Use a fine-grained personal access token with Contents read/write access."
-            exit 1
-          fi
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-          token: ${{ secrets.RENOVATE_DIST_TOKEN }}
 
       - name: Verify pull request head
         shell: bash
