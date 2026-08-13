@@ -1,7 +1,8 @@
 name: Update Renovate dist
 
 on:
-  pull_request:
+  # The PR checkout runs only in a read-only job; the write job never executes it.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened, synchronize]
     branches:
       - main
@@ -31,12 +32,64 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Verify changed paths
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          unexpected_paths=()
+          while IFS= read -r -d '' path; do
+            case "$path" in
+              package.json|pnpm-lock.yaml|dist/*) ;;
+              *) unexpected_paths+=("$path") ;;
+            esac
+          done < <(git diff --name-only --no-renames -z "$BASE_SHA...HEAD")
+
+          if [ "${#unexpected_paths[@]}" -ne 0 ]; then
+            echo "Unexpected files in the Rolldown update:"
+            printf '  %q\n' "${unexpected_paths[@]}"
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .node-version
+
+      - name: Verify Rolldown-only manifest change
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          node --input-type=module <<'EOF'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          import { readFileSync } from 'node:fs';
+
+          const base = JSON.parse(
+            execFileSync('git', ['show', `${process.env.BASE_SHA}:package.json`], {
+              encoding: 'utf8',
+            }),
+          );
+          const head = JSON.parse(readFileSync('package.json', 'utf8'));
+          const baseRolldown = base.devDependencies?.rolldown;
+          const headRolldown = head.devDependencies?.rolldown;
+
+          assert.equal(typeof baseRolldown, 'string');
+          assert.equal(typeof headRolldown, 'string');
+          assert.notEqual(headRolldown, baseRolldown, 'Rolldown must be updated');
+
+          delete base.devDependencies.rolldown;
+          delete head.devDependencies.rolldown;
+          assert.deepEqual(
+            head,
+            base,
+            'Only the Rolldown version may change in package.json',
+          );
+          EOF
 
       - name: Enable Corepack
         run: corepack enable
@@ -70,7 +123,8 @@ jobs:
     if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      actions: write # Dispatch validation for the generated commit.
+      contents: write # Push the generated dist files.
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -100,6 +154,8 @@ jobs:
         shell: bash
         env:
           HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -112,3 +168,10 @@ jobs:
 
           git commit -m "Regenerate dist for Rolldown update"
           git push origin "HEAD:$HEAD_BRANCH"
+
+          for workflow in check-dist.yml lint.yml test.yml; do
+            gh api --method POST \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" \
+              -f "ref=$HEAD_BRANCH" \
+              -f "inputs[pr_number]=$PR_NUMBER"
+          done
