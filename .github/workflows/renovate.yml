@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: '23 */3 * * *'
   workflow_dispatch:
-    inputs:
-      dry-run:
-        description: Preview updates without changing branches or pull requests
-        type: boolean
-        default: true
 
 permissions:
   contents: read
@@ -42,5 +37,3 @@ jobs:
           configurationFile: .github/renovate-config.json
           renovate-version: 44.65.5
           token: ${{ steps.app-token.outputs.token }}
-        env:
-          RENOVATE_DRY_RUN: ${{ inputs.dry-run && 'full' || '' }}
