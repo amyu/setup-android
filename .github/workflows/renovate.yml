@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   renovate:
-    if: github.repository == 'amyu/setup-android' && vars.RENOVATE_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    if: github.repository == 'amyu/setup-android' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
