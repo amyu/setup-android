@@ -13,6 +13,11 @@
         'npm',
       ],
       rangeStrategy: 'pin',
+    },
+    {
+      matchDepNames: [
+        'rolldown',
+      ],
       postUpgradeTasks: {
         commands: [
           'pnpm install --frozen-lockfile',
