@@ -52967,9 +52967,7 @@ var require_reflection_binary_reader = /* @__PURE__ */ __commonJSMin(((exports) 
 				case "enum":
 					val = 0;
 					break;
-				case "message":
-					val = field.V.T().create();
-					break;
+				case "message": val = field.V.T().create();
 			}
 			return [key, val];
 		}
@@ -53236,9 +53234,7 @@ var require_reflection_create = /* @__PURE__ */ __commonJSMin(((exports) => {
 				case "enum":
 					msg[name] = 0;
 					break;
-				case "map":
-					msg[name] = {};
-					break;
+				case "map": msg[name] = {};
 			}
 		}
 		return msg;
