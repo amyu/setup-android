@@ -58,7 +58,7 @@ var __copyProps = (to, from, except, desc) => {
 	}
 	return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
 	value: mod,
 	enumerable: true
 }) : target, mod));
@@ -982,20 +982,22 @@ var require_tree = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			while (true) {
 				const code = key.charCodeAt(index);
 				if (code > 127) throw new TypeError("key must be ascii string");
-				if (node.code === code) if (length === ++index) {
-					node.value = value;
-					break;
-				} else if (node.middle !== null) node = node.middle;
-				else {
-					node.middle = new TstNode(key, value, index);
-					break;
-				}
-				else if (node.code < code) if (node.left !== null) node = node.left;
-				else {
-					node.left = new TstNode(key, value, index);
-					break;
-				}
-				else if (node.right !== null) node = node.right;
+				if (node.code === code) {
+					if (length === ++index) {
+						node.value = value;
+						break;
+					} else if (node.middle !== null) node = node.middle;
+					else {
+						node.middle = new TstNode(key, value, index);
+						break;
+					}
+				} else if (node.code < code) {
+					if (node.left !== null) node = node.left;
+					else {
+						node.left = new TstNode(key, value, index);
+						break;
+					}
+				} else if (node.right !== null) node = node.right;
 				else {
 					node.right = new TstNode(key, value, index);
 					break;
@@ -1669,15 +1671,16 @@ var require_request$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			if (Array.isArray(headers)) {
 				if (headers.length % 2 !== 0) throw new InvalidArgumentError("headers array must be even");
 				for (let i = 0; i < headers.length; i += 2) processHeader(this, headers[i], headers[i + 1]);
-			} else if (headers && typeof headers === "object") if (headers[Symbol.iterator]) for (const header of headers) {
-				if (!Array.isArray(header) || header.length !== 2) throw new InvalidArgumentError("headers must be in key-value pair format");
-				processHeader(this, header[0], header[1]);
-			}
-			else {
-				const keys = Object.keys(headers);
-				for (let i = 0; i < keys.length; ++i) processHeader(this, keys[i], headers[keys[i]]);
-			}
-			else if (headers != null) throw new InvalidArgumentError("headers must be an object or an array");
+			} else if (headers && typeof headers === "object") {
+				if (headers[Symbol.iterator]) for (const header of headers) {
+					if (!Array.isArray(header) || header.length !== 2) throw new InvalidArgumentError("headers must be in key-value pair format");
+					processHeader(this, header[0], header[1]);
+				}
+				else {
+					const keys = Object.keys(headers);
+					for (let i = 0; i < keys.length; ++i) processHeader(this, keys[i], headers[keys[i]]);
+				}
+			} else if (headers != null) throw new InvalidArgumentError("headers must be an object or an array");
 			validateHandler(handler, method, upgrade);
 			this.servername = servername || getServerName(this.host);
 			this[kHandler] = handler;
@@ -1933,7 +1936,7 @@ var require_dispatcher_base = /* @__PURE__ */ __commonJSMin(((exports, module) =
 			}
 			if (callback === void 0) return new Promise((resolve, reject) => {
 				this.destroy(err, (err, data) => {
-					return err ? reject(err) : resolve(data);
+					return err ? /* istanbul ignore next: should never error */ reject(err) : resolve(data);
 				});
 			});
 			if (typeof callback !== "function") throw new InvalidArgumentError("invalid callback");
@@ -2403,7 +2406,7 @@ var require_connect = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				assert$25(!httpSocket, "httpSocket can only be sent on TLS update");
 				port = port || 80;
 				socket = net$4.connect({
-					highWaterMark: 64 * 1024,
+					highWaterMark: 65536,
 					...options,
 					localAddress,
 					port,
@@ -3882,10 +3885,7 @@ var require_util$6 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				case "strict-origin-when-cross-origin":
 					if (request.origin && urlHasHttpsScheme(request.origin) && !urlHasHttpsScheme(requestCurrentURL(request))) serializedOrigin = null;
 					break;
-				case "same-origin":
-					if (!sameOrigin(request, requestCurrentURL(request))) serializedOrigin = null;
-					break;
-				default:
+				case "same-origin": if (!sameOrigin(request, requestCurrentURL(request))) serializedOrigin = null;
 			}
 			request.headersList.append("origin", serializedOrigin, true);
 		}
@@ -4017,8 +4017,10 @@ var require_util$6 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			const algorithm = item.algo;
 			const expectedValue = item.hash;
 			let actualValue = crypto.createHash(algorithm).update(bytes).digest("base64");
-			if (actualValue[actualValue.length - 1] === "=") if (actualValue[actualValue.length - 2] === "=") actualValue = actualValue.slice(0, -2);
-			else actualValue = actualValue.slice(0, -1);
+			if (actualValue[actualValue.length - 1] === "=") {
+				if (actualValue[actualValue.length - 2] === "=") actualValue = actualValue.slice(0, -2);
+				else actualValue = actualValue.slice(0, -1);
+			}
 			if (compareBase64Mixed(actualValue, expectedValue)) return true;
 		}
 		return false;
@@ -4167,9 +4169,7 @@ var require_util$6 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					case "value":
 						result = value;
 						break;
-					case "key+value":
-						result = [key, value];
-						break;
+					case "key+value": result = [key, value];
 				}
 				return {
 					value: result,
@@ -4463,12 +4463,14 @@ var require_util$6 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		let temporaryValue = "";
 		while (position.position < input.length) {
 			temporaryValue += collectASequenceOfCodePoints((char) => char !== "\"" && char !== ",", input, position);
-			if (position.position < input.length) if (input.charCodeAt(position.position) === 34) {
-				temporaryValue += collectAnHTTPQuotedString(input, position);
-				if (position.position < input.length) continue;
-			} else {
-				assert$23(input.charCodeAt(position.position) === 44);
-				position.position++;
+			if (position.position < input.length) {
+				if (input.charCodeAt(position.position) === 34) {
+					temporaryValue += collectAnHTTPQuotedString(input, position);
+					if (position.position < input.length) continue;
+				} else {
+					assert$23(input.charCodeAt(position.position) === 44);
+					position.position++;
+				}
 			}
 			temporaryValue = removeChars(temporaryValue, true, true, (char) => char === 9 || char === 32);
 			values.push(temporaryValue);
@@ -4718,9 +4720,10 @@ var require_formdata = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		}
 		[nodeUtil$2.inspect.custom](depth, options) {
 			const state = this[kState].reduce((a, b) => {
-				if (a[b.name]) if (Array.isArray(a[b.name])) a[b.name].push(b.value);
-				else a[b.name] = [a[b.name], b.value];
-				else a[b.name] = b.value;
+				if (a[b.name]) {
+					if (Array.isArray(a[b.name])) a[b.name].push(b.value);
+					else a[b.name] = [a[b.name], b.value];
+				} else a[b.name] = b.value;
 				return a;
 			}, { __proto__: null });
 			options.depth ??= depth;
@@ -5332,10 +5335,12 @@ var require_client_h1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					timers.clearTimeout(this.timeout);
 					this.timeout = null;
 				}
-				if (delay) if (type & USE_FAST_TIMER) this.timeout = timers.setFastTimeout(onParserTimeout, delay, new WeakRef(this));
-				else {
-					this.timeout = setTimeout(onParserTimeout, delay, new WeakRef(this));
-					this.timeout.unref();
+				if (delay) {
+					if (type & USE_FAST_TIMER) this.timeout = timers.setFastTimeout(onParserTimeout, delay, new WeakRef(this));
+					else {
+						this.timeout = setTimeout(onParserTimeout, delay, new WeakRef(this));
+						this.timeout.unref();
+					}
 				}
 				this.timeoutValue = delay;
 			} else if (this.timeout) {
@@ -5794,9 +5799,10 @@ var require_client_h1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		/* istanbul ignore else: assertion */
 		if (!body || bodyLength === 0) writeBuffer(abort, null, client, request, socket, contentLength, header, expectsPayload);
 		else if (util.isBuffer(body)) writeBuffer(abort, body, client, request, socket, contentLength, header, expectsPayload);
-		else if (util.isBlobLike(body)) if (typeof body.stream === "function") writeIterable(abort, body.stream(), client, request, socket, contentLength, header, expectsPayload);
-		else writeBlob(abort, body, client, request, socket, contentLength, header, expectsPayload);
-		else if (util.isStream(body)) writeStream(abort, body, client, request, socket, contentLength, header, expectsPayload);
+		else if (util.isBlobLike(body)) {
+			if (typeof body.stream === "function") writeIterable(abort, body.stream(), client, request, socket, contentLength, header, expectsPayload);
+			else writeBlob(abort, body, client, request, socket, contentLength, header, expectsPayload);
+		} else if (util.isStream(body)) writeStream(abort, body, client, request, socket, contentLength, header, expectsPayload);
 		else if (util.isIterable(body)) writeIterable(abort, body, client, request, socket, contentLength, header, expectsPayload);
 		else assert$20(false);
 		return true;
@@ -5858,12 +5864,13 @@ var require_client_h1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	}
 	function writeBuffer(abort, body, client, request, socket, contentLength, header, expectsPayload) {
 		try {
-			if (!body) if (contentLength === 0) socket.write(`${header}content-length: 0\r\n\r\n`, "latin1");
-			else {
-				assert$20(contentLength === null, "no body must not have content length");
-				socket.write(`${header}\r\n`, "latin1");
-			}
-			else if (util.isBuffer(body)) {
+			if (!body) {
+				if (contentLength === 0) socket.write(`${header}content-length: 0\r\n\r\n`, "latin1");
+				else {
+					assert$20(contentLength === null, "no body must not have content length");
+					socket.write(`${header}\r\n`, "latin1");
+				}
+			} else if (util.isBuffer(body)) {
 				assert$20(contentLength === body.byteLength, "buffer body must have content length");
 				socket.cork();
 				socket.write(`${header}content-length: ${contentLength}\r\n\r\n`, "latin1");
@@ -5979,11 +5986,14 @@ var require_client_h1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			socket[kWriting] = false;
 			if (socket[kError]) throw socket[kError];
 			if (socket.destroyed) return;
-			if (bytesWritten === 0) if (expectsPayload) socket.write(`${header}content-length: 0\r\n\r\n`, "latin1");
-			else socket.write(`${header}\r\n`, "latin1");
-			else if (contentLength === null) socket.write("\r\n0\r\n\r\n", "latin1");
-			if (contentLength !== null && bytesWritten !== contentLength) if (client[kStrictContentLength]) throw new RequestContentLengthMismatchError();
-			else process.emitWarning(new RequestContentLengthMismatchError());
+			if (bytesWritten === 0) {
+				if (expectsPayload) socket.write(`${header}content-length: 0\r\n\r\n`, "latin1");
+				else socket.write(`${header}\r\n`, "latin1");
+			} else if (contentLength === null) socket.write("\r\n0\r\n\r\n", "latin1");
+			if (contentLength !== null && bytesWritten !== contentLength) {
+				if (client[kStrictContentLength]) throw new RequestContentLengthMismatchError();
+				else process.emitWarning(new RequestContentLengthMismatchError());
+			}
 			if (socket[kParser].timeout && socket[kParser].timeoutType === TIMEOUT_HEADERS) {
 				// istanbul ignore else: only for jest
 				if (socket[kParser].timeout.refresh) socket[kParser].timeout.refresh();
@@ -6104,12 +6114,14 @@ var require_client_h2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	}
 	function resumeH2(client) {
 		const socket = client[kSocket];
-		if (socket?.destroyed === false) if (client[kSize] === 0 && client[kMaxConcurrentStreams] === 0) {
-			socket.unref();
-			client[kHTTP2Session].unref();
-		} else {
-			socket.ref();
-			client[kHTTP2Session].ref();
+		if (socket?.destroyed === false) {
+			if (client[kSize] === 0 && client[kMaxConcurrentStreams] === 0) {
+				socket.unref();
+				client[kHTTP2Session].unref();
+			} else {
+				socket.ref();
+				client[kHTTP2Session].ref();
+			}
 		}
 	}
 	function onHttp2SessionError(err) {
@@ -6293,9 +6305,10 @@ var require_client_h2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			/* istanbul ignore else: assertion */
 			if (!body || contentLength === 0) writeBuffer(abort, stream, null, client, request, client[kSocket], contentLength, expectsPayload);
 			else if (util.isBuffer(body)) writeBuffer(abort, stream, body, client, request, client[kSocket], contentLength, expectsPayload);
-			else if (util.isBlobLike(body)) if (typeof body.stream === "function") writeIterable(abort, stream, body.stream(), client, request, client[kSocket], contentLength, expectsPayload);
-			else writeBlob(abort, stream, body, client, request, client[kSocket], contentLength, expectsPayload);
-			else if (util.isStream(body)) writeStream(abort, client[kSocket], expectsPayload, stream, body, client, request, contentLength);
+			else if (util.isBlobLike(body)) {
+				if (typeof body.stream === "function") writeIterable(abort, stream, body.stream(), client, request, client[kSocket], contentLength, expectsPayload);
+				else writeBlob(abort, stream, body, client, request, client[kSocket], contentLength, expectsPayload);
+			} else if (util.isStream(body)) writeStream(abort, client[kSocket], expectsPayload, stream, body, client, request, contentLength);
 			else if (util.isIterable(body)) writeIterable(abort, stream, body, client, request, client[kSocket], contentLength, expectsPayload);
 			else assert$19(false);
 		}
@@ -6873,7 +6886,7 @@ var require_client = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#region node_modules/.pnpm/undici@6.23.0/node_modules/undici/lib/dispatcher/fixed-queue.js
 var require_fixed_queue = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const kSize = 2048;
-	const kMask = kSize - 1;
+	const kMask = 2047;
 	var FixedCircularBuffer = class {
 		constructor() {
 			this.bottom = 0;
@@ -7658,7 +7671,7 @@ var require_retry_handler = /* @__PURE__ */ __commonJSMin(((exports, module) => 
 			this.retryOpts = {
 				retry: retryFn ?? RetryHandler[kRetryHandlerDefaultRetry],
 				retryAfter: retryAfter ?? true,
-				maxTimeout: maxTimeout ?? 30 * 1e3,
+				maxTimeout: maxTimeout ?? 3e4,
 				minTimeout: minTimeout ?? 500,
 				timeoutFactor: timeoutFactor ?? 2,
 				maxRetries: maxRetries ?? 5,
@@ -7746,13 +7759,15 @@ var require_retry_handler = /* @__PURE__ */ __commonJSMin(((exports, module) => 
 		onHeaders(statusCode, rawHeaders, resume, statusMessage) {
 			const headers = parseHeaders(rawHeaders);
 			this.retryCount += 1;
-			if (statusCode >= 300) if (this.retryOpts.statusCodes.includes(statusCode) === false) return this.handler.onHeaders(statusCode, rawHeaders, resume, statusMessage);
-			else {
-				this.abort(new RequestRetryError("Request failed", statusCode, {
-					headers,
-					data: { count: this.retryCount }
-				}));
-				return false;
+			if (statusCode >= 300) {
+				if (this.retryOpts.statusCodes.includes(statusCode) === false) return this.handler.onHeaders(statusCode, rawHeaders, resume, statusMessage);
+				else {
+					this.abort(new RequestRetryError("Request failed", statusCode, {
+						headers,
+						data: { count: this.retryCount }
+					}));
+					return false;
+				}
 			}
 			if (this.resume != null) {
 				this.resume = null;
@@ -7902,7 +7917,7 @@ var require_readable = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const kContentLength = Symbol("kContentLength");
 	const noop = () => {};
 	var BodyReadable = class extends Readable$4 {
-		constructor({ resume, abort, contentType = "", contentLength, highWaterMark = 64 * 1024 }) {
+		constructor({ resume, abort, contentType = "", contentLength, highWaterMark = 65536 }) {
 			super({
 				autoDestroy: true,
 				read: resume,
@@ -7981,7 +7996,7 @@ var require_readable = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			return this[kBody];
 		}
 		async dump(opts) {
-			let limit = Number.isFinite(opts?.limit) ? opts.limit : 128 * 1024;
+			let limit = Number.isFinite(opts?.limit) ? opts.limit : 131072;
 			const signal = opts?.signal;
 			if (signal != null && (typeof signal !== "object" || !("aborted" in signal))) throw new InvalidArgumentError("signal must be an AbortSignal");
 			signal?.throwIfAborted();
@@ -8120,7 +8135,7 @@ var require_util$5 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const assert$14 = __require("node:assert");
 	const { ResponseStatusCodeError } = require_errors();
 	const { chunksDecode } = require_readable();
-	const CHUNK_LIMIT = 128 * 1024;
+	const CHUNK_LIMIT = 131072;
 	async function getResolveErrorBodyCallback({ callback, body, contentType, statusCode, statusMessage, headers }) {
 		assert$14(body);
 		let chunks = [];
@@ -8209,17 +8224,19 @@ var require_api_request = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			if (util.isStream(body)) body.on("error", (err) => {
 				this.onError(err);
 			});
-			if (this.signal) if (this.signal.aborted) this.reason = this.signal.reason ?? new RequestAbortedError();
-			else this.removeAbortListener = util.addAbortListener(this.signal, () => {
-				this.reason = this.signal.reason ?? new RequestAbortedError();
-				if (this.res) util.destroy(this.res.on("error", util.nop), this.reason);
-				else if (this.abort) this.abort(this.reason);
-				if (this.removeAbortListener) {
-					this.res?.off("close", this.removeAbortListener);
-					this.removeAbortListener();
-					this.removeAbortListener = null;
-				}
-			});
+			if (this.signal) {
+				if (this.signal.aborted) this.reason = this.signal.reason ?? new RequestAbortedError();
+				else this.removeAbortListener = util.addAbortListener(this.signal, () => {
+					this.reason = this.signal.reason ?? new RequestAbortedError();
+					if (this.res) util.destroy(this.res.on("error", util.nop), this.reason);
+					else if (this.abort) this.abort(this.reason);
+					if (this.removeAbortListener) {
+						this.res?.off("close", this.removeAbortListener);
+						this.removeAbortListener();
+						this.removeAbortListener = null;
+					}
+				});
+			}
 		}
 		onConnect(abort, context) {
 			if (this.reason) {
@@ -8253,22 +8270,24 @@ var require_api_request = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			if (this.removeAbortListener) res.on("close", this.removeAbortListener);
 			this.callback = null;
 			this.res = res;
-			if (callback !== null) if (this.throwOnError && statusCode >= 400) this.runInAsyncScope(getResolveErrorBodyCallback, null, {
-				callback,
-				body: res,
-				contentType,
-				statusCode,
-				statusMessage,
-				headers
-			});
-			else this.runInAsyncScope(callback, null, null, {
-				statusCode,
-				headers,
-				trailers: this.trailers,
-				opaque,
-				body: res,
-				context
-			});
+			if (callback !== null) {
+				if (this.throwOnError && statusCode >= 400) this.runInAsyncScope(getResolveErrorBodyCallback, null, {
+					callback,
+					body: res,
+					contentType,
+					statusCode,
+					statusMessage,
+					headers
+				});
+				else this.runInAsyncScope(callback, null, null, {
+					statusCode,
+					headers,
+					trailers: this.trailers,
+					opaque,
+					body: res,
+					context
+				});
+			}
 		}
 		onData(chunk) {
 			return this.res.push(chunk);
@@ -9167,10 +9186,12 @@ var require_mock_interceptor = /* @__PURE__ */ __commonJSMin(((exports, module) 
 			if (typeof opts !== "object") throw new InvalidArgumentError("opts must be an object");
 			if (typeof opts.path === "undefined") throw new InvalidArgumentError("opts.path must be defined");
 			if (typeof opts.method === "undefined") opts.method = "GET";
-			if (typeof opts.path === "string") if (opts.query) opts.path = buildURL(opts.path, opts.query);
-			else {
-				const parsedURL = new URL(opts.path, "data://");
-				opts.path = parsedURL.pathname + parsedURL.search;
+			if (typeof opts.path === "string") {
+				if (opts.query) opts.path = buildURL(opts.path, opts.query);
+				else {
+					const parsedURL = new URL(opts.path, "data://");
+					opts.path = parsedURL.pathname + parsedURL.search;
+				}
 			}
 			if (typeof opts.method === "string") opts.method = opts.method.toUpperCase();
 			this[kDispatchKey] = buildKey(opts);
@@ -9461,9 +9482,10 @@ var require_mock_agent = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			this[kIsMockActive] = true;
 		}
 		enableNetConnect(matcher) {
-			if (typeof matcher === "string" || typeof matcher === "function" || matcher instanceof RegExp) if (Array.isArray(this[kNetConnect])) this[kNetConnect].push(matcher);
-			else this[kNetConnect] = [matcher];
-			else if (typeof matcher === "undefined") this[kNetConnect] = true;
+			if (typeof matcher === "string" || typeof matcher === "function" || matcher instanceof RegExp) {
+				if (Array.isArray(this[kNetConnect])) this[kNetConnect].push(matcher);
+				else this[kNetConnect] = [matcher];
+			} else if (typeof matcher === "undefined") this[kNetConnect] = true;
 			else throw new InvalidArgumentError("Unsupported matcher. Must be one of String|Function|RegExp.");
 		}
 		disableNetConnect() {
@@ -9619,7 +9641,7 @@ var require_dump = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const { InvalidArgumentError, RequestAbortedError } = require_errors();
 	const DecoratorHandler = require_decorator_handler();
 	var DumpHandler = class extends DecoratorHandler {
-		#maxSize = 1024 * 1024;
+		#maxSize = 1048576;
 		#abort = null;
 		#dumped = false;
 		#aborted = false;
@@ -9669,7 +9691,7 @@ var require_dump = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			this.#handler.onComplete(trailers);
 		}
 	};
-	function createDumpInterceptor({ maxSize: defaultMaxSize } = { maxSize: 1024 * 1024 }) {
+	function createDumpInterceptor({ maxSize: defaultMaxSize } = { maxSize: 1048576 }) {
 		return (dispatch) => {
 			return function Intercept(opts, handler) {
 				const { dumpMaxSize = defaultMaxSize } = opts;
@@ -9766,12 +9788,14 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			const { records, offset } = hostnameRecords;
 			let family;
 			if (this.dualStack) {
-				if (affinity == null) if (offset == null || offset === maxInt) {
-					hostnameRecords.offset = 0;
-					affinity = 4;
-				} else {
-					hostnameRecords.offset++;
-					affinity = (hostnameRecords.offset & 1) === 1 ? 6 : 4;
+				if (affinity == null) {
+					if (offset == null || offset === maxInt) {
+						hostnameRecords.offset = 0;
+						affinity = 4;
+					} else {
+						hostnameRecords.offset++;
+						affinity = (hostnameRecords.offset & 1) === 1 ? 6 : 4;
+					}
 				}
 				if (records[affinity] != null && records[affinity].ips.length > 0) family = records[affinity];
 				else family = records[affinity === 4 ? 6 : 4];
@@ -9840,9 +9864,7 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 					this.#handler.onError(err);
 					return;
 				case "ENOTFOUND": this.#state.deleteRecord(this.#origin);
-				default:
-					this.#handler.onError(err);
-					break;
+				default: this.#handler.onError(err);
 			}
 		}
 	};
@@ -11269,8 +11291,10 @@ var require_fetch = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		assert$5(!request.body || request.body.stream);
 		if (request.window === "client") request.window = request.client?.globalObject?.constructor?.name === "Window" ? request.client : "no-window";
 		if (request.origin === "client") request.origin = request.client.origin;
-		if (request.policyContainer === "client") if (request.client != null) request.policyContainer = clonePolicyContainer(request.client.policyContainer);
-		else request.policyContainer = makePolicyContainer();
+		if (request.policyContainer === "client") {
+			if (request.client != null) request.policyContainer = clonePolicyContainer(request.client.policyContainer);
+			else request.policyContainer = makePolicyContainer();
+		}
 		if (!request.headersList.contains("accept", true)) request.headersList.append("accept", "*/*", true);
 		if (!request.headersList.contains("accept-language", true)) request.headersList.append("accept-language", "*", true);
 		if (request.priority === null) {}
@@ -11539,8 +11563,10 @@ var require_fetch = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			if (!httpRequest.headersList.contains("cache-control", true)) httpRequest.headersList.append("cache-control", "no-cache", true);
 		}
 		if (httpRequest.headersList.contains("range", true)) httpRequest.headersList.append("accept-encoding", "identity", true);
-		if (!httpRequest.headersList.contains("accept-encoding", true)) if (urlHasHttpsScheme(requestCurrentURL(httpRequest))) httpRequest.headersList.append("accept-encoding", "br, gzip, deflate", true);
-		else httpRequest.headersList.append("accept-encoding", "gzip, deflate", true);
+		if (!httpRequest.headersList.contains("accept-encoding", true)) {
+			if (urlHasHttpsScheme(requestCurrentURL(httpRequest))) httpRequest.headersList.append("accept-encoding", "br, gzip, deflate", true);
+			else httpRequest.headersList.append("accept-encoding", "gzip, deflate", true);
+		}
 		httpRequest.headersList.delete("host", true);
 		if (includeCredentials) {}
 		httpRequest.cache = "no-store";
@@ -13954,8 +13980,10 @@ var require_util$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			failWebsocketConnection(ws, "Received invalid UTF-8 in text frame.");
 			return;
 		}
-		else if (type === opcodes.BINARY) if (ws[kBinaryType] === "blob") dataForEvent = new Blob([data]);
-		else dataForEvent = toArrayBuffer(data);
+		else if (type === opcodes.BINARY) {
+			if (ws[kBinaryType] === "blob") dataForEvent = new Blob([data]);
+			else dataForEvent = toArrayBuffer(data);
+		}
 		fireEvent("message", ws, createFastMessageEvent, {
 			origin: ws[kWebSocketURL].origin,
 			data: dataForEvent
@@ -15162,7 +15190,6 @@ var require_eventsource_stream = /* @__PURE__ */ __commonJSMin(((exports, module
 				default:
 					if (this.buffer[0] === BOM[0] && this.buffer[1] === BOM[1] && this.buffer[2] === BOM[2]) this.buffer = this.buffer.subarray(3);
 					this.checkBOM = false;
-					break;
 			}
 			while (this.pos < this.buffer.length) {
 				if (this.eventEndCheck) {
@@ -15228,9 +15255,7 @@ var require_eventsource_stream = /* @__PURE__ */ __commonJSMin(((exports, module
 				case "id":
 					if (isValidLastEventId(value)) event[field] = value;
 					break;
-				case "event":
-					if (value.length > 0) event[field] = value;
-					break;
+				case "event": if (value.length > 0) event[field] = value;
 			}
 		}
 		/**
@@ -15436,13 +15461,15 @@ var require_eventsource = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			};
 			fetchParams.processResponseEndOfBody = processEventSourceEndOfBody;
 			fetchParams.processResponse = (response) => {
-				if (isNetworkError(response)) if (response.aborted) {
-					this.close();
-					this.dispatchEvent(new Event("error"));
-					return;
-				} else {
-					this.#reconnect();
-					return;
+				if (isNetworkError(response)) {
+					if (response.aborted) {
+						this.close();
+						this.dispatchEvent(new Event("error"));
+						return;
+					} else {
+						this.#reconnect();
+						return;
+					}
 				}
 				const contentType = response.headersList.get("content-type", true);
 				const mimeType = contentType !== null ? parseMIMEType(contentType) : "failure";
@@ -16025,7 +16052,7 @@ var HttpClient = class {
 		req.on("socket", (sock) => {
 			socket = sock;
 		});
-		req.setTimeout(this._socketTimeout || 3 * 6e4, () => {
+		req.setTimeout(this._socketTimeout || 18e4, () => {
 			if (socket) socket.end();
 			handleResult(/* @__PURE__ */ new Error(`Request timeout: ${info.options.path}`));
 		});
@@ -16105,14 +16132,18 @@ var HttpClient = class {
 		let clientHeader;
 		if (this.requestOptions && this.requestOptions.headers) {
 			const headerValue = lowercaseKeys(this.requestOptions.headers)[Headers.ContentType];
-			if (headerValue) if (typeof headerValue === "number") clientHeader = String(headerValue);
-			else if (Array.isArray(headerValue)) clientHeader = headerValue.join(", ");
-			else clientHeader = headerValue;
+			if (headerValue) {
+				if (typeof headerValue === "number") clientHeader = String(headerValue);
+				else if (Array.isArray(headerValue)) clientHeader = headerValue.join(", ");
+				else clientHeader = headerValue;
+			}
 		}
 		const additionalValue = additionalHeaders[Headers.ContentType];
-		if (additionalValue !== void 0) if (typeof additionalValue === "number") return String(additionalValue);
-		else if (Array.isArray(additionalValue)) return additionalValue.join(", ");
-		else return additionalValue;
+		if (additionalValue !== void 0) {
+			if (typeof additionalValue === "number") return String(additionalValue);
+			else if (Array.isArray(additionalValue)) return additionalValue.join(", ");
+			else return additionalValue;
+		}
 		if (clientHeader !== void 0) return clientHeader;
 		return _default;
 	}
@@ -16717,8 +16748,10 @@ function which(tool, check) {
 		if (!tool) throw new Error("parameter 'tool' is required");
 		if (check) {
 			const result = yield which(tool, false);
-			if (!result) if (IS_WINDOWS$7) throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
-			else throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+			if (!result) {
+				if (IS_WINDOWS$7) throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
+				else throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+			}
 			return result;
 		}
 		const matches = yield findInPath(tool);
@@ -16801,17 +16834,18 @@ var ToolRunner = class extends events.EventEmitter {
 		const toolPath = this._getSpawnFileName();
 		const args = this._getSpawnArgs(options);
 		let cmd = noPrefix ? "" : "[command]";
-		if (IS_WINDOWS$6) if (this._isCmdFile()) {
-			cmd += toolPath;
-			for (const a of args) cmd += ` ${a}`;
-		} else if (options.windowsVerbatimArguments) {
-			cmd += `"${toolPath}"`;
-			for (const a of args) cmd += ` ${a}`;
+		if (IS_WINDOWS$6) {
+			if (this._isCmdFile()) {
+				cmd += toolPath;
+				for (const a of args) cmd += ` ${a}`;
+			} else if (options.windowsVerbatimArguments) {
+				cmd += `"${toolPath}"`;
+				for (const a of args) cmd += ` ${a}`;
+			} else {
+				cmd += this._windowsQuoteCmdArg(toolPath);
+				for (const a of args) cmd += ` ${this._windowsQuoteCmdArg(a)}`;
+			}
 		} else {
-			cmd += this._windowsQuoteCmdArg(toolPath);
-			for (const a of args) cmd += ` ${this._windowsQuoteCmdArg(a)}`;
-		}
-		else {
 			cmd += toolPath;
 			for (const a of args) cmd += ` ${a}`;
 		}
@@ -17409,12 +17443,13 @@ function ensureAbsoluteRoot(root, itemPath) {
 		if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
 			let cwd = process.cwd();
 			assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
-			if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) if (itemPath.length === 2) return `${itemPath[0]}:\\${cwd.substr(3)}`;
-			else {
-				if (!cwd.endsWith("\\")) cwd += "\\";
-				return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
-			}
-			else return `${itemPath[0]}:\\${itemPath.substr(2)}`;
+			if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
+				if (itemPath.length === 2) return `${itemPath[0]}:\\${cwd.substr(3)}`;
+				else {
+					if (!cwd.endsWith("\\")) cwd += "\\";
+					return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
+				}
+			} else return `${itemPath[0]}:\\${itemPath.substr(2)}`;
 		} else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
 			const cwd = process.cwd();
 			assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
@@ -17899,14 +17934,16 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 	};
 	Minimatch.prototype.braceExpand = braceExpand;
 	function braceExpand(pattern, options) {
-		if (!options) if (this instanceof Minimatch) options = this.options;
-		else options = {};
+		if (!options) {
+			if (this instanceof Minimatch) options = this.options;
+			else options = {};
+		}
 		pattern = typeof pattern === "undefined" ? this.pattern : pattern;
 		assertValidPattern(pattern);
 		if (options.nobrace || !/\{(?:(?!\{).)*\}/.test(pattern)) return [pattern];
 		return expand(pattern);
 	}
-	var MAX_PATTERN_LENGTH = 1024 * 64;
+	var MAX_PATTERN_LENGTH = 65536;
 	var assertValidPattern = function(pattern) {
 		if (typeof pattern !== "string") throw new TypeError("invalid pattern");
 		if (pattern.length > MAX_PATTERN_LENGTH) throw new TypeError("pattern is too long");
@@ -17916,8 +17953,10 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 	function parse(pattern, isSub) {
 		assertValidPattern(pattern);
 		var options = this.options;
-		if (pattern === "**") if (!options.noglobstar) return GLOBSTAR;
-		else pattern = "*";
+		if (pattern === "**") {
+			if (!options.noglobstar) return GLOBSTAR;
+			else pattern = "*";
+		}
 		if (pattern === "") return "";
 		var re = "";
 		var hasMagic = !!options.nocase;
@@ -17941,9 +17980,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 						re += qmark;
 						hasMagic = true;
 						break;
-					default:
-						re += "\\" + stateChar;
-						break;
+					default: re += "\\" + stateChar;
 				}
 				self.debug("clearStateChar %j %j", stateChar, re);
 				stateChar = false;
@@ -18107,7 +18144,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 		var flags = options.nocase ? "i" : "";
 		try {
 			var regExp = new RegExp("^" + re + "$", flags);
-		} catch (er) 		/* istanbul ignore next - should be impossible */ {
+		} catch (er) /* istanbul ignore next - should be impossible */ {
 			return /* @__PURE__ */ new RegExp("$.");
 		}
 		regExp._glob = pattern;
@@ -18137,7 +18174,7 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 		if (this.negate) re = "^(?!" + re + ").*$";
 		try {
 			this.regexp = new RegExp(re, flags);
-		} catch (ex) 		/* istanbul ignore next - should be impossible */ {
+		} catch (ex) /* istanbul ignore next - should be impossible */ {
 			this.regexp = false;
 		}
 		return this.regexp;
@@ -18720,14 +18757,12 @@ function create(patterns, options) {
 //#endregion
 //#region node_modules/.pnpm/semver@7.7.4/node_modules/semver/internal/constants.js
 var require_constants = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const SEMVER_SPEC_VERSION = "2.0.0";
-	const MAX_LENGTH = 256;
-	const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
 	module.exports = {
-		MAX_LENGTH,
+		MAX_LENGTH: 256,
 		MAX_SAFE_COMPONENT_LENGTH: 16,
-		MAX_SAFE_BUILD_LENGTH: MAX_LENGTH - 6,
-		MAX_SAFE_INTEGER,
+		MAX_SAFE_BUILD_LENGTH: 250,
+		MAX_SAFE_INTEGER: Number.MAX_SAFE_INTEGER || 
+		/* istanbul ignore next */ 9007199254740991,
 		RELEASE_TYPES: [
 			"major",
 			"premajor",
@@ -18737,7 +18772,7 @@ var require_constants = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			"prepatch",
 			"prerelease"
 		],
-		SEMVER_SPEC_VERSION,
+		SEMVER_SPEC_VERSION: "2.0.0",
 		FLAG_INCLUDE_PRERELEASE: 1,
 		FLAG_LOOSE: 2
 	};
@@ -18869,9 +18904,10 @@ var require_semver$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = class SemVer {
 		constructor(version, options) {
 			options = parseOptions(options);
-			if (version instanceof SemVer) if (version.loose === !!options.loose && version.includePrerelease === !!options.includePrerelease) return version;
-			else version = version.version;
-			else if (typeof version !== "string") throw new TypeError(`Invalid version. Must be a string. Got type "${typeof version}".`);
+			if (version instanceof SemVer) {
+				if (version.loose === !!options.loose && version.includePrerelease === !!options.includePrerelease) return version;
+				else version = version.version;
+			} else if (typeof version !== "string") throw new TypeError(`Invalid version. Must be a string. Got type "${typeof version}".`);
 			if (version.length > MAX_LENGTH) throw new TypeError(`version is longer than ${MAX_LENGTH} characters`);
 			debug("SemVer", version, options);
 			this.options = options;
@@ -19340,8 +19376,10 @@ var require_range = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = class Range {
 		constructor(range, options) {
 			options = parseOptions(options);
-			if (range instanceof Range) if (range.loose === !!options.loose && range.includePrerelease === !!options.includePrerelease) return range;
-			else return new Range(range.raw, options);
+			if (range instanceof Range) {
+				if (range.loose === !!options.loose && range.includePrerelease === !!options.includePrerelease) return range;
+				else return new Range(range.raw, options);
+			}
 			if (range instanceof Comparator) {
 				this.raw = range.value;
 				this.set = [[range]];
@@ -19507,18 +19545,21 @@ var require_range = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			let ret;
 			if (isX(M)) ret = "";
 			else if (isX(m)) ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
-			else if (isX(p)) if (M === "0") ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
-			else ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`;
-			else if (pr) {
+			else if (isX(p)) {
+				if (M === "0") ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
+				else ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`;
+			} else if (pr) {
 				debug("replaceCaret pr", pr);
-				if (M === "0") if (m === "0") ret = `>=${M}.${m}.${p}-${pr} <${M}.${m}.${+p + 1}-0`;
-				else ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
-				else ret = `>=${M}.${m}.${p}-${pr} <${+M + 1}.0.0-0`;
+				if (M === "0") {
+					if (m === "0") ret = `>=${M}.${m}.${p}-${pr} <${M}.${m}.${+p + 1}-0`;
+					else ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+				} else ret = `>=${M}.${m}.${p}-${pr} <${+M + 1}.0.0-0`;
 			} else {
 				debug("no pr");
-				if (M === "0") if (m === "0") ret = `>=${M}.${m}.${p}${z} <${M}.${m}.${+p + 1}-0`;
-				else ret = `>=${M}.${m}.${p}${z} <${M}.${+m + 1}.0-0`;
-				else ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
+				if (M === "0") {
+					if (m === "0") ret = `>=${M}.${m}.${p}${z} <${M}.${m}.${+p + 1}-0`;
+					else ret = `>=${M}.${m}.${p}${z} <${M}.${+m + 1}.0-0`;
+				} else ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
 			}
 			debug("caret return", ret);
 			return ret;
@@ -19539,9 +19580,10 @@ var require_range = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			const anyX = xp;
 			if (gtlt === "=" && anyX) gtlt = "";
 			pr = options.includePrerelease ? "-0" : "";
-			if (xM) if (gtlt === ">" || gtlt === "<") ret = "<0.0.0-0";
-			else ret = "*";
-			else if (gtlt && anyX) {
+			if (xM) {
+				if (gtlt === ">" || gtlt === "<") ret = "<0.0.0-0";
+				else ret = "*";
+			} else if (gtlt && anyX) {
 				if (xm) m = 0;
 				p = 0;
 				if (gtlt === ">") {
@@ -19615,8 +19657,10 @@ var require_comparator = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		}
 		constructor(comp, options) {
 			options = parseOptions(options);
-			if (comp instanceof Comparator) if (comp.loose === !!options.loose) return comp;
-			else comp = comp.value;
+			if (comp instanceof Comparator) {
+				if (comp.loose === !!options.loose) return comp;
+				else comp = comp.value;
+			}
 			comp = comp.trim().split(/\s+/).join(" ");
 			debug("comparator", comp, options);
 			this.options = options;
@@ -19936,11 +19980,15 @@ var require_subset = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	const minimumVersion = [new Comparator(">=0.0.0")];
 	const simpleSubset = (sub, dom, options) => {
 		if (sub === dom) return true;
-		if (sub.length === 1 && sub[0].semver === ANY) if (dom.length === 1 && dom[0].semver === ANY) return true;
-		else if (options.includePrerelease) sub = minimumVersionWithPreRelease;
-		else sub = minimumVersion;
-		if (dom.length === 1 && dom[0].semver === ANY) if (options.includePrerelease) return true;
-		else dom = minimumVersion;
+		if (sub.length === 1 && sub[0].semver === ANY) {
+			if (dom.length === 1 && dom[0].semver === ANY) return true;
+			else if (options.includePrerelease) sub = minimumVersionWithPreRelease;
+			else sub = minimumVersion;
+		}
+		if (dom.length === 1 && dom[0].semver === ANY) {
+			if (options.includePrerelease) return true;
+			else dom = minimumVersion;
+		}
 		const eqSet = /* @__PURE__ */ new Set();
 		let gt, lt;
 		for (const c of sub) if (c.operator === ">" || c.operator === ">=") gt = higherGT(gt, c, options);
@@ -20448,8 +20496,10 @@ function createLoggerContext(options) {
 		for (const logger of registeredLoggers) if (shouldEnable(logger)) enabledNamespaces.push(logger.namespace);
 		debugObj.enable(enabledNamespaces.join(","));
 	}
-	if (logLevelFromEnv) if (isTypeSpecRuntimeLogLevel(logLevelFromEnv)) contextSetLogLevel(logLevelFromEnv);
-	else console.error(`${options.logLevelEnvVarName} set to unknown log level '${logLevelFromEnv}'; logging is not enabled. Acceptable values: ${TYPESPEC_RUNTIME_LOG_LEVELS.join(", ")}.`);
+	if (logLevelFromEnv) {
+		if (isTypeSpecRuntimeLogLevel(logLevelFromEnv)) contextSetLogLevel(logLevelFromEnv);
+		else console.error(`${options.logLevelEnvVarName} set to unknown log level '${logLevelFromEnv}'; logging is not enabled. Acceptable values: ${TYPESPEC_RUNTIME_LOG_LEVELS.join(", ")}.`);
+	}
 	function shouldEnable(logger) {
 		return Boolean(logLevel && levelMap[logger.level] <= levelMap[logLevel]);
 	}
@@ -21217,13 +21267,14 @@ var NodeHttpClient = class {
 				reject(abortError);
 			});
 			if (body && isReadableStream(body)) body.pipe(req);
-			else if (body) if (typeof body === "string" || Buffer.isBuffer(body)) req.end(body);
-			else if (isArrayBuffer(body)) req.end(ArrayBuffer.isView(body) ? Buffer.from(body.buffer) : Buffer.from(body));
-			else {
-				logger$4.error("Unrecognized body type", body);
-				reject(new RestError$1("Unrecognized body type"));
-			}
-			else req.end();
+			else if (body) {
+				if (typeof body === "string" || Buffer.isBuffer(body)) req.end(body);
+				else if (isArrayBuffer(body)) req.end(ArrayBuffer.isView(body) ? Buffer.from(body.buffer) : Buffer.from(body));
+				else {
+					logger$4.error("Unrecognized body type", body);
+					reject(new RestError$1("Unrecognized body type"));
+				}
+			} else req.end();
 		});
 	}
 	getOrCreateAgent(request, isInsecure) {
@@ -21534,7 +21585,7 @@ function throttlingRetryStrategy() {
 //#endregion
 //#region node_modules/.pnpm/@typespec+ts-http-runtime@0.3.2_supports-color@7.2.0/node_modules/@typespec/ts-http-runtime/dist/esm/retryStrategies/exponentialRetryStrategy.js
 const DEFAULT_CLIENT_RETRY_INTERVAL = 1e3;
-const DEFAULT_CLIENT_MAX_RETRY_INTERVAL = 1e3 * 64;
+const DEFAULT_CLIENT_MAX_RETRY_INTERVAL = 64e3;
 /**
 * A retry strategy that retries with an exponentially increasing delay in these two cases:
 * - When there are errors in the underlying transport layer (e.g. DNS lookup failures).
@@ -22005,15 +22056,16 @@ var require_common = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			let templateIndex = 0;
 			let starIndex = -1;
 			let matchIndex = 0;
-			while (searchIndex < search.length) if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === "*")) if (template[templateIndex] === "*") {
-				starIndex = templateIndex;
-				matchIndex = searchIndex;
-				templateIndex++;
-			} else {
-				searchIndex++;
-				templateIndex++;
-			}
-			else if (starIndex !== -1) {
+			while (searchIndex < search.length) if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === "*")) {
+				if (template[templateIndex] === "*") {
+					starIndex = templateIndex;
+					matchIndex = searchIndex;
+					templateIndex++;
+				} else {
+					searchIndex++;
+					templateIndex++;
+				}
+			} else if (starIndex !== -1) {
 				templateIndex = starIndex + 1;
 				matchIndex++;
 				searchIndex = matchIndex;
@@ -22283,9 +22335,11 @@ var require_supports_color = /* @__PURE__ */ __commonJSMin(((exports, module) =>
 	let forceColor;
 	if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) forceColor = 0;
 	else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) forceColor = 1;
-	if ("FORCE_COLOR" in env) if (env.FORCE_COLOR === "true") forceColor = 1;
-	else if (env.FORCE_COLOR === "false") forceColor = 0;
-	else forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+	if ("FORCE_COLOR" in env) {
+		if (env.FORCE_COLOR === "true") forceColor = 1;
+		else if (env.FORCE_COLOR === "false") forceColor = 0;
+		else forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+	}
 	function translateLevel(level) {
 		if (level === 0) return false;
 		return {
@@ -24188,7 +24242,7 @@ function createPipelineRequest(options) {
 const DEFAULT_CYCLER_OPTIONS = {
 	forcedRefreshWindowInMs: 1e3,
 	retryIntervalInMs: 3e3,
-	refreshWindowInMs: 1e3 * 60 * 2
+	refreshWindowInMs: 12e4
 };
 /**
 * Converts an an unreliable access token getter (which may resolve with null)
@@ -24739,10 +24793,11 @@ var SerializerImpl = class {
 			if (mapperType.match(/^Number$/i) !== null) {
 				payload = parseFloat(responseBody);
 				if (isNaN(payload)) payload = responseBody;
-			} else if (mapperType.match(/^Boolean$/i) !== null) if (responseBody === "true") payload = true;
-			else if (responseBody === "false") payload = false;
-			else payload = responseBody;
-			else if (mapperType.match(/^(String|Enum|Object|Stream|Uuid|TimeSpan|any)$/i) !== null) payload = responseBody;
+			} else if (mapperType.match(/^Boolean$/i) !== null) {
+				if (responseBody === "true") payload = true;
+				else if (responseBody === "false") payload = false;
+				else payload = responseBody;
+			} else if (mapperType.match(/^(String|Enum|Object|Stream|Uuid|TimeSpan|any)$/i) !== null) payload = responseBody;
 			else if (mapperType.match(/^(Date|DateTime|DateTimeRfc1123)$/i) !== null) payload = new Date(responseBody);
 			else if (mapperType.match(/^UnixTime$/i) !== null) payload = unixTimeToDate(responseBody);
 			else if (mapperType.match(/^ByteArray$/i) !== null) payload = decodeString(responseBody);
@@ -24943,9 +24998,10 @@ function serializeCompositeType(serializer, mapper, object, objectName, isXml, o
 			if (propertyMapper.readOnly) continue;
 			let propName;
 			let parentObject = payload;
-			if (serializer.isXML) if (propertyMapper.xmlIsWrapped) propName = propertyMapper.xmlName;
-			else propName = propertyMapper.xmlElementName || propertyMapper.xmlName;
-			else {
+			if (serializer.isXML) {
+				if (propertyMapper.xmlIsWrapped) propName = propertyMapper.xmlName;
+				else propName = propertyMapper.xmlElementName || propertyMapper.xmlName;
+			} else {
 				const paths = splitSerializeName(propertyMapper.serializedName);
 				propName = paths.pop();
 				for (const pathName of paths) {
@@ -24989,11 +25045,13 @@ function serializeCompositeType(serializer, mapper, object, objectName, isXml, o
 function getXmlObjectValue(propertyMapper, serializedValue, isXml, options) {
 	if (!isXml || !propertyMapper.xmlNamespace) return serializedValue;
 	const xmlNamespace = { [propertyMapper.xmlNamespacePrefix ? `xmlns:${propertyMapper.xmlNamespacePrefix}` : "xmlns"]: propertyMapper.xmlNamespace };
-	if (["Composite"].includes(propertyMapper.type.name)) if (serializedValue["$"]) return serializedValue;
-	else {
-		const result = { ...serializedValue };
-		result["$"] = xmlNamespace;
-		return result;
+	if (["Composite"].includes(propertyMapper.type.name)) {
+		if (serializedValue["$"]) return serializedValue;
+		else {
+			const result = { ...serializedValue };
+			result["$"] = xmlNamespace;
+			return result;
+		}
 	}
 	const result = {};
 	result[options.xml.xmlCharKey] = serializedValue;
@@ -25024,23 +25082,24 @@ function deserializeCompositeType(serializer, mapper, responseBody, objectName, 
 				handledPropertyNames.push(headerKey);
 			}
 			instance[key] = dictionary;
-		} else if (serializer.isXML) if (propertyMapper.xmlIsAttribute && responseBody["$"]) instance[key] = serializer.deserialize(propertyMapper, responseBody["$"][xmlName], propertyObjectName, options);
-		else if (propertyMapper.xmlIsMsText) {
-			if (responseBody[xmlCharKey] !== void 0) instance[key] = responseBody[xmlCharKey];
-			else if (typeof responseBody === "string") instance[key] = responseBody;
-		} else {
-			const propertyName = xmlElementName || xmlName || serializedName;
-			if (propertyMapper.xmlIsWrapped) {
-				const elementList = responseBody[xmlName]?.[xmlElementName] ?? [];
-				instance[key] = serializer.deserialize(propertyMapper, elementList, propertyObjectName, options);
-				handledPropertyNames.push(xmlName);
+		} else if (serializer.isXML) {
+			if (propertyMapper.xmlIsAttribute && responseBody["$"]) instance[key] = serializer.deserialize(propertyMapper, responseBody["$"][xmlName], propertyObjectName, options);
+			else if (propertyMapper.xmlIsMsText) {
+				if (responseBody[xmlCharKey] !== void 0) instance[key] = responseBody[xmlCharKey];
+				else if (typeof responseBody === "string") instance[key] = responseBody;
 			} else {
-				const property = responseBody[propertyName];
-				instance[key] = serializer.deserialize(propertyMapper, property, propertyObjectName, options);
-				handledPropertyNames.push(propertyName);
+				const propertyName = xmlElementName || xmlName || serializedName;
+				if (propertyMapper.xmlIsWrapped) {
+					const elementList = responseBody[xmlName]?.[xmlElementName] ?? [];
+					instance[key] = serializer.deserialize(propertyMapper, elementList, propertyObjectName, options);
+					handledPropertyNames.push(xmlName);
+				} else {
+					const property = responseBody[propertyName];
+					instance[key] = serializer.deserialize(propertyMapper, property, propertyObjectName, options);
+					handledPropertyNames.push(propertyName);
+				}
 			}
-		}
-		else {
+		} else {
 			let propertyInstance;
 			let res = responseBody;
 			let steps = 0;
@@ -25178,13 +25237,15 @@ function getOperationArgumentValueFromParameter(operationArguments, parameter, f
 	let value;
 	if (typeof parameterPath === "string") parameterPath = [parameterPath];
 	if (Array.isArray(parameterPath)) {
-		if (parameterPath.length > 0) if (parameterMapper.isConstant) value = parameterMapper.defaultValue;
-		else {
-			let propertySearchResult = getPropertyFromParameterPath(operationArguments, parameterPath);
-			if (!propertySearchResult.propertyFound && fallbackObject) propertySearchResult = getPropertyFromParameterPath(fallbackObject, parameterPath);
-			let useDefaultValue = false;
-			if (!propertySearchResult.propertyFound) useDefaultValue = parameterMapper.required || parameterPath[0] === "options" && parameterPath.length === 2;
-			value = useDefaultValue ? parameterMapper.defaultValue : propertySearchResult.propertyValue;
+		if (parameterPath.length > 0) {
+			if (parameterMapper.isConstant) value = parameterMapper.defaultValue;
+			else {
+				let propertySearchResult = getPropertyFromParameterPath(operationArguments, parameterPath);
+				if (!propertySearchResult.propertyFound && fallbackObject) propertySearchResult = getPropertyFromParameterPath(fallbackObject, parameterPath);
+				let useDefaultValue = false;
+				if (!propertySearchResult.propertyFound) useDefaultValue = parameterMapper.required || parameterPath[0] === "options" && parameterPath.length === 2;
+				value = useDefaultValue ? parameterMapper.defaultValue : propertySearchResult.propertyValue;
+			}
 		}
 	} else {
 		if (parameterMapper.required) value = {};
@@ -25264,8 +25325,10 @@ function getOperationResponseMap(parsedResponse) {
 	const request = parsedResponse.request;
 	const operationInfo = getOperationRequestInfo(request);
 	const operationSpec = operationInfo?.operationSpec;
-	if (operationSpec) if (!operationInfo?.operationResponseGetter) result = operationSpec.responses[parsedResponse.status];
-	else result = operationInfo?.operationResponseGetter(operationSpec, parsedResponse);
+	if (operationSpec) {
+		if (!operationInfo?.operationResponseGetter) result = operationSpec.responses[parsedResponse.status];
+		else result = operationInfo?.operationResponseGetter(operationSpec, parsedResponse);
+	}
 	return result;
 }
 function shouldDeserializeResponse(parsedResponse) {
@@ -25313,17 +25376,20 @@ function isOperationSpecEmpty(operationSpec) {
 }
 function handleErrorResponse(parsedResponse, operationSpec, responseSpec, options) {
 	const isSuccessByStatus = 200 <= parsedResponse.status && parsedResponse.status < 300;
-	if (isOperationSpecEmpty(operationSpec) ? isSuccessByStatus : !!responseSpec) if (responseSpec) {
-		if (!responseSpec.isError) return {
+	if (isOperationSpecEmpty(operationSpec) ? isSuccessByStatus : !!responseSpec) {
+		if (responseSpec) {
+			if (!responseSpec.isError) return {
+				error: null,
+				shouldReturnResponse: false
+			};
+		} else return {
 			error: null,
 			shouldReturnResponse: false
 		};
-	} else return {
-		error: null,
-		shouldReturnResponse: false
-	};
+	}
 	const errorResponseSpec = responseSpec ?? operationSpec.responses.default;
-	const error = new RestError(parsedResponse.request.streamResponseStatusCodes?.has(parsedResponse.status) ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText, {
+	const initialErrorMessage = parsedResponse.request.streamResponseStatusCodes?.has(parsedResponse.status) ? `Unexpected status code: ${parsedResponse.status}` : parsedResponse.bodyAsText;
+	const error = new RestError(initialErrorMessage, {
 		statusCode: parsedResponse.status,
 		request: parsedResponse.request,
 		response: parsedResponse
@@ -25373,8 +25439,10 @@ async function parse(jsonContentTypes, xmlContentTypes, operationResponse, opts,
 				return operationResponse;
 			}
 		} catch (err) {
-			throw new RestError(`Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`, {
-				code: err.code || RestError.PARSE_ERROR,
+			const msg = `Error "${err}" occurred while parsing the response body - ${operationResponse.bodyAsText}.`;
+			const errCode = err.code || RestError.PARSE_ERROR;
+			throw new RestError(msg, {
+				code: errCode,
 				statusCode: operationResponse.status,
 				request: operationResponse.request,
 				response: operationResponse
@@ -25633,10 +25701,12 @@ function calculateQueryParameters(operationSpec, operationArguments, fallbackObj
 			});
 			if (queryParameter.collectionFormat === "Multi" && queryParameterValue.length === 0) continue;
 			else if (Array.isArray(queryParameterValue) && (queryParameter.collectionFormat === "SSV" || queryParameter.collectionFormat === "TSV")) queryParameterValue = queryParameterValue.join(delimiter);
-			if (!queryParameter.skipEncoding) if (Array.isArray(queryParameterValue)) queryParameterValue = queryParameterValue.map((item) => {
-				return encodeURIComponent(item);
-			});
-			else queryParameterValue = encodeURIComponent(queryParameterValue);
+			if (!queryParameter.skipEncoding) {
+				if (Array.isArray(queryParameterValue)) queryParameterValue = queryParameterValue.map((item) => {
+					return encodeURIComponent(item);
+				});
+				else queryParameterValue = encodeURIComponent(queryParameterValue);
+			}
 			if (Array.isArray(queryParameterValue) && (queryParameter.collectionFormat === "CSV" || queryParameter.collectionFormat === "Pipes")) queryParameterValue = queryParameterValue.join(delimiter);
 			result.set(queryParameter.mapper.serializedName || getPathStringFromParameter(queryParameter), queryParameterValue);
 		}
@@ -25654,9 +25724,10 @@ function simpleParseQueryParams(queryString) {
 	for (const pair of pairs) {
 		const [name, value] = pair.split("=", 2);
 		const existingValue = result.get(name);
-		if (existingValue) if (Array.isArray(existingValue)) existingValue.push(value);
-		else result.set(name, [existingValue, value]);
-		else result.set(name, value);
+		if (existingValue) {
+			if (Array.isArray(existingValue)) existingValue.push(value);
+			else result.set(name, [existingValue, value]);
+		} else result.set(name, value);
 	}
 	return result;
 }
@@ -25667,12 +25738,13 @@ function appendQueryParams(url, queryParams, sequenceParams, noOverwrite = false
 	const combinedParams = simpleParseQueryParams(parsedUrl.search);
 	for (const [name, value] of queryParams) {
 		const existingValue = combinedParams.get(name);
-		if (Array.isArray(existingValue)) if (Array.isArray(value)) {
-			existingValue.push(...value);
-			const valueSet = new Set(existingValue);
-			combinedParams.set(name, Array.from(valueSet));
-		} else existingValue.push(value);
-		else if (existingValue) {
+		if (Array.isArray(existingValue)) {
+			if (Array.isArray(value)) {
+				existingValue.push(...value);
+				const valueSet = new Set(existingValue);
+				combinedParams.set(name, Array.from(valueSet));
+			} else existingValue.push(value);
+		} else if (existingValue) {
 			if (Array.isArray(value)) value.unshift(existingValue);
 			else if (sequenceParams.has(name)) combinedParams.set(name, [existingValue, value]);
 			if (!noOverwrite) combinedParams.set(name, value);
@@ -26250,8 +26322,6 @@ function convertHttpClient(requestPolicyClient) {
 		return toPipelineResponse(await requestPolicyClient.sendRequest(toWebResourceLike(request, { createProxy: true })));
 	} };
 }
-//#endregion
-//#region node_modules/.pnpm/fast-xml-parser@5.3.3/node_modules/fast-xml-parser/src/util.js
 const regexName = /* @__PURE__ */ new RegExp("^[:A-Za-z_\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD][:A-Za-z_\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD\\-.\\d\\u00B7\\u0300-\\u036F\\u203F-\\u2040]*$");
 function getAllMatches(string, regex) {
 	const matches = [];
@@ -26324,18 +26394,19 @@ function validate(xmlData, options) {
 				const isValid = validateAttributeString(attrStr, options);
 				if (isValid === true) tagFound = true;
 				else return getErrorObject(isValid.err.code, isValid.err.msg, getLineNumberForPosition(xmlData, attrStrStart + isValid.err.line));
-			} else if (closingTag) if (!result.tagClosed) return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' doesn't have proper closing.", getLineNumberForPosition(xmlData, i));
-			else if (attrStr.trim().length > 0) return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' can't have attributes or invalid starting.", getLineNumberForPosition(xmlData, tagStartPos));
-			else if (tags.length === 0) return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' has not been opened.", getLineNumberForPosition(xmlData, tagStartPos));
-			else {
-				const otg = tags.pop();
-				if (tagName !== otg.tagName) {
-					let openPos = getLineNumberForPosition(xmlData, otg.tagStartPos);
-					return getErrorObject("InvalidTag", "Expected closing tag '" + otg.tagName + "' (opened in line " + openPos.line + ", col " + openPos.col + ") instead of closing tag '" + tagName + "'.", getLineNumberForPosition(xmlData, tagStartPos));
+			} else if (closingTag) {
+				if (!result.tagClosed) return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' doesn't have proper closing.", getLineNumberForPosition(xmlData, i));
+				else if (attrStr.trim().length > 0) return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' can't have attributes or invalid starting.", getLineNumberForPosition(xmlData, tagStartPos));
+				else if (tags.length === 0) return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' has not been opened.", getLineNumberForPosition(xmlData, tagStartPos));
+				else {
+					const otg = tags.pop();
+					if (tagName !== otg.tagName) {
+						let openPos = getLineNumberForPosition(xmlData, otg.tagStartPos);
+						return getErrorObject("InvalidTag", "Expected closing tag '" + otg.tagName + "' (opened in line " + openPos.line + ", col " + openPos.col + ") instead of closing tag '" + tagName + "'.", getLineNumberForPosition(xmlData, tagStartPos));
+					}
+					if (tags.length == 0) reachedRoot = true;
 				}
-				if (tags.length == 0) reachedRoot = true;
-			}
-			else {
+			} else {
 				const isValid = validateAttributeString(attrStr, options);
 				if (isValid !== true) return getErrorObject(isValid.err.code, isValid.err.msg, getLineNumberForPosition(xmlData, i - attrStr.length + isValid.err.line));
 				if (reachedRoot === true) return getErrorObject("InvalidXml", "Multiple possible root nodes found.", getLineNumberForPosition(xmlData, i));
@@ -26345,15 +26416,16 @@ function validate(xmlData, options) {
 				});
 				tagFound = true;
 			}
-			for (i++; i < xmlData.length; i++) if (xmlData[i] === "<") if (xmlData[i + 1] === "!") {
-				i++;
-				i = readCommentAndCDATA(xmlData, i);
-				continue;
-			} else if (xmlData[i + 1] === "?") {
-				i = readPI(xmlData, ++i);
-				if (i.err) return i;
-			} else break;
-			else if (xmlData[i] === "&") {
+			for (i++; i < xmlData.length; i++) if (xmlData[i] === "<") {
+				if (xmlData[i + 1] === "!") {
+					i++;
+					i = readCommentAndCDATA(xmlData, i);
+					continue;
+				} else if (xmlData[i + 1] === "?") {
+					i = readPI(xmlData, ++i);
+					if (i.err) return i;
+				} else break;
+			} else if (xmlData[i] === "&") {
 				const afterAmp = validateAmpersand(xmlData, i);
 				if (afterAmp == -1) return getErrorObject("InvalidChar", "char '&' is not expected.", getLineNumberForPosition(xmlData, i));
 				i = afterAmp;
@@ -26425,9 +26497,10 @@ function readAttributeStr(xmlData, i) {
 	let startChar = "";
 	let tagClosed = false;
 	for (; i < xmlData.length; i++) {
-		if (xmlData[i] === doubleQuote || xmlData[i] === singleQuote) if (startChar === "") startChar = xmlData[i];
-		else if (startChar !== xmlData[i]) {} else startChar = "";
-		else if (xmlData[i] === ">") {
+		if (xmlData[i] === doubleQuote || xmlData[i] === singleQuote) {
+			if (startChar === "") startChar = xmlData[i];
+			else if (startChar !== xmlData[i]) {} else startChar = "";
+		} else if (xmlData[i] === ">") {
 			if (startChar === "") {
 				tagClosed = true;
 				break;
@@ -26844,12 +26917,15 @@ function toNumber(str, options = {}) {
 				const num = Number(trimmedStr);
 				const parsedStr = String(num);
 				if (num === 0) return num;
-				if (parsedStr.search(/[eE]/) !== -1) if (options.eNotation) return num;
-				else return str;
-				else if (trimmedStr.indexOf(".") !== -1) if (parsedStr === "0") return num;
-				else if (parsedStr === numTrimmedByZeros) return num;
-				else if (parsedStr === `${sign}${numTrimmedByZeros}`) return num;
-				else return str;
+				if (parsedStr.search(/[eE]/) !== -1) {
+					if (options.eNotation) return num;
+					else return str;
+				} else if (trimmedStr.indexOf(".") !== -1) {
+					if (parsedStr === "0") return num;
+					else if (parsedStr === numTrimmedByZeros) return num;
+					else if (parsedStr === `${sign}${numTrimmedByZeros}`) return num;
+					else return str;
+				}
 				let n = leadingZeros ? numTrimmedByZeros : trimmedStr;
 				if (leadingZeros) return n === parsedStr || sign + n === parsedStr ? num : str;
 				else return n === parsedStr || n === sign + parsedStr ? num : str;
@@ -27084,130 +27160,131 @@ const parseXml = function(xmlData) {
 	let textData = "";
 	let jPath = "";
 	const docTypeReader = new DocTypeReader(this.options.processEntities);
-	for (let i = 0; i < xmlData.length; i++) if (xmlData[i] === "<") if (xmlData[i + 1] === "/") {
-		const closeIndex = findClosingIndex(xmlData, ">", i, "Closing Tag is not closed.");
-		let tagName = xmlData.substring(i + 2, closeIndex).trim();
-		if (this.options.removeNSPrefix) {
-			const colonIndex = tagName.indexOf(":");
-			if (colonIndex !== -1) tagName = tagName.substr(colonIndex + 1);
-		}
-		if (this.options.transformTagName) tagName = this.options.transformTagName(tagName);
-		if (currentNode) textData = this.saveTextToParentTag(textData, currentNode, jPath);
-		const lastTagName = jPath.substring(jPath.lastIndexOf(".") + 1);
-		if (tagName && this.options.unpairedTags.indexOf(tagName) !== -1) throw new Error(`Unpaired tag can not be used as closing tag: </${tagName}>`);
-		let propIndex = 0;
-		if (lastTagName && this.options.unpairedTags.indexOf(lastTagName) !== -1) {
-			propIndex = jPath.lastIndexOf(".", jPath.lastIndexOf(".") - 1);
-			this.tagsNodeStack.pop();
-		} else propIndex = jPath.lastIndexOf(".");
-		jPath = jPath.substring(0, propIndex);
-		currentNode = this.tagsNodeStack.pop();
-		textData = "";
-		i = closeIndex;
-	} else if (xmlData[i + 1] === "?") {
-		let tagData = readTagExp(xmlData, i, false, "?>");
-		if (!tagData) throw new Error("Pi Tag is not closed.");
-		textData = this.saveTextToParentTag(textData, currentNode, jPath);
-		if (this.options.ignoreDeclaration && tagData.tagName === "?xml" || this.options.ignorePiTags) {} else {
-			const childNode = new XmlNode(tagData.tagName);
-			childNode.add(this.options.textNodeName, "");
-			if (tagData.tagName !== tagData.tagExp && tagData.attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagData.tagExp, jPath);
-			this.addChild(currentNode, childNode, jPath, i);
-		}
-		i = tagData.closeIndex + 1;
-	} else if (xmlData.substr(i + 1, 3) === "!--") {
-		const endIndex = findClosingIndex(xmlData, "-->", i + 4, "Comment is not closed.");
-		if (this.options.commentPropName) {
-			const comment = xmlData.substring(i + 4, endIndex - 2);
-			textData = this.saveTextToParentTag(textData, currentNode, jPath);
-			currentNode.add(this.options.commentPropName, [{ [this.options.textNodeName]: comment }]);
-		}
-		i = endIndex;
-	} else if (xmlData.substr(i + 1, 2) === "!D") {
-		const result = docTypeReader.readDocType(xmlData, i);
-		this.docTypeEntities = result.entities;
-		i = result.i;
-	} else if (xmlData.substr(i + 1, 2) === "![") {
-		const closeIndex = findClosingIndex(xmlData, "]]>", i, "CDATA is not closed.") - 2;
-		const tagExp = xmlData.substring(i + 9, closeIndex);
-		textData = this.saveTextToParentTag(textData, currentNode, jPath);
-		let val = this.parseTextData(tagExp, currentNode.tagname, jPath, true, false, true, true);
-		if (val == void 0) val = "";
-		if (this.options.cdataPropName) currentNode.add(this.options.cdataPropName, [{ [this.options.textNodeName]: tagExp }]);
-		else currentNode.add(this.options.textNodeName, val);
-		i = closeIndex + 2;
-	} else {
-		let result = readTagExp(xmlData, i, this.options.removeNSPrefix);
-		let tagName = result.tagName;
-		const rawTagName = result.rawTagName;
-		let tagExp = result.tagExp;
-		let attrExpPresent = result.attrExpPresent;
-		let closeIndex = result.closeIndex;
-		if (this.options.transformTagName) {
-			const newTagName = this.options.transformTagName(tagName);
-			if (tagExp === tagName) tagExp = newTagName;
-			tagName = newTagName;
-		}
-		if (currentNode && textData) {
-			if (currentNode.tagname !== "!xml") textData = this.saveTextToParentTag(textData, currentNode, jPath, false);
-		}
-		const lastTag = currentNode;
-		if (lastTag && this.options.unpairedTags.indexOf(lastTag.tagname) !== -1) {
-			currentNode = this.tagsNodeStack.pop();
-			jPath = jPath.substring(0, jPath.lastIndexOf("."));
-		}
-		if (tagName !== xmlObj.tagname) jPath += jPath ? "." + tagName : tagName;
-		const startIndex = i;
-		if (this.isItStopNode(this.stopNodesExact, this.stopNodesWildcard, jPath, tagName)) {
-			let tagContent = "";
-			if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
-				if (tagName[tagName.length - 1] === "/") {
-					tagName = tagName.substr(0, tagName.length - 1);
-					jPath = jPath.substr(0, jPath.length - 1);
-					tagExp = tagName;
-				} else tagExp = tagExp.substr(0, tagExp.length - 1);
-				i = result.closeIndex;
-			} else if (this.options.unpairedTags.indexOf(tagName) !== -1) i = result.closeIndex;
-			else {
-				const result = this.readStopNodeData(xmlData, rawTagName, closeIndex + 1);
-				if (!result) throw new Error(`Unexpected end of ${rawTagName}`);
-				i = result.i;
-				tagContent = result.tagContent;
+	for (let i = 0; i < xmlData.length; i++) if (xmlData[i] === "<") {
+		if (xmlData[i + 1] === "/") {
+			const closeIndex = findClosingIndex(xmlData, ">", i, "Closing Tag is not closed.");
+			let tagName = xmlData.substring(i + 2, closeIndex).trim();
+			if (this.options.removeNSPrefix) {
+				const colonIndex = tagName.indexOf(":");
+				if (colonIndex !== -1) tagName = tagName.substr(colonIndex + 1);
 			}
-			const childNode = new XmlNode(tagName);
-			if (tagName !== tagExp && attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
-			if (tagContent) tagContent = this.parseTextData(tagContent, tagName, jPath, true, attrExpPresent, true, true);
-			jPath = jPath.substr(0, jPath.lastIndexOf("."));
-			childNode.add(this.options.textNodeName, tagContent);
-			this.addChild(currentNode, childNode, jPath, startIndex);
+			if (this.options.transformTagName) tagName = this.options.transformTagName(tagName);
+			if (currentNode) textData = this.saveTextToParentTag(textData, currentNode, jPath);
+			const lastTagName = jPath.substring(jPath.lastIndexOf(".") + 1);
+			if (tagName && this.options.unpairedTags.indexOf(tagName) !== -1) throw new Error(`Unpaired tag can not be used as closing tag: </${tagName}>`);
+			let propIndex = 0;
+			if (lastTagName && this.options.unpairedTags.indexOf(lastTagName) !== -1) {
+				propIndex = jPath.lastIndexOf(".", jPath.lastIndexOf(".") - 1);
+				this.tagsNodeStack.pop();
+			} else propIndex = jPath.lastIndexOf(".");
+			jPath = jPath.substring(0, propIndex);
+			currentNode = this.tagsNodeStack.pop();
+			textData = "";
+			i = closeIndex;
+		} else if (xmlData[i + 1] === "?") {
+			let tagData = readTagExp(xmlData, i, false, "?>");
+			if (!tagData) throw new Error("Pi Tag is not closed.");
+			textData = this.saveTextToParentTag(textData, currentNode, jPath);
+			if (this.options.ignoreDeclaration && tagData.tagName === "?xml" || this.options.ignorePiTags) {} else {
+				const childNode = new XmlNode(tagData.tagName);
+				childNode.add(this.options.textNodeName, "");
+				if (tagData.tagName !== tagData.tagExp && tagData.attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagData.tagExp, jPath);
+				this.addChild(currentNode, childNode, jPath, i);
+			}
+			i = tagData.closeIndex + 1;
+		} else if (xmlData.substr(i + 1, 3) === "!--") {
+			const endIndex = findClosingIndex(xmlData, "-->", i + 4, "Comment is not closed.");
+			if (this.options.commentPropName) {
+				const comment = xmlData.substring(i + 4, endIndex - 2);
+				textData = this.saveTextToParentTag(textData, currentNode, jPath);
+				currentNode.add(this.options.commentPropName, [{ [this.options.textNodeName]: comment }]);
+			}
+			i = endIndex;
+		} else if (xmlData.substr(i + 1, 2) === "!D") {
+			const result = docTypeReader.readDocType(xmlData, i);
+			this.docTypeEntities = result.entities;
+			i = result.i;
+		} else if (xmlData.substr(i + 1, 2) === "![") {
+			const closeIndex = findClosingIndex(xmlData, "]]>", i, "CDATA is not closed.") - 2;
+			const tagExp = xmlData.substring(i + 9, closeIndex);
+			textData = this.saveTextToParentTag(textData, currentNode, jPath);
+			let val = this.parseTextData(tagExp, currentNode.tagname, jPath, true, false, true, true);
+			if (val == void 0) val = "";
+			if (this.options.cdataPropName) currentNode.add(this.options.cdataPropName, [{ [this.options.textNodeName]: tagExp }]);
+			else currentNode.add(this.options.textNodeName, val);
+			i = closeIndex + 2;
 		} else {
-			if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
-				if (tagName[tagName.length - 1] === "/") {
-					tagName = tagName.substr(0, tagName.length - 1);
-					jPath = jPath.substr(0, jPath.length - 1);
-					tagExp = tagName;
-				} else tagExp = tagExp.substr(0, tagExp.length - 1);
-				if (this.options.transformTagName) {
-					const newTagName = this.options.transformTagName(tagName);
-					if (tagExp === tagName) tagExp = newTagName;
-					tagName = newTagName;
+			let result = readTagExp(xmlData, i, this.options.removeNSPrefix);
+			let tagName = result.tagName;
+			const rawTagName = result.rawTagName;
+			let tagExp = result.tagExp;
+			let attrExpPresent = result.attrExpPresent;
+			let closeIndex = result.closeIndex;
+			if (this.options.transformTagName) {
+				const newTagName = this.options.transformTagName(tagName);
+				if (tagExp === tagName) tagExp = newTagName;
+				tagName = newTagName;
+			}
+			if (currentNode && textData) {
+				if (currentNode.tagname !== "!xml") textData = this.saveTextToParentTag(textData, currentNode, jPath, false);
+			}
+			const lastTag = currentNode;
+			if (lastTag && this.options.unpairedTags.indexOf(lastTag.tagname) !== -1) {
+				currentNode = this.tagsNodeStack.pop();
+				jPath = jPath.substring(0, jPath.lastIndexOf("."));
+			}
+			if (tagName !== xmlObj.tagname) jPath += jPath ? "." + tagName : tagName;
+			const startIndex = i;
+			if (this.isItStopNode(this.stopNodesExact, this.stopNodesWildcard, jPath, tagName)) {
+				let tagContent = "";
+				if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
+					if (tagName[tagName.length - 1] === "/") {
+						tagName = tagName.substr(0, tagName.length - 1);
+						jPath = jPath.substr(0, jPath.length - 1);
+						tagExp = tagName;
+					} else tagExp = tagExp.substr(0, tagExp.length - 1);
+					i = result.closeIndex;
+				} else if (this.options.unpairedTags.indexOf(tagName) !== -1) i = result.closeIndex;
+				else {
+					const result = this.readStopNodeData(xmlData, rawTagName, closeIndex + 1);
+					if (!result) throw new Error(`Unexpected end of ${rawTagName}`);
+					i = result.i;
+					tagContent = result.tagContent;
 				}
 				const childNode = new XmlNode(tagName);
 				if (tagName !== tagExp && attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
-				this.addChild(currentNode, childNode, jPath, startIndex);
+				if (tagContent) tagContent = this.parseTextData(tagContent, tagName, jPath, true, attrExpPresent, true, true);
 				jPath = jPath.substr(0, jPath.lastIndexOf("."));
-			} else {
-				const childNode = new XmlNode(tagName);
-				this.tagsNodeStack.push(currentNode);
-				if (tagName !== tagExp && attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
+				childNode.add(this.options.textNodeName, tagContent);
 				this.addChild(currentNode, childNode, jPath, startIndex);
-				currentNode = childNode;
+			} else {
+				if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
+					if (tagName[tagName.length - 1] === "/") {
+						tagName = tagName.substr(0, tagName.length - 1);
+						jPath = jPath.substr(0, jPath.length - 1);
+						tagExp = tagName;
+					} else tagExp = tagExp.substr(0, tagExp.length - 1);
+					if (this.options.transformTagName) {
+						const newTagName = this.options.transformTagName(tagName);
+						if (tagExp === tagName) tagExp = newTagName;
+						tagName = newTagName;
+					}
+					const childNode = new XmlNode(tagName);
+					if (tagName !== tagExp && attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
+					this.addChild(currentNode, childNode, jPath, startIndex);
+					jPath = jPath.substr(0, jPath.lastIndexOf("."));
+				} else {
+					const childNode = new XmlNode(tagName);
+					this.tagsNodeStack.push(currentNode);
+					if (tagName !== tagExp && attrExpPresent) childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
+					this.addChild(currentNode, childNode, jPath, startIndex);
+					currentNode = childNode;
+				}
+				textData = "";
+				i = closeIndex;
 			}
-			textData = "";
-			i = closeIndex;
 		}
-	}
-	else textData += xmlData[i];
+	} else textData += xmlData[i];
 	return xmlObj.child;
 };
 function addChild(currentNode, childNode, jPath, startIndex) {
@@ -27270,16 +27347,17 @@ function tagExpWithClosingIndex(xmlData, i, closingChar = ">") {
 		if (attrBoundary) {
 			if (ch === attrBoundary) attrBoundary = "";
 		} else if (ch === "\"" || ch === "'") attrBoundary = ch;
-		else if (ch === closingChar[0]) if (closingChar[1]) {
-			if (xmlData[index + 1] === closingChar[1]) return {
+		else if (ch === closingChar[0]) {
+			if (closingChar[1]) {
+				if (xmlData[index + 1] === closingChar[1]) return {
+					data: tagExp,
+					index
+				};
+			} else return {
 				data: tagExp,
 				index
 			};
-		} else return {
-			data: tagExp,
-			index
-		};
-		else if (ch === "	") ch = " ";
+		} else if (ch === "	") ch = " ";
 		tagExp += ch;
 	}
 }
@@ -27325,24 +27403,26 @@ function readTagExp(xmlData, i, removeNSPrefix, closingChar = ">") {
 function readStopNodeData(xmlData, tagName, i) {
 	const startIndex = i;
 	let openTagCount = 1;
-	for (; i < xmlData.length; i++) if (xmlData[i] === "<") if (xmlData[i + 1] === "/") {
-		const closeIndex = findClosingIndex(xmlData, ">", i, `${tagName} is not closed`);
-		if (xmlData.substring(i + 2, closeIndex).trim() === tagName) {
-			openTagCount--;
-			if (openTagCount === 0) return {
-				tagContent: xmlData.substring(startIndex, i),
-				i: closeIndex
-			};
-		}
-		i = closeIndex;
-	} else if (xmlData[i + 1] === "?") i = findClosingIndex(xmlData, "?>", i + 1, "StopNode is not closed.");
-	else if (xmlData.substr(i + 1, 3) === "!--") i = findClosingIndex(xmlData, "-->", i + 3, "StopNode is not closed.");
-	else if (xmlData.substr(i + 1, 2) === "![") i = findClosingIndex(xmlData, "]]>", i, "StopNode is not closed.") - 2;
-	else {
-		const tagData = readTagExp(xmlData, i, ">");
-		if (tagData) {
-			if ((tagData && tagData.tagName) === tagName && tagData.tagExp[tagData.tagExp.length - 1] !== "/") openTagCount++;
-			i = tagData.closeIndex;
+	for (; i < xmlData.length; i++) if (xmlData[i] === "<") {
+		if (xmlData[i + 1] === "/") {
+			const closeIndex = findClosingIndex(xmlData, ">", i, `${tagName} is not closed`);
+			if (xmlData.substring(i + 2, closeIndex).trim() === tagName) {
+				openTagCount--;
+				if (openTagCount === 0) return {
+					tagContent: xmlData.substring(startIndex, i),
+					i: closeIndex
+				};
+			}
+			i = closeIndex;
+		} else if (xmlData[i + 1] === "?") i = findClosingIndex(xmlData, "?>", i + 1, "StopNode is not closed.");
+		else if (xmlData.substr(i + 1, 3) === "!--") i = findClosingIndex(xmlData, "-->", i + 3, "StopNode is not closed.");
+		else if (xmlData.substr(i + 1, 2) === "![") i = findClosingIndex(xmlData, "]]>", i, "StopNode is not closed.") - 2;
+		else {
+			const tagData = readTagExp(xmlData, i, ">");
+			if (tagData) {
+				if ((tagData && tagData.tagName) === tagName && tagData.tagExp[tagData.tagExp.length - 1] !== "/") openTagCount++;
+				i = tagData.closeIndex;
+			}
 		}
 	}
 }
@@ -27383,17 +27463,20 @@ function compress(arr, options, jPath) {
 		let newJpath = "";
 		if (jPath === void 0) newJpath = property;
 		else newJpath = jPath + "." + property;
-		if (property === options.textNodeName) if (text === void 0) text = tagObj[property];
-		else text += "" + tagObj[property];
-		else if (property === void 0) continue;
+		if (property === options.textNodeName) {
+			if (text === void 0) text = tagObj[property];
+			else text += "" + tagObj[property];
+		} else if (property === void 0) continue;
 		else if (tagObj[property]) {
 			let val = compress(tagObj[property], options, newJpath);
 			const isLeaf = isLeafTag(val, options);
 			if (tagObj[METADATA_SYMBOL] !== void 0) val[METADATA_SYMBOL] = tagObj[METADATA_SYMBOL];
 			if (tagObj[":@"]) assignAttributes(val, tagObj[":@"], newJpath, options);
 			else if (Object.keys(val).length === 1 && val[options.textNodeName] !== void 0 && !options.alwaysCreateTextNode) val = val[options.textNodeName];
-			else if (Object.keys(val).length === 0) if (options.alwaysCreateTextNode) val[options.textNodeName] = "";
-			else val = "";
+			else if (Object.keys(val).length === 0) {
+				if (options.alwaysCreateTextNode) val[options.textNodeName] = "";
+				else val = "";
+			}
 			if (compressedObj[property] !== void 0 && compressedObj.hasOwnProperty(property)) {
 				if (!Array.isArray(compressedObj[property])) compressedObj[property] = [compressedObj[property]];
 				compressedObj[property].push(val);
@@ -27538,9 +27621,10 @@ function arrToStr(arr, options, jPath, indentation) {
 		if (newIdentation !== "") newIdentation += options.indentBy;
 		const tagStart = indentation + `<${tagName}${attr_to_str(tagObj[":@"], options)}`;
 		const tagValue = arrToStr(tagObj[tagName], options, newJPath, newIdentation);
-		if (options.unpairedTags.indexOf(tagName) !== -1) if (options.suppressUnpairedNode) xmlStr += tagStart + ">";
-		else xmlStr += tagStart + "/>";
-		else if ((!tagValue || tagValue.length === 0) && options.suppressEmptyNode) xmlStr += tagStart + "/>";
+		if (options.unpairedTags.indexOf(tagName) !== -1) {
+			if (options.suppressUnpairedNode) xmlStr += tagStart + ">";
+			else xmlStr += tagStart + "/>";
+		} else if ((!tagValue || tagValue.length === 0) && options.suppressEmptyNode) xmlStr += tagStart + "/>";
 		else if (tagValue && tagValue.endsWith(">")) xmlStr += tagStart + `>${tagValue}${indentation}</${tagName}>`;
 		else {
 			xmlStr += tagStart + ">";
@@ -27670,32 +27754,37 @@ Builder.prototype.j2x = function(jObj, level, ajPath) {
 		if (!Object.prototype.hasOwnProperty.call(jObj, key)) continue;
 		if (typeof jObj[key] === "undefined") {
 			if (this.isAttribute(key)) val += "";
-		} else if (jObj[key] === null) if (this.isAttribute(key)) val += "";
-		else if (key === this.options.cdataPropName) val += "";
-		else if (key[0] === "?") val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
-		else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
-		else if (jObj[key] instanceof Date) val += this.buildTextValNode(jObj[key], key, "", level);
+		} else if (jObj[key] === null) {
+			if (this.isAttribute(key)) val += "";
+			else if (key === this.options.cdataPropName) val += "";
+			else if (key[0] === "?") val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
+			else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
+		} else if (jObj[key] instanceof Date) val += this.buildTextValNode(jObj[key], key, "", level);
 		else if (typeof jObj[key] !== "object") {
 			const attr = this.isAttribute(key);
 			if (attr && !this.ignoreAttributesFn(attr, jPath)) attrStr += this.buildAttrPairStr(attr, "" + jObj[key]);
-			else if (!attr) if (key === this.options.textNodeName) {
-				let newval = this.options.tagValueProcessor(key, "" + jObj[key]);
-				val += this.replaceEntitiesValue(newval);
-			} else val += this.buildTextValNode(jObj[key], key, "", level);
+			else if (!attr) {
+				if (key === this.options.textNodeName) {
+					let newval = this.options.tagValueProcessor(key, "" + jObj[key]);
+					val += this.replaceEntitiesValue(newval);
+				} else val += this.buildTextValNode(jObj[key], key, "", level);
+			}
 		} else if (Array.isArray(jObj[key])) {
 			const arrLen = jObj[key].length;
 			let listTagVal = "";
 			let listTagAttr = "";
 			for (let j = 0; j < arrLen; j++) {
 				const item = jObj[key][j];
-				if (typeof item === "undefined") {} else if (item === null) if (key[0] === "?") val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
-				else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
-				else if (typeof item === "object") if (this.options.oneListGroup) {
-					const result = this.j2x(item, level + 1, ajPath.concat(key));
-					listTagVal += result.val;
-					if (this.options.attributesGroupName && item.hasOwnProperty(this.options.attributesGroupName)) listTagAttr += result.attrStr;
-				} else listTagVal += this.processTextOrObjNode(item, key, level, ajPath);
-				else if (this.options.oneListGroup) {
+				if (typeof item === "undefined") {} else if (item === null) {
+					if (key[0] === "?") val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
+					else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
+				} else if (typeof item === "object") {
+					if (this.options.oneListGroup) {
+						const result = this.j2x(item, level + 1, ajPath.concat(key));
+						listTagVal += result.val;
+						if (this.options.attributesGroupName && item.hasOwnProperty(this.options.attributesGroupName)) listTagAttr += result.attrStr;
+					} else listTagVal += this.processTextOrObjNode(item, key, level, ajPath);
+				} else if (this.options.oneListGroup) {
 					let textValue = this.options.tagValueProcessor(key, item);
 					textValue = this.replaceEntitiesValue(textValue);
 					listTagVal += textValue;
@@ -27726,9 +27815,10 @@ function processTextOrObjNode(object, key, level, ajPath) {
 	else return this.buildObjectNode(result.val, key, result.attrStr, level);
 }
 Builder.prototype.buildObjectNode = function(val, key, attrStr, level) {
-	if (val === "") if (key[0] === "?") return this.indentate(level) + "<" + key + attrStr + "?" + this.tagEndChar;
-	else return this.indentate(level) + "<" + key + attrStr + this.closeTag(key) + this.tagEndChar;
-	else {
+	if (val === "") {
+		if (key[0] === "?") return this.indentate(level) + "<" + key + attrStr + "?" + this.tagEndChar;
+		else return this.indentate(level) + "<" + key + attrStr + this.closeTag(key) + this.tagEndChar;
+	} else {
 		let tagEndExp = "</" + key + this.tagEndChar;
 		let piClosingChar = "";
 		if (key[0] === "?") {
@@ -28149,11 +28239,13 @@ var BufferScheduler = class {
 					this.triggerOutgoingHandlers();
 					return;
 				}
-				if (this.isStreamEnd && this.executingOutgoingHandlers === 0) if (this.unresolvedLength > 0 && this.unresolvedLength < this.bufferSize) {
-					const buffer = this.shiftBufferFromUnresolvedDataArray();
-					this.outgoingHandler(() => buffer.getReadableStream(), buffer.size, this.offset).then(resolve).catch(reject);
-				} else if (this.unresolvedLength >= this.bufferSize) return;
-				else resolve();
+				if (this.isStreamEnd && this.executingOutgoingHandlers === 0) {
+					if (this.unresolvedLength > 0 && this.unresolvedLength < this.bufferSize) {
+						const buffer = this.shiftBufferFromUnresolvedDataArray();
+						this.outgoingHandler(() => buffer.getReadableStream(), buffer.size, this.offset).then(resolve).catch(reject);
+					} else if (this.unresolvedLength >= this.bufferSize) return;
+					else resolve();
+				}
 			});
 		});
 	}
@@ -30033,9 +30125,7 @@ var NativeCRC64 = (() => {
 					case 4:
 						offset >>>= 2;
 						break;
-					case 8:
-						offset >>>= 3;
-						break;
+					case 8: offset >>>= 3;
 				}
 				for (var i = 0; i < array.length; i++) view[offset + i] = array[i];
 			}
@@ -30141,7 +30231,7 @@ var StorageCRC64Calculator = class StorageCRC64Calculator {
 function signalStreamEnd(pushData) {
 	pushData(null);
 }
-const MAX_SEGMENT_CONTENT_LENGTH = 4 * 1024 * 1024;
+const MAX_SEGMENT_CONTENT_LENGTH = 4194304;
 var SMRegion$1;
 (function(SMRegion) {
 	SMRegion[SMRegion["StreamHeader"] = 0] = "StreamHeader";
@@ -31508,9 +31598,9 @@ var StorageRetryPolicyType;
 //#endregion
 //#region node_modules/.pnpm/@azure+storage-common@12.4.0_supports-color@7.2.0/node_modules/@azure/storage-common/dist/esm/policies/StorageRetryPolicy.js
 const DEFAULT_RETRY_OPTIONS$1 = {
-	maxRetryDelayInMs: 120 * 1e3,
+	maxRetryDelayInMs: 12e4,
 	maxTries: 4,
-	retryDelayInMs: 4 * 1e3,
+	retryDelayInMs: 4e3,
 	retryPolicyType: StorageRetryPolicyType.EXPONENTIAL,
 	secondaryHost: "",
 	tryTimeoutInMs: void 0
@@ -31648,9 +31738,7 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
 			case StorageRetryPolicyType.EXPONENTIAL:
 				delayTimeInMs = Math.min((Math.pow(2, attempt - 1) - 1) * this.retryOptions.retryDelayInMs, this.retryOptions.maxRetryDelayInMs);
 				break;
-			case StorageRetryPolicyType.FIXED:
-				delayTimeInMs = this.retryOptions.retryDelayInMs;
-				break;
+			case StorageRetryPolicyType.FIXED: delayTimeInMs = this.retryOptions.retryDelayInMs;
 		}
 		else delayTimeInMs = Math.random() * 1e3;
 		logger.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
@@ -31729,9 +31817,9 @@ function storageCorrectContentLengthPolicy() {
 */
 const storageRetryPolicyName = "storageRetryPolicy";
 const DEFAULT_RETRY_OPTIONS = {
-	maxRetryDelayInMs: 120 * 1e3,
+	maxRetryDelayInMs: 12e4,
 	maxTries: 4,
-	retryDelayInMs: 4 * 1e3,
+	retryDelayInMs: 4e3,
 	retryPolicyType: StorageRetryPolicyType.EXPONENTIAL,
 	secondaryHost: "",
 	tryTimeoutInMs: void 0
@@ -31802,9 +31890,7 @@ function storageRetryPolicy(options = {}) {
 			case StorageRetryPolicyType.EXPONENTIAL:
 				delayTimeInMs = Math.min((Math.pow(2, attempt - 1) - 1) * retryDelayInMs, maxRetryDelayInMs);
 				break;
-			case StorageRetryPolicyType.FIXED:
-				delayTimeInMs = retryDelayInMs;
-				break;
+			case StorageRetryPolicyType.FIXED: delayTimeInMs = retryDelayInMs;
 		}
 		else delayTimeInMs = Math.random() * 1e3;
 		logger.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
@@ -32022,12 +32108,12 @@ var UserDelegationKeyCredential = class {
 //#region node_modules/.pnpm/@azure+storage-blob@12.32.0_supports-color@7.2.0/node_modules/@azure/storage-blob/dist/esm/utils/constants.js
 const SDK_VERSION = "12.32.0";
 const SERVICE_VERSION = "2026-04-06";
-const BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
-const BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
+const BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 268435456;
+const BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4194304e3;
 const BLOCK_BLOB_MAX_BLOCKS = 5e4;
-const DEFAULT_BLOCK_BUFFER_SIZE_BYTES = 8 * 1024 * 1024;
-const DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES = 4 * 1024 * 1024;
-const REQUEST_TIMEOUT = 100 * 1e3;
+const DEFAULT_BLOCK_BUFFER_SIZE_BYTES = 8388608;
+const DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES = 4194304;
+const REQUEST_TIMEOUT = 1e5;
 const URLConstants = { Parameters: {
 	FORCE_BROWSER_NO_CACHE: "_",
 	SIGNATURE: "sig",
@@ -44169,7 +44255,7 @@ function base64encode(content) {
 */
 function generateBlockID(blockIDPrefix, blockIndex) {
 	const maxSourceStringLength = 48;
-	const maxAllowedBlockIDPrefixLength = maxSourceStringLength - 6;
+	const maxAllowedBlockIDPrefixLength = 42;
 	if (blockIDPrefix.length > maxAllowedBlockIDPrefixLength) blockIDPrefix = blockIDPrefix.slice(0, maxAllowedBlockIDPrefixLength);
 	return base64encode(blockIDPrefix + padStart(blockIndex.toString(), maxSourceStringLength - blockIDPrefix.length, "0"));
 }
@@ -45115,9 +45201,7 @@ var SASQueryParameters = class {
 			case "srh":
 				this.tryAppendQueryParameter(queries, param, this.requestHeaderKeys);
 				break;
-			case "srq":
-				this.tryAppendQueryParameter(queries, param, this.requestQueryParameterKeys);
-				break;
+			case "srq": this.tryAppendQueryParameter(queries, param, this.requestQueryParameterKeys);
 		}
 		return queries.join("&");
 	}
@@ -45146,15 +45230,21 @@ function generateBlobSASQueryParametersInternal(blobSASSignatureValues, sharedKe
 	let userDelegationKeyCredential;
 	if (sharedKeyCredential === void 0 && accountName !== void 0) userDelegationKeyCredential = new UserDelegationKeyCredential(accountName, sharedKeyCredentialOrUserDelegationKey);
 	if (sharedKeyCredential === void 0 && userDelegationKeyCredential === void 0) throw TypeError("Invalid sharedKeyCredential, userDelegationKey or accountName.");
-	if (version >= "2020-12-06") if (sharedKeyCredential !== void 0) return generateBlobSASQueryParameters20201206(blobSASSignatureValues, sharedKeyCredential);
-	else if (version >= "2026-04-06") return generateBlobSASQueryParametersUDK20260406(blobSASSignatureValues, userDelegationKeyCredential);
-	else if (version >= "2025-07-05") return generateBlobSASQueryParametersUDK20250705(blobSASSignatureValues, userDelegationKeyCredential);
-	else return generateBlobSASQueryParametersUDK20201206(blobSASSignatureValues, userDelegationKeyCredential);
-	if (version >= "2018-11-09") if (sharedKeyCredential !== void 0) return generateBlobSASQueryParameters20181109(blobSASSignatureValues, sharedKeyCredential);
-	else if (version >= "2020-02-10") return generateBlobSASQueryParametersUDK20200210(blobSASSignatureValues, userDelegationKeyCredential);
-	else return generateBlobSASQueryParametersUDK20181109(blobSASSignatureValues, userDelegationKeyCredential);
-	if (version >= "2015-04-05") if (sharedKeyCredential !== void 0) return generateBlobSASQueryParameters20150405(blobSASSignatureValues, sharedKeyCredential);
-	else throw new RangeError("'version' must be >= '2018-11-09' when generating user delegation SAS using user delegation key.");
+	if (version >= "2020-12-06") {
+		if (sharedKeyCredential !== void 0) return generateBlobSASQueryParameters20201206(blobSASSignatureValues, sharedKeyCredential);
+		else if (version >= "2026-04-06") return generateBlobSASQueryParametersUDK20260406(blobSASSignatureValues, userDelegationKeyCredential);
+		else if (version >= "2025-07-05") return generateBlobSASQueryParametersUDK20250705(blobSASSignatureValues, userDelegationKeyCredential);
+		else return generateBlobSASQueryParametersUDK20201206(blobSASSignatureValues, userDelegationKeyCredential);
+	}
+	if (version >= "2018-11-09") {
+		if (sharedKeyCredential !== void 0) return generateBlobSASQueryParameters20181109(blobSASSignatureValues, sharedKeyCredential);
+		else if (version >= "2020-02-10") return generateBlobSASQueryParametersUDK20200210(blobSASSignatureValues, userDelegationKeyCredential);
+		else return generateBlobSASQueryParametersUDK20181109(blobSASSignatureValues, userDelegationKeyCredential);
+	}
+	if (version >= "2015-04-05") {
+		if (sharedKeyCredential !== void 0) return generateBlobSASQueryParameters20150405(blobSASSignatureValues, sharedKeyCredential);
+		else throw new RangeError("'version' must be >= '2018-11-09' when generating user delegation SAS using user delegation key.");
+	}
 	throw new RangeError("'version' must be >= '2015-04-05'.");
 }
 /**
@@ -45179,8 +45269,10 @@ function generateBlobSASQueryParameters20150405(blobSASSignatureValues, sharedKe
 	let resource = "c";
 	if (blobSASSignatureValues.blobName) resource = "b";
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45232,8 +45324,10 @@ function generateBlobSASQueryParameters20181109(blobSASSignatureValues, sharedKe
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45287,8 +45381,10 @@ function generateBlobSASQueryParameters20201206(blobSASSignatureValues, sharedKe
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45341,8 +45437,10 @@ function generateBlobSASQueryParametersUDK20181109(blobSASSignatureValues, userD
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45399,8 +45497,10 @@ function generateBlobSASQueryParametersUDK20200210(blobSASSignatureValues, userD
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45460,8 +45560,10 @@ function generateBlobSASQueryParametersUDK20201206(blobSASSignatureValues, userD
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45522,8 +45624,10 @@ function generateBlobSASQueryParametersUDK20250705(blobSASSignatureValues, userD
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45586,8 +45690,10 @@ function generateBlobSASQueryParametersUDK20260406(blobSASSignatureValues, userD
 		}
 	}
 	let verifiedPermissions;
-	if (blobSASSignatureValues.permissions) if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
-	else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	if (blobSASSignatureValues.permissions) {
+		if (blobSASSignatureValues.blobName) verifiedPermissions = BlobSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+		else verifiedPermissions = ContainerSASPermissions.parse(blobSASSignatureValues.permissions.toString()).toString();
+	}
 	const stringToSign = [
 		verifiedPermissions ? verifiedPermissions : "",
 		blobSASSignatureValues.startsOn ? truncatedISO8061Date(blobSASSignatureValues.startsOn, false) : "",
@@ -45918,16 +46024,17 @@ var RetriableReadableStream = class extends Readable {
 		}
 		this.removeSourceEventHandlers();
 		if (this.offset - 1 === this.end) this.push(null);
-		else if (this.offset <= this.end) if (this.retries < this.maxRetryRequests) {
-			this.retries += 1;
-			this.getter(this.offset).then((newSource) => {
-				this.source = newSource;
-				this.setSourceEventHandlers();
-			}).catch((error) => {
-				this.destroy(error);
-			});
-		} else this.destroy(/* @__PURE__ */ new Error(`Data corruption failure: received less data than required and reached maxRetires limitation. Received data offset: ${this.offset - 1}, data needed offset: ${this.end}, retries: ${this.retries}, max retries: ${this.maxRetryRequests}`));
-		else this.destroy(/* @__PURE__ */ new Error(`Data corruption failure: Received more data than original request, data needed offset is ${this.end}, received offset: ${this.offset - 1}`));
+		else if (this.offset <= this.end) {
+			if (this.retries < this.maxRetryRequests) {
+				this.retries += 1;
+				this.getter(this.offset).then((newSource) => {
+					this.source = newSource;
+					this.setSourceEventHandlers();
+				}).catch((error) => {
+					this.destroy(error);
+				});
+			} else this.destroy(/* @__PURE__ */ new Error(`Data corruption failure: received less data than required and reached maxRetires limitation. Received data offset: ${this.offset - 1}, data needed offset: ${this.end}, retries: ${this.retries}, max retries: ${this.maxRetryRequests}`));
+		} else this.destroy(/* @__PURE__ */ new Error(`Data corruption failure: Received more data than original request, data needed offset is ${this.end}, received offset: ${this.offset - 1}`));
 	};
 	_destroy(error, callback) {
 		this.removeSourceEventHandlers();
@@ -48106,13 +48213,14 @@ var BlobClient = class BlobClient extends StorageClient {
 			const containerName = credentialOrPipelineOrContainerName;
 			const blobName = blobNameOrOptions;
 			const extractedCreds = extractConnectionStringParts(urlOrConnectionString);
-			if (extractedCreds.kind === "AccountConnString") if (isNodeLike) {
-				const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
-				if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
-				pipeline = newPipeline(sharedKeyCredential, options);
-			} else throw new Error("Account connection string is only supported in Node.js environment");
-			else if (extractedCreds.kind === "SASConnString") {
+			if (extractedCreds.kind === "AccountConnString") {
+				if (isNodeLike) {
+					const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
+					url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+					if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+					pipeline = newPipeline(sharedKeyCredential, options);
+				} else throw new Error("Account connection string is only supported in Node.js environment");
+			} else if (extractedCreds.kind === "SASConnString") {
 				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
 				pipeline = newPipeline(new AnonymousCredential(), options);
 			} else throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -49090,13 +49198,14 @@ var AppendBlobClient = class AppendBlobClient extends BlobClient {
 			const containerName = credentialOrPipelineOrContainerName;
 			const blobName = blobNameOrOptions;
 			const extractedCreds = extractConnectionStringParts(urlOrConnectionString);
-			if (extractedCreds.kind === "AccountConnString") if (isNodeLike) {
-				const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
-				if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
-				pipeline = newPipeline(sharedKeyCredential, options);
-			} else throw new Error("Account connection string is only supported in Node.js environment");
-			else if (extractedCreds.kind === "SASConnString") {
+			if (extractedCreds.kind === "AccountConnString") {
+				if (isNodeLike) {
+					const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
+					url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+					if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+					pipeline = newPipeline(sharedKeyCredential, options);
+				} else throw new Error("Account connection string is only supported in Node.js environment");
+			} else if (extractedCreds.kind === "SASConnString") {
 				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
 				pipeline = newPipeline(new AnonymousCredential(), options);
 			} else throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -49362,13 +49471,14 @@ var BlockBlobClient = class BlockBlobClient extends BlobClient {
 			const containerName = credentialOrPipelineOrContainerName;
 			const blobName = blobNameOrOptions;
 			const extractedCreds = extractConnectionStringParts(urlOrConnectionString);
-			if (extractedCreds.kind === "AccountConnString") if (isNodeLike) {
-				const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
-				if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
-				pipeline = newPipeline(sharedKeyCredential, options);
-			} else throw new Error("Account connection string is only supported in Node.js environment");
-			else if (extractedCreds.kind === "SASConnString") {
+			if (extractedCreds.kind === "AccountConnString") {
+				if (isNodeLike) {
+					const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
+					url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+					if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+					pipeline = newPipeline(sharedKeyCredential, options);
+				} else throw new Error("Account connection string is only supported in Node.js environment");
+			} else if (extractedCreds.kind === "SASConnString") {
 				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
 				pipeline = newPipeline(new AnonymousCredential(), options);
 			} else throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -49930,13 +50040,14 @@ var PageBlobClient = class PageBlobClient extends BlobClient {
 			const containerName = credentialOrPipelineOrContainerName;
 			const blobName = blobNameOrOptions;
 			const extractedCreds = extractConnectionStringParts(urlOrConnectionString);
-			if (extractedCreds.kind === "AccountConnString") if (isNodeLike) {
-				const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
-				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
-				if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
-				pipeline = newPipeline(sharedKeyCredential, options);
-			} else throw new Error("Account connection string is only supported in Node.js environment");
-			else if (extractedCreds.kind === "SASConnString") {
+			if (extractedCreds.kind === "AccountConnString") {
+				if (isNodeLike) {
+					const sharedKeyCredential = new StorageSharedKeyCredential(extractedCreds.accountName, extractedCreds.accountKey);
+					url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName));
+					if (!options.proxyOptions) options.proxyOptions = getDefaultProxySettings(extractedCreds.proxyUri);
+					pipeline = newPipeline(sharedKeyCredential, options);
+				} else throw new Error("Account connection string is only supported in Node.js environment");
+			} else if (extractedCreds.kind === "SASConnString") {
 				url = appendToURLPath(appendToURLPath(extractedCreds.url, encodeURIComponent(containerName)), encodeURIComponent(blobName)) + "?" + extractedCreds.accountSas;
 				pipeline = newPipeline(new AnonymousCredential(), options);
 			} else throw new Error("Connection string must be either an Account connection string or a SAS connection string");
@@ -50749,7 +50860,7 @@ var UploadProgress = class {
 		const transferredBytes = this.sentBytes;
 		const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
 		const elapsedTime = Date.now() - this.startTime;
-		const uploadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
+		const uploadSpeed = (transferredBytes / 1048576 / (elapsedTime / 1e3)).toFixed(1);
 		info(`Sent ${transferredBytes} of ${this.contentLength} (${percentage}%), ${uploadSpeed} MBs/sec`);
 		if (this.isDone()) this.displayedComplete = true;
 	}
@@ -50805,7 +50916,7 @@ function uploadCacheArchiveSDK(signedUploadURL, archivePath, options) {
 		const uploadOptions = {
 			blockSize: options === null || options === void 0 ? void 0 : options.uploadChunkSize,
 			concurrency: options === null || options === void 0 ? void 0 : options.uploadConcurrency,
-			maxSingleShotSize: 128 * 1024 * 1024,
+			maxSingleShotSize: 134217728,
 			onProgress: uploadProgress.onProgress()
 		};
 		try {
@@ -51019,7 +51130,7 @@ var DownloadProgress = class {
 		const transferredBytes = this.segmentOffset + this.receivedBytes;
 		const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
 		const elapsedTime = Date.now() - this.startTime;
-		const downloadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
+		const downloadSpeed = (transferredBytes / 1048576 / (elapsedTime / 1e3)).toFixed(1);
 		info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
 		if (this.isDone()) this.displayedComplete = true;
 	}
@@ -51104,7 +51215,7 @@ function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options
 			const length = parseInt(lengthHeader);
 			if (Number.isNaN(length)) throw new Error(`Could not interpret Content-Length: ${length}`);
 			const downloads = [];
-			const blockSize = 4 * 1024 * 1024;
+			const blockSize = 4194304;
 			for (let offset = 0; offset < length; offset += blockSize) {
 				const count = Math.min(blockSize, length - offset);
 				downloads.push({
@@ -51235,7 +51346,7 @@ function getUploadOptions(copy) {
 	const result = {
 		useAzureSdk: false,
 		uploadConcurrency: 4,
-		uploadChunkSize: 32 * 1024 * 1024
+		uploadChunkSize: 33554432
 	};
 	if (copy) {
 		if (typeof copy.useAzureSdk === "boolean") result.useAzureSdk = copy.useAzureSdk;
@@ -51246,7 +51357,7 @@ function getUploadOptions(copy) {
 	* Add env var overrides
 	*/
 	result.uploadConcurrency = !isNaN(Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) ? Math.min(32, Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) : result.uploadConcurrency;
-	result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(128 * 1024 * 1024, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
+	result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(134217728, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
 	debug(`Use Azure SDK: ${result.useAzureSdk}`);
 	debug(`Upload concurrency: ${result.uploadConcurrency}`);
 	debug(`Upload chunk size: ${result.uploadChunkSize}`);
@@ -51465,10 +51576,11 @@ function downloadCache(archiveLocation, archivePath, options) {
 	return __awaiter$3(this, void 0, void 0, function* () {
 		const archiveUrl = new URL$1(archiveLocation);
 		const downloadOptions = getDownloadOptions(options);
-		if (archiveUrl.hostname.endsWith(".blob.core.windows.net")) if (downloadOptions.useAzureSdk) yield downloadCacheStorageSDK(archiveLocation, archivePath, downloadOptions);
-		else if (downloadOptions.concurrentBlobDownloads) yield downloadCacheHttpClientConcurrent(archiveLocation, archivePath, downloadOptions);
-		else yield downloadCacheHttpClient(archiveLocation, archivePath);
-		else yield downloadCacheHttpClient(archiveLocation, archivePath);
+		if (archiveUrl.hostname.endsWith(".blob.core.windows.net")) {
+			if (downloadOptions.useAzureSdk) yield downloadCacheStorageSDK(archiveLocation, archivePath, downloadOptions);
+			else if (downloadOptions.concurrentBlobDownloads) yield downloadCacheHttpClientConcurrent(archiveLocation, archivePath, downloadOptions);
+			else yield downloadCacheHttpClient(archiveLocation, archivePath);
+		} else yield downloadCacheHttpClient(archiveLocation, archivePath);
 	});
 }
 function reserveCache(key, paths, options) {
@@ -51552,7 +51664,7 @@ function saveCache$2(cacheId, archivePath, signedUploadURL, options) {
 			yield uploadFile(httpClient, cacheId, archivePath, options);
 			debug("Commiting cache");
 			const cacheSize = getArchiveFileSizeInBytes(archivePath);
-			info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
+			info(`Cache Size: ~${Math.round(cacheSize / 1048576)} MB (${cacheSize} B)`);
 			const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
 			if (!isSuccessStatusCode(commitCacheResponse.statusCode)) throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
 			info("Cache saved successfully");
@@ -51639,7 +51751,6 @@ var require_base64 = /* @__PURE__ */ __commonJSMin(((exports) => {
 				case 3:
 					bytes[bytePos++] = (p & 3) << 6 | b;
 					groupPos = 0;
-					break;
 			}
 		}
 		if (groupPos == 1) throw Error(`invalid base64 string.`);
@@ -51670,7 +51781,6 @@ var require_base64 = /* @__PURE__ */ __commonJSMin(((exports) => {
 					base64 += encTable[p | b >> 6];
 					base64 += encTable[b & 63];
 					groupPos = 0;
-					break;
 			}
 		}
 		if (groupPos) {
@@ -51888,7 +51998,7 @@ var require_goog_varint = /* @__PURE__ */ __commonJSMin(((exports) => {
 		bytes.push(hi >>> 31 & 1);
 	}
 	exports.varint64write = varint64write;
-	const TWO_PWR_32_DBL = 65536 * 65536;
+	const TWO_PWR_32_DBL = 4294967296;
 	/**
 	* Parse decimal string of 64 bit integer value as two JS numbers.
 	*
@@ -52982,9 +53092,7 @@ var require_reflection_type_check = /* @__PURE__ */ __commonJSMin(((exports) => 
 					case "message":
 						if (field.repeat) req.push(field.localName);
 						break;
-					case "map":
-						req.push(field.localName);
-						break;
+					case "map": req.push(field.localName);
 				}
 			}
 			this.data = {
@@ -53061,7 +53169,6 @@ var require_reflection_type_check = /* @__PURE__ */ __commonJSMin(((exports) => 
 						case "enum": return this.scalars(Object.values(arg), reflection_info_1.ScalarType.INT32, depth);
 						case "message": return this.messages(Object.values(arg), field.V.T(), allowExcessProperties, depth);
 					}
-					break;
 			}
 			return true;
 		}
@@ -53222,9 +53329,7 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 								val = this.enum(field.V.T(), jsonObjValue, field.name, options.ignoreUnknownFields);
 								if (val === false) continue;
 								break;
-							case "scalar":
-								val = this.scalar(jsonObjValue, field.V.T, field.V.L, field.name);
-								break;
+							case "scalar": val = this.scalar(jsonObjValue, field.V.T, field.V.L, field.name);
 						}
 						this.assert(val !== void 0, field.name + " map value", jsonObjValue);
 						let key = jsonObjKey;
@@ -53247,9 +53352,7 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 								val = this.enum(field.T(), jsonItem, field.name, options.ignoreUnknownFields);
 								if (val === false) continue;
 								break;
-							case "scalar":
-								val = this.scalar(jsonItem, field.T, field.L, field.name);
-								break;
+							case "scalar": val = this.scalar(jsonItem, field.T, field.L, field.name);
 						}
 						this.assert(val !== void 0, field.name, jsonValue);
 						fieldArr.push(val);
@@ -53271,7 +53374,6 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 					case "scalar":
 						if (jsonValue === null) continue;
 						target[localName] = this.scalar(jsonValue, field.T, field.L, field.name);
-						break;
 				}
 			}
 		}
@@ -53336,8 +53438,10 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 						let int32;
 						if (typeof json == "number") int32 = json;
 						else if (json === "") e = "empty string";
-						else if (typeof json == "string") if (json.trim().length !== json.length) e = "extra whitespace";
-						else int32 = Number(json);
+						else if (typeof json == "string") {
+							if (json.trim().length !== json.length) e = "extra whitespace";
+							else int32 = Number(json);
+						}
 						if (int32 === void 0) break;
 						if (type == reflection_info_1.ScalarType.UINT32) assert_1.assertUInt32(int32);
 						else assert_1.assertInt32(int32);
@@ -53446,7 +53550,6 @@ var require_reflection_json_writer = /* @__PURE__ */ __commonJSMin(((exports) =>
 							assert_1.assert(val !== void 0);
 							jsonObj[entryKey.toString()] = val;
 						}
-						break;
 				}
 				if (options.emitDefaultValues || Object.keys(jsonObj).length > 0) jsonValue = jsonObj;
 			} else if (field.repeat) {
@@ -53476,7 +53579,6 @@ var require_reflection_json_writer = /* @__PURE__ */ __commonJSMin(((exports) =>
 							assert_1.assert(val !== void 0);
 							jsonArr.push(val);
 						}
-						break;
 				}
 				if (options.emitDefaultValues || jsonArr.length > 0 || options.emitDefaultValues) jsonValue = jsonArr;
 			} else switch (field.kind) {
@@ -53486,9 +53588,7 @@ var require_reflection_json_writer = /* @__PURE__ */ __commonJSMin(((exports) =>
 				case "enum":
 					jsonValue = this.enum(field.T(), value, field.name, field.opt, options.emitDefaultValues, options.enumAsInteger);
 					break;
-				case "message":
-					jsonValue = this.message(field.T(), value, field.name, options);
-					break;
+				case "message": jsonValue = this.message(field.T(), value, field.name, options);
 			}
 			return jsonValue;
 		}
@@ -53670,7 +53770,6 @@ var require_reflection_binary_reader = /* @__PURE__ */ __commonJSMin(((exports) 
 					case "map":
 						let [mapKey, mapVal] = this.mapEntry(field, reader, options);
 						target[localName][mapKey] = mapVal;
-						break;
 				}
 			}
 		}
@@ -53697,9 +53796,7 @@ var require_reflection_binary_reader = /* @__PURE__ */ __commonJSMin(((exports) 
 							case "enum":
 								val = reader.int32();
 								break;
-							case "message":
-								val = field.V.T().internalBinaryRead(reader, reader.uint32(), options);
-								break;
+							case "message": val = field.V.T().internalBinaryRead(reader, reader.uint32(), options);
 						}
 						break;
 					default: throw new Error(`Unknown field ${fieldNo} (wire type ${wireType}) in map entry for ${this.info.typeName}#${field.name}`);
@@ -53804,7 +53901,6 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 					case "map":
 						assert_1.assert(typeof value == "object" && value !== null);
 						for (const [key, val] of Object.entries(value)) this.mapEntry(writer, options, field, key, val);
-						break;
 				}
 			}
 			let u = options.writeUnknownFields;
@@ -53825,7 +53921,6 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 				case reflection_info_1.ScalarType.BOOL:
 					assert_1.assert(key == "true" || key == "false");
 					keyValue = key == "true";
-					break;
 			}
 			this.scalar(writer, field.K, 1, keyValue, true);
 			switch (field.V.kind) {
@@ -53835,9 +53930,7 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 				case "enum":
 					this.scalar(writer, reflection_info_1.ScalarType.INT32, 2, value, true);
 					break;
-				case "message":
-					this.message(writer, options, field.V.T(), 2, value);
-					break;
+				case "message": this.message(writer, options, field.V.T(), 2, value);
 			}
 			writer.join();
 		}
@@ -53944,7 +54037,6 @@ var require_reflection_binary_writer = /* @__PURE__ */ __commonJSMin(((exports) 
 				case reflection_info_1.ScalarType.SINT64:
 					d = i || pb_long_1.PbLong.from(value).isZero();
 					m = "sint64";
-					break;
 			}
 			return [
 				t,
@@ -54058,18 +54150,15 @@ var require_reflection_merge_partial = /* @__PURE__ */ __commonJSMin(((exports) 
 					else if (output[name] === void 0) output[name] = T.create(fieldValue);
 					else T.mergePartial(output[name], fieldValue);
 					break;
-				case "map":
-					switch (field.V.kind) {
-						case "scalar":
-						case "enum":
-							Object.assign(output[name], fieldValue);
-							break;
-						case "message":
-							let T = field.V.T();
-							for (let k of Object.keys(fieldValue)) output[name][k] = T.create(fieldValue[k]);
-							break;
-					}
-					break;
+				case "map": switch (field.V.kind) {
+					case "scalar":
+					case "enum":
+						Object.assign(output[name], fieldValue);
+						break;
+					case "message":
+						let T = field.V.T();
+						for (let k of Object.keys(fieldValue)) output[name][k] = T.create(fieldValue[k]);
+				}
 			}
 		}
 	}
@@ -54106,7 +54195,6 @@ var require_reflection_equals = /* @__PURE__ */ __commonJSMin(((exports) => {
 				case "message":
 					let T = field.T();
 					if (!(field.repeat ? repeatedMsgEq(T, val_a, val_b) : T.equals(val_a, val_b))) return false;
-					break;
 			}
 		}
 		return true;
@@ -54882,9 +54970,7 @@ var require_rpc_options = /* @__PURE__ */ __commonJSMin(((exports) => {
 					copy(defaults.meta, o.meta);
 					copy(options.meta, o.meta);
 					break;
-				case "interceptors":
-					o.interceptors = defaults.interceptors ? defaults.interceptors.concat(val) : val.concat();
-					break;
+				case "interceptors": o.interceptors = defaults.interceptors ? defaults.interceptors.concat(val) : val.concat();
 			}
 		}
 		return o;
@@ -56824,7 +56910,6 @@ function getTarPath() {
 					type: ArchiveToolType.BSD
 				};
 			}
-			default: break;
 		}
 		return {
 			path: yield which("tar", true),
@@ -56846,17 +56931,13 @@ function getTarArgs(tarPath_1, compressionMethod_1, type_1) {
 			case "extract":
 				args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"));
 				break;
-			case "list":
-				args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P");
-				break;
+			case "list": args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P");
 		}
 		if (tarPath.type === ArchiveToolType.GNU) switch (process.platform) {
 			case "win32":
 				args.push("--force-local");
 				break;
-			case "darwin":
-				args.push("--delay-directory-restore");
-				break;
+			case "darwin": args.push("--delay-directory-restore");
 		}
 		return args;
 	});
@@ -57083,7 +57164,7 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 			yield downloadCache(cacheEntry.archiveLocation, archivePath, options);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
-			info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+			info(`Cache Size: ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B)`);
 			yield extractTar(archivePath, compressionMethod);
 			info("Cache restored successfully");
 			return new CacheEntry(cacheEntry.cacheKey, archiveFileSize);
@@ -57140,7 +57221,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 			debug(`Starting download of archive to: ${archivePath}`);
 			yield downloadCache(response.signedDownloadUrl, archivePath, options);
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
-			info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+			info(`Cache Size: ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B)`);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
 			yield extractTar(archivePath, compressionMethod);
 			info("Cache restored successfully");
@@ -57199,10 +57280,10 @@ function saveCacheV1(paths_1, key_1, options_1) {
 		try {
 			yield createTar(archiveFolder, cachePaths, compressionMethod);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
-			const fileSizeLimit = 10 * 1024 * 1024 * 1024;
+			const fileSizeLimit = 10737418240;
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
 			debug(`File Size: ${archiveFileSize}`);
-			if (archiveFileSize > fileSizeLimit && !isGhes()) throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
+			if (archiveFileSize > fileSizeLimit && !isGhes()) throw new Error(`Cache size of ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
 			debug("Reserving Cache");
 			const reserveCacheResponse = yield reserveCache(key, paths, {
 				compressionMethod,
@@ -57210,7 +57291,7 @@ function saveCacheV1(paths_1, key_1, options_1) {
 				cacheSize: archiveFileSize
 			});
 			if ((_a = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cacheId) cacheId = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _b === void 0 ? void 0 : _b.cacheId;
-			else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
+			else if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
 			else {
 				const detailMessage = (_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message;
 				if (detailMessage === null || detailMessage === void 0 ? void 0 : detailMessage.startsWith("cache write denied:")) throw new CacheWriteDeniedError(`Unable to reserve cache with key ${key}. More details: ${detailMessage}`);
@@ -57226,6 +57307,7 @@ function saveCacheV1(paths_1, key_1, options_1) {
 				debug(`Failed to delete archive: ${error}`);
 			}
 		}
+		return cacheId;
 	});
 }
 /**
@@ -57241,7 +57323,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 	return __awaiter(this, arguments, void 0, function* (paths, key, options, enableCrossOsArchive = false) {
 		var _a;
 		options = Object.assign(Object.assign({}, options), {
-			uploadChunkSize: 64 * 1024 * 1024,
+			uploadChunkSize: 67108864,
 			uploadConcurrency: 8,
 			useAzureSdk: true
 		});
@@ -57303,6 +57385,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 				debug(`Failed to delete archive: ${error}`);
 			}
 		}
+		return cacheId;
 	});
 }
 //#endregion
@@ -57425,7 +57508,7 @@ async function renderSummary(versions, savedCacheEntry) {
 }
 function formatSize(bytes) {
 	if (bytes === void 0 || bytes === 0) return "X";
-	return `${Math.round(bytes / (1024 * 1024))} MB (${bytes} B)`;
+	return `${Math.round(bytes / 1048576)} MB (${bytes} B)`;
 }
 function formatList(values) {
 	return values.length > 0 ? values.join(", ") : "Not specified";
