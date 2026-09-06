@@ -1,6 +1,7 @@
 {
   "platform": "github",
   "repositories": ["amyu/setup-android"],
+  "branchPrefix": "renovate-self-hosted/",
   "onboarding": false,
   "requireConfig": "required",
   "binarySource": "install",
