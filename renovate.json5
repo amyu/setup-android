@@ -15,6 +15,23 @@
       rangeStrategy: 'pin',
     },
     {
+      matchDepNames: [
+        'rolldown',
+      ],
+      postUpgradeTasks: {
+        commands: [
+          'pnpm install --frozen-lockfile',
+          'pnpm run package',
+        ],
+        installTools: {
+          node: {},
+          pnpm: {},
+        },
+        fileFilters: ['dist/**'],
+        executionMode: 'branch',
+      },
+    },
+    {
       enabled: false,
       matchPackageNames: [
         '/@actions/cache/',

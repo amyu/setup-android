@@ -1,0 +1,11 @@
+{
+  "platform": "github",
+  "repositories": ["amyu/setup-android"],
+  "onboarding": false,
+  "requireConfig": "required",
+  "binarySource": "install",
+  "allowedCommands": [
+    "^pnpm install --frozen-lockfile$",
+    "^pnpm run package$"
+  ]
+}
