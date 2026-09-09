@@ -18201,8 +18201,8 @@ var import_minimatch = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((
 		var set = this.set;
 		this.debug(this.pattern, "set", set);
 		var filename;
-		var i;
-		for (i = f.length - 1; i >= 0; i--) {
+		var i = f.length - 1;
+		for (; i >= 0; i--) {
 			filename = f[i];
 			if (filename) break;
 		}
