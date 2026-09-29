@@ -7,7 +7,6 @@
   "packageManager": "pnpm@12.5.1",
   "scripts": {
     "postinstall": "patch-package",
-    "build": "tsc",
     "format": "oxfmt --write ./src/",
     "format-check": "oxfmt --check ./src/",
     "lint": "oxlint ./src/ && pnpm run format-check",
