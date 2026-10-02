@@ -66,5 +66,13 @@
       rangeStrategy: 'pin',
       versioning: 'node',
     },
+    {
+      matchFileNames: [
+        'sample-android-project/**',
+      ],
+      automerge: true,
+      minimumReleaseAge: '0 days',
+      platformAutomerge: false,
+    },
   ],
 }
