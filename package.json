@@ -41,7 +41,7 @@
     "@types/node": "24.13.6",
     "oxfmt": "0.70.0",
     "oxlint": "1.85.0",
-    "oxlint-tsgolint": "7.0.2002",
+    "oxlint-tsgolint": "7.0.2003",
     "patch-package": "8.0.1",
     "rolldown": "1.2.11",
     "typescript": "7.0.2"
