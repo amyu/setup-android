@@ -2,7 +2,7 @@ name: Renovate
 
 on:
   schedule:
-    - cron: '23 */3 * * *'
+    - cron: '*/30 * * * *' # Every hour at minutes 0 and 30.
   workflow_dispatch:
 
 permissions:
