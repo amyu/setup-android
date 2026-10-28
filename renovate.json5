@@ -7,6 +7,31 @@
   patch: {
     automerge: true,
   },
+  customManagers: [
+    {
+      customType: 'jsonata',
+      fileFormat: 'yaml',
+      managerFilePatterns: [
+        'action.yml',
+      ],
+      matchStrings: [
+        'runs.{ "currentValue": using }',
+      ],
+      depNameTemplate: 'GitHub Actions Node.js runtime',
+      datasourceTemplate: 'custom.github-actions-node',
+      versioningTemplate: 'regex:^node(?<major>\\d+)$',
+    },
+  ],
+  customDatasources: {
+    // Only offer runtimes documented by GitHub, rather than every Node.js release.
+    'github-actions-node': {
+      defaultRegistryUrlTemplate: 'https://raw.githubusercontent.com/github/docs/main/content/actions/reference/workflows-and-actions/metadata-syntax.md',
+      format: 'plain',
+      transformTemplates: [
+        '{ "releases": [releases.version.$match(/^[-*] Use `(node[0-9]+)` for Node\\.js/).{ "version": groups[0] }], "homepage": "https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runsusing-for-javascript-actions" }',
+      ],
+    },
+  },
   packageRules: [
     {
       matchManagers: [
@@ -56,6 +81,13 @@
     },
     {
       groupName: 'Node.js',
+      matchDepNames: [
+        'node',
+        '@types/node',
+        'GitHub Actions Node.js runtime',
+      ],
+    },
+    {
       matchDatasources: [
         'node-version',
       ],
