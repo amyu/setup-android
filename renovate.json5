@@ -11,7 +11,7 @@
     {
       customType: 'regex',
       managerFilePatterns: [
-        'action.{yml,yaml}',
+        'action.yml',
       ],
       matchStrings: [
         '(?:^|\\n)[ \\t]+using:[ \\t]*["\']?node(?<currentValue>\\d+)["\']?[ \\t]*(?:\\r?\\n|$)',
