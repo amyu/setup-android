@@ -43,7 +43,7 @@
     "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2004",
     "patch-package": "8.0.1",
-    "rolldown": "1.2.14",
+    "rolldown": "1.2.15",
     "typescript": "7.0.2"
   },
   "engines": {
