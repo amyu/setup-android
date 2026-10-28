@@ -2,7 +2,7 @@ name: Renovate
 
 on:
   schedule:
-    - cron: '23 */3 * * *'
+    - cron: '17,47 * * * *' # Every 30 minutes, offset from the start of the hour.
   workflow_dispatch:
 
 permissions:
