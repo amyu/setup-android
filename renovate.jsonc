@@ -1,0 +1,113 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "Asia/Tokyo",
+  "minimumReleaseAge": "7 days",
+  "patch": {
+    "automerge": true
+  },
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "yaml",
+      "managerFilePatterns": [
+        "action.yml"
+      ],
+      "matchStrings": [
+        "runs.{ \"currentValue\": using }"
+      ],
+      "depNameTemplate": "GitHub Actions Node.js runtime",
+      "datasourceTemplate": "custom.github-actions-node",
+      "versioningTemplate": "regex:^node(?<major>\\d+)$"
+    }
+  ],
+  "customDatasources": {
+    // Only offer runtimes documented by GitHub, rather than every Node.js release.
+    "github-actions-node": {
+      "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/github/docs/main/content/actions/reference/workflows-and-actions/metadata-syntax.md",
+      "format": "plain",
+      "transformTemplates": [
+        "{ \"releases\": [releases.version.$match(/^[-*] Use `(node[0-9]+)` for Node\\.js/).{ \"version\": groups[0] }], \"homepage\": \"https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runsusing-for-javascript-actions\" }"
+      ]
+    }
+  },
+  "packageRules": [
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "rangeStrategy": "pin"
+    },
+    {
+      "matchDepNames": [
+        "rolldown"
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "pnpm install --frozen-lockfile",
+          "pnpm run package"
+        ],
+        "installTools": {
+          "node": {},
+          "pnpm": {}
+        },
+        "fileFilters": [
+          "dist/**"
+        ],
+        "executionMode": "branch"
+      }
+    },
+    {
+      "enabled": false,
+      "matchPackageNames": [
+        "/@actions/cache/"
+      ]
+    },
+    {
+      "groupName": "Android Gradle Plugin",
+      "matchPackageNames": [
+        "com.android.library{/,}**",
+        "com.android.application{/,}**"
+      ]
+    },
+    {
+      "groupName": "Oxc",
+      "groupSlug": "oxc",
+      "groupSingleUpdates": true,
+      "matchDepNames": [
+        "oxfmt",
+        "oxlint",
+        "oxlint-tsgolint"
+      ]
+    },
+    {
+      "groupName": "Node.js",
+      "matchDepNames": [
+        "node",
+        "@types/node",
+        "GitHub Actions Node.js runtime"
+      ]
+    },
+    {
+      "matchDatasources": [
+        "node-version"
+      ],
+      "matchDepNames": [
+        "node"
+      ],
+      "ignoreUnstable": true,
+      "rangeStrategy": "pin",
+      "versioning": "node"
+    },
+    {
+      "matchFileNames": [
+        "sample-android-project/**"
+      ],
+      "automerge": true,
+      "minimumReleaseAge": "0 days",
+      "platformAutomerge": false
+    }
+  ]
+}
