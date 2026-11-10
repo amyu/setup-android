@@ -39,8 +39,8 @@
   },
   "devDependencies": {
     "@types/node": "24.19.2",
-    "oxfmt": "0.75.0",
-    "oxlint": "1.90.0",
+    "oxfmt": "0.76.0",
+    "oxlint": "1.91.0",
     "oxlint-tsgolint": "7.0.2005",
     "patch-package": "8.0.1",
     "rolldown": "1.2.16",
