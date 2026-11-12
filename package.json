@@ -38,7 +38,7 @@
     "@actions/tool-cache": "4.0.0"
   },
   "devDependencies": {
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "oxfmt": "0.76.0",
     "oxlint": "1.91.0",
     "oxlint-tsgolint": "7.0.2005",
@@ -47,6 +47,6 @@
     "typescript": "7.0.2"
   },
   "engines": {
-    "node": "24.22.2"
+    "node": "26.13.0"
   }
 }
