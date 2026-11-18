@@ -1,20 +1,20 @@
 import { createRequire } from "node:module";
-import * as os$3 from "os";
-import os, { EOL } from "os";
+import * as os$1 from "os";
+import os$2, { EOL as EOL$1 } from "os";
 import * as crypto$1 from "crypto";
-import * as fs$1 from "fs";
+import * as fs from "fs";
 import { constants, existsSync, promises, writeFileSync } from "fs";
-import * as path$1 from "path";
-import * as http$1 from "http";
-import * as https$1 from "https";
+import * as path from "path";
+import * as http from "http";
+import * as https from "https";
 import * as events from "events";
 import { EventEmitter } from "events";
 import assert, { ok } from "assert";
-import * as util$1 from "util";
-import http from "node:http";
+import * as util from "util";
+import http$1 from "node:http";
 import Stream, { Readable, Transform } from "node:stream";
-import buffer from "node:buffer";
-import util, { inspect } from "node:util";
+import buffer$1 from "node:buffer";
+import util$1, { inspect } from "node:util";
 import zlib from "node:zlib";
 import { createHmac } from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -23,14 +23,14 @@ import { setTimeout as setTimeout$1 } from "timers";
 import * as stream from "stream";
 import { Readable as Readable$1 } from "stream";
 import { URL as URL$1 } from "url";
-import * as os$2 from "node:os";
-import os$1, { EOL as EOL$1 } from "node:os";
+import * as os from "node:os";
+import os$3, { EOL as EOL$2 } from "node:os";
 import process$1 from "node:process";
-import https from "node:https";
-import path, { dirname } from "node:path";
-import * as buffer$1 from "buffer";
+import https$1 from "node:https";
+import path$1, { dirname as dirname$1 } from "node:path";
+import * as buffer from "buffer";
 import { Buffer as Buffer$1 } from "buffer";
-import fs from "node:fs";
+import fs$1 from "node:fs";
 // \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -39,14 +39,14 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
-var __exportAll = (all, no_symbols) => {
-	let target = {};
+var __exportAll = (all, flags) => {
+	let target = Object.setPrototypeOf({}, null);
 	for (var name in all) __defProp(target, name, {
 		get: all[name],
 		enumerable: true
 	});
-	if (!no_symbols) __defProp(target, Symbol.toStringTag, { value: "Module" });
-	return target;
+	if (!(flags & 1)) __defProp(target, Symbol.toStringTag, { value: "Module" });
+	return flags & 2 ? target : Object.preventExtensions(target);
 };
 var __copyProps = (to, from, except, desc) => {
 	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
@@ -126,7 +126,7 @@ function toCommandProperties(annotationProperties) {
 */
 function issueCommand(command, properties, message) {
 	const cmd = new Command(command, properties, message);
-	process.stdout.write(cmd.toString() + os$3.EOL);
+	process.stdout.write(cmd.toString() + os$1.EOL);
 }
 function issue(name, message = "") {
 	issueCommand(name, {}, message);
@@ -6061,7 +6061,7 @@ var require_client_h2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		});
 		return {
 			version: "h2",
-			defaultPipelining: Infinity,
+			defaultPipelining: 1e400,
 			write(...args) {
 				return writeH2(client, ...args);
 			},
@@ -9366,7 +9366,7 @@ var require_pending_interceptors_formatter = /* @__PURE__ */ __commonJSMin(((exp
 				"Status code": statusCode,
 				Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
 				Invocations: timesInvoked,
-				Remaining: persist ? Infinity : times - timesInvoked
+				Remaining: persist ? 1e400 : times - timesInvoked
 			}));
 			this.logger.table(withPrettyHeaders);
 			return this.transform.read().toString();
@@ -9816,7 +9816,7 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			pick: interceptorOpts?.pick ?? null,
 			dualStack,
 			affinity,
-			maxItems: interceptorOpts?.maxItems ?? Infinity
+			maxItems: interceptorOpts?.maxItems ?? 1e400
 		});
 		return (dispatch) => {
 			return function dnsInterceptor(origDispatchOpts, handler) {
@@ -12899,7 +12899,7 @@ var require_cache = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			}
 			return true;
 		}
-		#internalMatchAll(request, options, maxResponses = Infinity) {
+		#internalMatchAll(request, options, maxResponses = 1e400) {
 			let r = null;
 			if (request !== void 0) {
 				if (request instanceof Request) {
@@ -15984,7 +15984,7 @@ var HttpClient = class {
 		const info = {};
 		info.parsedUrl = requestUrl;
 		const usingSsl = info.parsedUrl.protocol === "https:";
-		info.httpModule = usingSsl ? https$1 : http$1;
+		info.httpModule = usingSsl ? https : http;
 		const defaultPort = usingSsl ? 443 : 80;
 		info.options = {};
 		info.options.host = info.parsedUrl.hostname;
@@ -16054,7 +16054,7 @@ var HttpClient = class {
 		if (agent) return agent;
 		const usingSsl = parsedUrl.protocol === "https:";
 		let maxSockets = 100;
-		if (this.requestOptions) maxSockets = this.requestOptions.maxSockets || http$1.globalAgent.maxSockets;
+		if (this.requestOptions) maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
 		if (proxyUrl && proxyUrl.hostname) {
 			const agentOptions = {
 				maxSockets,
@@ -16076,7 +16076,7 @@ var HttpClient = class {
 				keepAlive: this._keepAlive,
 				maxSockets
 			};
-			agent = usingSsl ? new https$1.Agent(options) : new http$1.Agent(options);
+			agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
 			this._agent = agent;
 		}
 		if (usingSsl && this._ignoreSslError) agent.options = Object.assign(agent.options || {}, { rejectUnauthorized: false });
@@ -16331,7 +16331,7 @@ var Summary = class {
 	* @returns {Summary} summary instance
 	*/
 	addEOL() {
-		return this.addRaw(EOL);
+		return this.addRaw(EOL$1);
 	}
 	/**
 	* Adds an HTML codeblock to the summary buffer
@@ -16505,9 +16505,9 @@ var __awaiter$16 = function(thisArg, _arguments, P, generator) {
 		step((generator = generator.apply(thisArg, _arguments || [])).next());
 	});
 };
-const { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs$1.promises;
+const { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
 const IS_WINDOWS$7 = process.platform === "win32";
-fs$1.constants.O_RDONLY;
+fs.constants.O_RDONLY;
 function exists(fsPath) {
 	return __awaiter$16(this, void 0, void 0, function* () {
 		try {
@@ -16545,7 +16545,7 @@ function tryGetExecutablePath(filePath, extensions) {
 		}
 		if (stats && stats.isFile()) {
 			if (IS_WINDOWS$7) {
-				const upperExt = path$1.extname(filePath).toUpperCase();
+				const upperExt = path.extname(filePath).toUpperCase();
 				if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) return filePath;
 			} else if (isUnixExecutable(stats)) return filePath;
 		}
@@ -16561,10 +16561,10 @@ function tryGetExecutablePath(filePath, extensions) {
 			if (stats && stats.isFile()) {
 				if (IS_WINDOWS$7) {
 					try {
-						const directory = path$1.dirname(filePath);
-						const upperName = path$1.basename(filePath).toUpperCase();
+						const directory = path.dirname(filePath);
+						const upperName = path.basename(filePath).toUpperCase();
 						for (const actualName of yield readdir(directory)) if (upperName === actualName.toUpperCase()) {
-							filePath = path$1.join(directory, actualName);
+							filePath = path.join(directory, actualName);
 							break;
 						}
 					} catch (err) {
@@ -16663,21 +16663,21 @@ function findInPath(tool) {
 		if (!tool) throw new Error("parameter 'tool' is required");
 		const extensions = [];
 		if (IS_WINDOWS$7 && process.env["PATHEXT"]) {
-			for (const extension of process.env["PATHEXT"].split(path$1.delimiter)) if (extension) extensions.push(extension);
+			for (const extension of process.env["PATHEXT"].split(path.delimiter)) if (extension) extensions.push(extension);
 		}
 		if (isRooted(tool)) {
 			const filePath = yield tryGetExecutablePath(tool, extensions);
 			if (filePath) return [filePath];
 			return [];
 		}
-		if (tool.includes(path$1.sep)) return [];
+		if (tool.includes(path.sep)) return [];
 		const directories = [];
 		if (process.env.PATH) {
-			for (const p of process.env.PATH.split(path$1.delimiter)) if (p) directories.push(p);
+			for (const p of process.env.PATH.split(path.delimiter)) if (p) directories.push(p);
 		}
 		const matches = [];
 		for (const directory of directories) {
-			const filePath = yield tryGetExecutablePath(path$1.join(directory, tool), extensions);
+			const filePath = yield tryGetExecutablePath(path.join(directory, tool), extensions);
 			if (filePath) matches.push(filePath);
 		}
 		return matches;
@@ -16747,11 +16747,11 @@ var ToolRunner = class extends events.EventEmitter {
 	_processLineBuffer(data, strBuffer, onLine) {
 		try {
 			let s = strBuffer + data.toString();
-			let n = s.indexOf(os$3.EOL);
+			let n = s.indexOf(os$1.EOL);
 			while (n > -1) {
 				onLine(s.substring(0, n));
-				s = s.substring(n + os$3.EOL.length);
-				n = s.indexOf(os$3.EOL);
+				s = s.substring(n + os$1.EOL.length);
+				n = s.indexOf(os$1.EOL);
 			}
 			return s;
 		} catch (err) {
@@ -16884,14 +16884,14 @@ var ToolRunner = class extends events.EventEmitter {
 	*/
 	exec() {
 		return __awaiter$14(this, void 0, void 0, function* () {
-			if (!isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS$6 && this.toolPath.includes("\\"))) this.toolPath = path$1.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+			if (!isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS$6 && this.toolPath.includes("\\"))) this.toolPath = path.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
 			this.toolPath = yield which(this.toolPath, true);
 			return new Promise((resolve, reject) => __awaiter$14(this, void 0, void 0, function* () {
 				this._debug(`exec tool: ${this.toolPath}`);
 				this._debug("arguments:");
 				for (const arg of this.args) this._debug(`   ${arg}`);
 				const optionsNonNull = this._cloneExecOptions(this.options);
-				if (!optionsNonNull.silent && optionsNonNull.outStream) optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os$3.EOL);
+				if (!optionsNonNull.silent && optionsNonNull.outStream) optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os$1.EOL);
 				const state = new ExecState(optionsNonNull, this.toolPath);
 				state.on("debug", (message) => {
 					this._debug(message);
@@ -17087,8 +17087,8 @@ function exec(commandLine, args, options) {
 		return new ToolRunner(toolPath, args, options).exec();
 	});
 }
-os.platform();
-os.arch();
+os$2.platform();
+os$2.arch();
 /**
 * The code to exit an action
 */
@@ -17232,7 +17232,7 @@ function warning(message, properties = {}) {
 * @param message info message
 */
 function info(message) {
-	process.stdout.write(message + os$3.EOL);
+	process.stdout.write(message + os$1.EOL);
 }
 /**
 * Begin an output group.
@@ -17314,10 +17314,10 @@ const IS_WINDOWS$5 = process.platform === "win32";
 * - `\\hello         => \\hello`
 * - `\\hello\world   => \\hello\world`
 */
-function dirname$1(p) {
+function dirname(p) {
 	p = safeTrimTrailingSeparator(p);
 	if (IS_WINDOWS$5 && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) return p;
-	let result = path$1.dirname(p);
+	let result = path.dirname(p);
 	if (IS_WINDOWS$5 && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) result = safeTrimTrailingSeparator(result);
 	return result;
 }
@@ -17347,7 +17347,7 @@ function ensureAbsoluteRoot(root, itemPath) {
 		}
 	}
 	assert(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
-	if (root.endsWith("/") || IS_WINDOWS$5 && root.endsWith("\\")) {} else root += path$1.sep;
+	if (root.endsWith("/") || IS_WINDOWS$5 && root.endsWith("\\")) {} else root += path.sep;
 	return root + itemPath;
 }
 /**
@@ -17388,8 +17388,8 @@ function normalizeSeparators(p) {
 function safeTrimTrailingSeparator(p) {
 	if (!p) return "";
 	p = normalizeSeparators(p);
-	if (!p.endsWith(path$1.sep)) return p;
-	if (p === path$1.sep) return p;
+	if (!p.endsWith(path.sep)) return p;
+	if (p === path.sep) return p;
 	if (IS_WINDOWS$5 && /^[A-Z]:\\$/i.test(p)) return p;
 	return p.substr(0, p.length - 1);
 }
@@ -17427,14 +17427,14 @@ function getSearchPaths(patterns) {
 		if (searchPathMap[key] === "included") continue;
 		let foundAncestor = false;
 		let tempKey = key;
-		let parent = dirname$1(tempKey);
+		let parent = dirname(tempKey);
 		while (parent !== tempKey) {
 			if (searchPathMap[parent]) {
 				foundAncestor = true;
 				break;
 			}
 			tempKey = parent;
-			parent = dirname$1(tempKey);
+			parent = dirname(tempKey);
 		}
 		if (!foundAncestor) {
 			result.push(pattern.searchPath);
@@ -18189,15 +18189,15 @@ var Path = class {
 		if (typeof itemPath === "string") {
 			assert(itemPath, `Parameter 'itemPath' must not be empty`);
 			itemPath = safeTrimTrailingSeparator(itemPath);
-			if (!hasRoot(itemPath)) this.segments = itemPath.split(path$1.sep);
+			if (!hasRoot(itemPath)) this.segments = itemPath.split(path.sep);
 			else {
 				let remaining = itemPath;
-				let dir = dirname$1(remaining);
+				let dir = dirname(remaining);
 				while (dir !== remaining) {
-					const basename = path$1.basename(remaining);
+					const basename = path.basename(remaining);
 					this.segments.unshift(basename);
 					remaining = dir;
-					dir = dirname$1(remaining);
+					dir = dirname(remaining);
 				}
 				this.segments.unshift(remaining);
 			}
@@ -18209,10 +18209,10 @@ var Path = class {
 				segment = normalizeSeparators(itemPath[i]);
 				if (i === 0 && hasRoot(segment)) {
 					segment = safeTrimTrailingSeparator(segment);
-					assert(segment === dirname$1(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
+					assert(segment === dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
 					this.segments.push(segment);
 				} else {
-					assert(!segment.includes(path$1.sep), `Parameter 'itemPath' contains unexpected path separators`);
+					assert(!segment.includes(path.sep), `Parameter 'itemPath' contains unexpected path separators`);
 					this.segments.push(segment);
 				}
 			}
@@ -18223,10 +18223,10 @@ var Path = class {
 	*/
 	toString() {
 		let result = this.segments[0];
-		let skipSlash = result.endsWith(path$1.sep) || IS_WINDOWS$3 && /^[A-Z]:$/i.test(result);
+		let skipSlash = result.endsWith(path.sep) || IS_WINDOWS$3 && /^[A-Z]:$/i.test(result);
 		for (let i = 1; i < this.segments.length; i++) {
 			if (skipSlash) skipSlash = false;
-			else result += path$1.sep;
+			else result += path.sep;
 			result += this.segments[i];
 		}
 		return result;
@@ -18257,7 +18257,7 @@ var Pattern = class Pattern {
 		}
 		pattern = Pattern.fixupPattern(pattern, homedir);
 		this.segments = new Path(pattern).segments;
-		this.trailingSeparator = normalizeSeparators(pattern).endsWith(path$1.sep);
+		this.trailingSeparator = normalizeSeparators(pattern).endsWith(path.sep);
 		pattern = safeTrimTrailingSeparator(pattern);
 		let foundGlob = false;
 		const searchSegments = this.segments.map((x) => Pattern.getLiteral(x)).filter((x) => !foundGlob && !(foundGlob = x === ""));
@@ -18281,7 +18281,7 @@ var Pattern = class Pattern {
 	match(itemPath) {
 		if (this.segments[this.segments.length - 1] === "**") {
 			itemPath = normalizeSeparators(itemPath);
-			if (!itemPath.endsWith(path$1.sep) && this.isImplicitPattern === false) itemPath = `${itemPath}${path$1.sep}`;
+			if (!itemPath.endsWith(path.sep) && this.isImplicitPattern === false) itemPath = `${itemPath}${path.sep}`;
 		} else itemPath = safeTrimTrailingSeparator(itemPath);
 		if (this.minimatch.match(itemPath)) return this.trailingSeparator ? MatchKind.Directory : MatchKind.All;
 		return MatchKind.None;
@@ -18291,7 +18291,7 @@ var Pattern = class Pattern {
 	*/
 	partialMatch(itemPath) {
 		itemPath = safeTrimTrailingSeparator(itemPath);
-		if (dirname$1(itemPath) === itemPath) return this.rootRegExp.test(itemPath);
+		if (dirname(itemPath) === itemPath) return this.rootRegExp.test(itemPath);
 		return this.minimatch.matchOne(itemPath.split(IS_WINDOWS$2 ? /\\+/ : /\/+/), this.minimatch.set[0], true);
 	}
 	/**
@@ -18309,9 +18309,9 @@ var Pattern = class Pattern {
 		assert(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
 		assert(!hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
 		pattern = normalizeSeparators(pattern);
-		if (pattern === "." || pattern.startsWith(`.${path$1.sep}`)) pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
-		else if (pattern === "~" || pattern.startsWith(`~${path$1.sep}`)) {
-			homedir = homedir || os$3.homedir();
+		if (pattern === "." || pattern.startsWith(`.${path.sep}`)) pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
+		else if (pattern === "~" || pattern.startsWith(`~${path.sep}`)) {
+			homedir = homedir || os$1.homedir();
 			assert(homedir, "Unable to determine HOME directory");
 			assert(hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
 			pattern = Pattern.globEscape(homedir) + pattern.substr(1);
@@ -18523,7 +18523,7 @@ var DefaultGlobber = class DefaultGlobber {
 			for (const searchPath of getSearchPaths(patterns)) {
 				debug(`Search path '${searchPath}'`);
 				try {
-					yield __await(fs$1.promises.lstat(searchPath));
+					yield __await(fs.promises.lstat(searchPath));
 				} catch (err) {
 					if (err.code === "ENOENT") continue;
 					throw err;
@@ -18538,12 +18538,12 @@ var DefaultGlobber = class DefaultGlobber {
 				if (!match$1 && !partialMatch$1) continue;
 				const stats = yield __await(DefaultGlobber.stat(item, options, traversalChain));
 				if (!stats) continue;
-				if (options.excludeHiddenFiles && path$1.basename(item.path).match(/^\./)) continue;
+				if (options.excludeHiddenFiles && path.basename(item.path).match(/^\./)) continue;
 				if (stats.isDirectory()) {
 					if (match$1 & MatchKind.Directory && options.matchDirectories) yield yield __await(item.path);
 					else if (!partialMatch$1) continue;
 					const childLevel = item.level + 1;
-					const childItems = (yield __await(fs$1.promises.readdir(item.path))).map((x) => new SearchState(path$1.join(item.path, x), childLevel));
+					const childItems = (yield __await(fs.promises.readdir(item.path))).map((x) => new SearchState(path.join(item.path, x), childLevel));
 					stack.push(...childItems.reverse());
 				} else if (match$1 & MatchKind.File) yield yield __await(item.path);
 			}
@@ -18570,7 +18570,7 @@ var DefaultGlobber = class DefaultGlobber {
 		return __awaiter$10(this, void 0, void 0, function* () {
 			let stats;
 			if (options.followSymbolicLinks) try {
-				stats = yield fs$1.promises.stat(item.path);
+				stats = yield fs.promises.stat(item.path);
 			} catch (err) {
 				if (err.code === "ENOENT") {
 					if (options.omitBrokenSymbolicLinks) {
@@ -18581,9 +18581,9 @@ var DefaultGlobber = class DefaultGlobber {
 				}
 				throw err;
 			}
-			else stats = yield fs$1.promises.lstat(item.path);
+			else stats = yield fs.promises.lstat(item.path);
 			if (stats.isDirectory() && options.followSymbolicLinks) {
-				const realPath = yield fs$1.promises.realpath(item.path);
+				const realPath = yield fs.promises.realpath(item.path);
 				while (traversalChain.length >= item.level) traversalChain.pop();
 				if (traversalChain.some((x) => x === realPath)) {
 					debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
@@ -20025,15 +20025,15 @@ function createTempDirectory() {
 			if (IS_WINDOWS) baseLocation = process.env["USERPROFILE"] || "C:\\";
 			else if (process.platform === "darwin") baseLocation = "/Users";
 			else baseLocation = "/home";
-			tempDirectory = path$1.join(baseLocation, "actions", "temp");
+			tempDirectory = path.join(baseLocation, "actions", "temp");
 		}
-		const dest = path$1.join(tempDirectory, crypto$1.randomUUID());
+		const dest = path.join(tempDirectory, crypto$1.randomUUID());
 		yield mkdirP(dest);
 		return dest;
 	});
 }
 function getArchiveFileSizeInBytes(filePath) {
-	return fs$1.statSync(filePath).size;
+	return fs.statSync(filePath).size;
 }
 function resolvePaths(patterns) {
 	return __awaiter$7(this, void 0, void 0, function* () {
@@ -20047,7 +20047,7 @@ function resolvePaths(patterns) {
 				_c = _g.value;
 				_e = false;
 				const file = _c;
-				const relativeFile = path$1.relative(workspace, file).replace(new RegExp(`\\${path$1.sep}`, "g"), "/");
+				const relativeFile = path.relative(workspace, file).replace(new RegExp(`\\${path.sep}`, "g"), "/");
 				debug(`Matched: ${relativeFile}`);
 				if (relativeFile === "") paths.push(".");
 				else paths.push(`${relativeFile}`);
@@ -20066,7 +20066,7 @@ function resolvePaths(patterns) {
 }
 function unlinkFile(filePath) {
 	return __awaiter$7(this, void 0, void 0, function* () {
-		return util$1.promisify(fs$1.unlink)(filePath);
+		return util.promisify(fs.unlink)(filePath);
 	});
 }
 function getVersion(app_1) {
@@ -20104,7 +20104,7 @@ function getCacheFileName(compressionMethod) {
 }
 function getGnuTarPathOnWindows() {
 	return __awaiter$7(this, void 0, void 0, function* () {
-		if (fs$1.existsSync(GnuTarPathOnWindows)) return GnuTarPathOnWindows;
+		if (fs.existsSync(GnuTarPathOnWindows)) return GnuTarPathOnWindows;
 		return (yield getVersion("tar")).toLowerCase().includes("gnu tar") ? which("tar") : "";
 	});
 }
@@ -20162,7 +20162,7 @@ var AbortError$1 = class extends Error {
 };
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.2_supports-color@7.2.0/node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
 function log(message, ...args) {
-	process$1.stderr.write(`${util.format(message, ...args)}${EOL$1}`);
+	process$1.stderr.write(`${util$1.format(message, ...args)}${EOL$2}`);
 }
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.2_supports-color@7.2.0/node_modules/@typespec/ts-http-runtime/dist/esm/logger/debug.js
 const debugEnvVariable = typeof process !== "undefined" && process.env && process.env.DEBUG || void 0;
@@ -21072,7 +21072,7 @@ var NodeHttpClient = class {
 			...request.requestOverrides
 		};
 		return new Promise((resolve, reject) => {
-			const req = isInsecure ? http.request(options, resolve) : https.request(options, resolve);
+			const req = isInsecure ? http$1.request(options, resolve) : https$1.request(options, resolve);
 			req.once("error", (err) => {
 				reject(new RestError$1(err.message, {
 					code: err.code ?? RestError$1.REQUEST_SEND_ERROR,
@@ -21098,16 +21098,16 @@ var NodeHttpClient = class {
 	getOrCreateAgent(request, isInsecure) {
 		const disableKeepAlive = request.disableKeepAlive;
 		if (isInsecure) {
-			if (disableKeepAlive) return http.globalAgent;
-			if (!this.cachedHttpAgent) this.cachedHttpAgent = new http.Agent({ keepAlive: true });
+			if (disableKeepAlive) return http$1.globalAgent;
+			if (!this.cachedHttpAgent) this.cachedHttpAgent = new http$1.Agent({ keepAlive: true });
 			return this.cachedHttpAgent;
 		} else {
-			if (disableKeepAlive && !request.tlsSettings) return https.globalAgent;
+			if (disableKeepAlive && !request.tlsSettings) return https$1.globalAgent;
 			const tlsSettings = request.tlsSettings ?? DEFAULT_TLS_SETTINGS;
 			let agent = this.cachedHttpsAgents.get(tlsSettings);
 			if (agent && agent.options.keepAlive === !disableKeepAlive) return agent;
 			logger$4.info("No cached TLS Agent exist, creating a new Agent");
-			agent = new https.Agent({
+			agent = new https$1.Agent({
 				keepAlive: !disableKeepAlive,
 				...tlsSettings
 			});
@@ -22540,7 +22540,7 @@ var require_dist$2 = /* @__PURE__ */ __commonJSMin(((exports, module, this$9) =>
 			return stack.split("\n").some((l) => l.indexOf("(https.js:") !== -1 || l.indexOf("node:https:") !== -1);
 		}
 		incrementSockets(name) {
-			if (this.maxSockets === Infinity && this.maxTotalSockets === Infinity) return null;
+			if (this.maxSockets === 1e400 && this.maxTotalSockets === 1e400) return null;
 			if (!this.sockets[name]) this.sockets[name] = [];
 			const fakeSocket = new net.Socket({ writable: false });
 			this.sockets[name].push(fakeSocket);
@@ -23297,7 +23297,7 @@ function getHeaderName() {
 */
 async function setPlatformSpecificData(map) {
 	if (process$1 && process$1.versions) {
-		const osInfo = `${os$1.type()} ${os$1.release()}; ${os$1.arch()}`;
+		const osInfo = `${os$3.type()} ${os$3.release()}; ${os$3.arch()}`;
 		const versions = process$1.versions;
 		if (versions.bun) map.set("Bun", `${versions.bun} (${osInfo})`);
 		else if (versions.deno) map.set("Deno", `${versions.deno} (${osInfo})`);
@@ -27290,7 +27290,7 @@ var XMLParser = class {
 	}
 };
 // node_modules/.pnpm/fast-xml-parser@5.3.3/node_modules/fast-xml-parser/src/xmlbuilder/orderedJs2Xml.js
-const EOL$2 = "\n";
+const EOL = "\n";
 /**
 * 
 * @param {array} jArray 
@@ -27299,7 +27299,7 @@ const EOL$2 = "\n";
 */
 function toXml(jArray, options) {
 	let indentation = "";
-	if (options.format && options.indentBy.length > 0) indentation = EOL$2;
+	if (options.format && options.indentBy.length > 0) indentation = EOL;
 	return arrToStr(jArray, options, "", indentation);
 }
 function arrToStr(arr, options, jPath, indentation) {
@@ -27730,7 +27730,7 @@ var BuffersStream = class extends Readable {
 /**
 * maxBufferLength is max size of each buffer in the pooled buffers.
 */
-const maxBufferLength = buffer.constants.MAX_LENGTH;
+const maxBufferLength = buffer$1.constants.MAX_LENGTH;
 /**
 * This class provides a buffer container which conceptually has no hard size limit.
 * It accepts a capacity, an array of input buffers and the total length of input data.
@@ -28058,7 +28058,7 @@ let __dirname;
 if (__isNode__) {
 	require$1 = createRequire(import.meta.url);
 	__filename = fileURLToPath(import.meta.url);
-	__dirname = dirname(__filename);
+	__dirname = dirname$1(__filename);
 }
 var NativeCRC64 = (() => {
 	var _scriptDir = typeof document !== "undefined" && document.currentScript ? document.currentScript.src : void 0;
@@ -47793,7 +47793,7 @@ async function streamToBuffer(stream, buffer, offset, end, encoding) {
 */
 async function readStreamToLocalFile(rs, file) {
 	return new Promise((resolve, reject) => {
-		const ws = fs.createWriteStream(file);
+		const ws = fs$1.createWriteStream(file);
 		rs.on("error", (err) => {
 			reject(err);
 		});
@@ -47809,8 +47809,8 @@ async function readStreamToLocalFile(rs, file) {
 *
 * Promisified version of fs.stat().
 */
-const fsStat = util.promisify(fs.stat);
-const fsCreateReadStream = fs.createReadStream;
+const fsStat = util$1.promisify(fs$1.stat);
+const fsCreateReadStream = fs$1.createReadStream;
 // node_modules/.pnpm/@azure+storage-blob@12.32.0_supports-color@7.2.0/node_modules/@azure/storage-blob/dist/esm/Clients.js
 /**
 * A BlobClient represents a URL to an Azure Storage blob; the blob may be a block blob,
@@ -49606,7 +49606,7 @@ var BlockBlobClient = class BlockBlobClient extends BlobClient {
 			return this.uploadSeekableInternal((offset, count) => {
 				return () => fsCreateReadStream(filePath, {
 					autoClose: true,
-					end: count ? offset + count - 1 : Infinity,
+					end: count ? offset + count - 1 : 1e400,
 					start: offset
 				});
 			}, size, {
@@ -50716,7 +50716,7 @@ var __awaiter$4 = function(thisArg, _arguments, P, generator) {
 */
 function pipeResponseToStream(response, output) {
 	return __awaiter$4(this, void 0, void 0, function* () {
-		yield util$1.promisify(stream.pipeline)(response.message, output);
+		yield util.promisify(stream.pipeline)(response.message, output);
 	});
 }
 /**
@@ -50819,7 +50819,7 @@ var DownloadProgress = class {
 */
 function downloadCacheHttpClient(archiveLocation, archivePath) {
 	return __awaiter$4(this, void 0, void 0, function* () {
-		const writeStream = fs$1.createWriteStream(archivePath);
+		const writeStream = fs.createWriteStream(archivePath);
 		const httpClient = new HttpClient("actions/cache");
 		const downloadResponse = yield retryHttpClientResponse("downloadCache", () => __awaiter$4(this, void 0, void 0, function* () {
 			return httpClient.get(archiveLocation);
@@ -50846,7 +50846,7 @@ function downloadCacheHttpClient(archiveLocation, archivePath) {
 function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
 	return __awaiter$4(this, void 0, void 0, function* () {
 		var _a;
-		const archiveDescriptor = yield fs$1.promises.open(archivePath, "w");
+		const archiveDescriptor = yield fs.promises.open(archivePath, "w");
 		const httpClient = new HttpClient("actions/cache", void 0, {
 			socketTimeout: options.timeoutInMs,
 			keepAlive: true
@@ -50941,9 +50941,9 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
 			debug("Unable to determine content length, downloading file with http-client...");
 			yield downloadCacheHttpClient(archiveLocation, archivePath);
 		} else {
-			const maxSegmentSize = Math.min(134217728, buffer$1.constants.MAX_LENGTH);
+			const maxSegmentSize = Math.min(134217728, buffer.constants.MAX_LENGTH);
 			const downloadProgress = new DownloadProgress(contentLength);
-			const fd = fs$1.openSync(archivePath, "w");
+			const fd = fs.openSync(archivePath, "w");
 			try {
 				downloadProgress.startDisplayTimer();
 				const controller = new AbortController();
@@ -50960,11 +50960,11 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
 					if (result === "timeout") {
 						controller.abort();
 						throw new Error("Aborting cache download as the download time exceeded the timeout.");
-					} else if (Buffer.isBuffer(result)) fs$1.writeFileSync(fd, result);
+					} else if (Buffer.isBuffer(result)) fs.writeFileSync(fd, result);
 				}
 			} finally {
 				downloadProgress.stopDisplayTimer();
-				fs$1.closeSync(fd);
+				fs.closeSync(fd);
 			}
 		}
 	});
@@ -51255,7 +51255,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
 	return __awaiter$3(this, void 0, void 0, function* () {
 		const fileSize = getArchiveFileSizeInBytes(archivePath);
 		const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
-		const fd = fs$1.openSync(archivePath, "r");
+		const fd = fs.openSync(archivePath, "r");
 		const uploadOptions = getUploadOptions(options);
 		const concurrency = assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
 		const maxChunkSize = assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
@@ -51269,7 +51269,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
 					const start = offset;
 					const end = offset + chunkSize - 1;
 					offset += maxChunkSize;
-					yield uploadChunk(httpClient, resourceUrl, () => fs$1.createReadStream(archivePath, {
+					yield uploadChunk(httpClient, resourceUrl, () => fs.createReadStream(archivePath, {
 						fd,
 						start,
 						end,
@@ -51280,7 +51280,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
 				}
 			})));
 		} finally {
-			fs$1.closeSync(fd);
+			fs.closeSync(fd);
 		}
 	});
 }
@@ -53087,6 +53087,12 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 						if (json === null) return "";
 						if (typeof json !== "string") {
 							e = "extra whitespace";
+							break;
+						}
+						try {
+							encodeURIComponent(json);
+						} catch (e) {
+							e = "invalid UTF8";
 							break;
 						}
 						return json;
@@ -56513,12 +56519,12 @@ function getTarArgs(tarPath_1, compressionMethod_1, type_1) {
 		const BSD_TAR_ZSTD = tarPath.type === ArchiveToolType.BSD && compressionMethod !== CompressionMethod.Gzip && IS_WINDOWS;
 		switch (type) {
 			case "create":
-				args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "--files-from", ManifestFilename);
+				args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "--files-from", ManifestFilename);
 				break;
 			case "extract":
-				args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"));
+				args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path.sep}`, "g"), "/"));
 				break;
-			case "list": args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "-P");
+			case "list": args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/"), "-P");
 		}
 		if (tarPath.type === ArchiveToolType.GNU) switch (process.platform) {
 			case "win32":
@@ -56553,12 +56559,12 @@ function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
 			case CompressionMethod.Zstd: return BSD_TAR_ZSTD ? [
 				"zstd -d --long=30 --force -o",
 				TarFilename,
-				archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/")
+				archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/")
 			] : ["--use-compress-program", IS_WINDOWS ? "\"zstd -d --long=30\"" : "unzstd --long=30"];
 			case CompressionMethod.ZstdWithoutLong: return BSD_TAR_ZSTD ? [
 				"zstd -d --force -o",
 				TarFilename,
-				archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/")
+				archivePath.replace(new RegExp(`\\${path.sep}`, "g"), "/")
 			] : ["--use-compress-program", IS_WINDOWS ? "\"zstd -d\"" : "unzstd"];
 			default: return ["-z"];
 		}
@@ -56571,12 +56577,12 @@ function getCompressionProgram(tarPath, compressionMethod) {
 		switch (compressionMethod) {
 			case CompressionMethod.Zstd: return BSD_TAR_ZSTD ? [
 				"zstd -T0 --long=30 --force -o",
-				cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"),
+				cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
 				TarFilename
 			] : ["--use-compress-program", IS_WINDOWS ? "\"zstd -T0 --long=30\"" : "zstdmt --long=30"];
 			case CompressionMethod.ZstdWithoutLong: return BSD_TAR_ZSTD ? [
 				"zstd -T0 --force -o",
-				cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"),
+				cacheFileName.replace(new RegExp(`\\${path.sep}`, "g"), "/"),
 				TarFilename
 			] : ["--use-compress-program", IS_WINDOWS ? "\"zstd -T0\"" : "zstdmt"];
 			default: return ["-z"];
@@ -56608,7 +56614,7 @@ function extractTar(archivePath, compressionMethod) {
 }
 function createTar(archiveFolder, sourceDirectories, compressionMethod) {
 	return __awaiter$1(this, void 0, void 0, function* () {
-		writeFileSync(path$1.join(archiveFolder, ManifestFilename), sourceDirectories.join("\n"));
+		writeFileSync(path.join(archiveFolder, ManifestFilename), sourceDirectories.join("\n"));
 		yield execCommands(yield getCommands(compressionMethod, "create"), archiveFolder);
 	});
 }
@@ -56745,7 +56751,7 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 				info("Lookup only - skipping download");
 				return cacheEntry.cacheKey;
 			}
-			archivePath = path$1.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
+			archivePath = path.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
 			debug(`Archive Path: ${archivePath}`);
 			yield downloadCache(cacheEntry.archiveLocation, archivePath, options);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
@@ -56802,7 +56808,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 				info("Lookup only - skipping download");
 				return response.matchedKey;
 			}
-			archivePath = path$1.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
+			archivePath = path.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
 			debug(`Archive path: ${archivePath}`);
 			debug(`Starting download of archive to: ${archivePath}`);
 			yield downloadCache(response.signedDownloadUrl, archivePath, options);
@@ -56861,7 +56867,7 @@ function saveCacheV1(paths_1, key_1, options_1) {
 		debug(`${JSON.stringify(cachePaths)}`);
 		if (cachePaths.length === 0) throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
 		const archiveFolder = yield createTempDirectory();
-		const archivePath = path$1.join(archiveFolder, getCacheFileName(compressionMethod));
+		const archivePath = path.join(archiveFolder, getCacheFileName(compressionMethod));
 		debug(`Archive Path: ${archivePath}`);
 		try {
 			yield createTar(archiveFolder, cachePaths, compressionMethod);
@@ -56921,7 +56927,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 		debug(`${JSON.stringify(cachePaths)}`);
 		if (cachePaths.length === 0) throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
 		const archiveFolder = yield createTempDirectory();
-		const archivePath = path$1.join(archiveFolder, getCacheFileName(compressionMethod));
+		const archivePath = path.join(archiveFolder, getCacheFileName(compressionMethod));
 		debug(`Archive Path: ${archivePath}`);
 		try {
 			yield createTar(archiveFolder, cachePaths, compressionMethod);
@@ -56984,9 +56990,9 @@ const INPUT_CACHE_DISABLED = "cache-disabled";
 const INPUT_CACHE_KEY = "cache-key";
 const INPUT_GENERATE_JOB_SUMMARY = "generate-job-summary";
 const INPUT_JOB_STATUS = "job-status";
-const HOME = os$2.homedir();
-const ANDROID_HOME_DIR = path.join(HOME, ".android");
-path.join(ANDROID_HOME_DIR, "sdk");
+const HOME = os.homedir();
+const ANDROID_HOME_DIR = path$1.join(HOME, ".android");
+path$1.join(ANDROID_HOME_DIR, "sdk");
 // src/cache.ts
 const RESTORED_ENTRY_STATE_KEY = "restoredEntry";
 function simpleHash(str) {
