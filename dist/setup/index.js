@@ -1,38 +1,38 @@
 import { createRequire } from "node:module";
-import * as os$3 from "os";
-import os, { EOL } from "os";
+import * as os$1 from "os";
+import os$2, { EOL as EOL$1 } from "os";
 import * as crypto$1 from "crypto";
-import * as fs$2 from "fs";
+import * as fs$1 from "fs";
 import { constants, existsSync, promises } from "fs";
-import * as path$2 from "path";
-import * as http$1 from "http";
-import * as https$1 from "https";
+import * as path$1 from "path";
+import * as http from "http";
+import * as https from "https";
 import * as events from "events";
 import { EventEmitter } from "events";
 import { ok } from "assert";
-import * as util$1 from "util";
-import http from "node:http";
+import * as util from "util";
+import http$1 from "node:http";
 import Stream, { Readable, Transform } from "node:stream";
-import buffer from "node:buffer";
-import util, { inspect } from "node:util";
+import buffer$1 from "node:buffer";
+import util$1, { inspect } from "node:util";
 import zlib from "node:zlib";
 import { createHmac } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import * as child from "child_process";
 import { setTimeout as setTimeout$1 } from "timers";
-import * as path$1 from "node:path";
-import path, { dirname } from "node:path";
-import * as os$2 from "node:os";
-import os$1, { EOL as EOL$1 } from "node:os";
+import * as path from "node:path";
+import path$2, { dirname } from "node:path";
+import * as os from "node:os";
+import os$3, { EOL as EOL$2 } from "node:os";
 import * as stream from "stream";
 import { Readable as Readable$1 } from "stream";
 import { URL as URL$1 } from "url";
 import process$1 from "node:process";
-import https from "node:https";
-import * as buffer$1 from "buffer";
+import https$1 from "node:https";
+import * as buffer from "buffer";
 import { Buffer as Buffer$1 } from "buffer";
-import fs from "node:fs";
-import * as fs$1 from "node:fs/promises";
+import fs$2 from "node:fs";
+import * as fs from "node:fs/promises";
 // \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -41,14 +41,14 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
-var __exportAll = (all, no_symbols) => {
-	let target = {};
+var __exportAll = (all, flags) => {
+	let target = Object.setPrototypeOf({}, null);
 	for (var name in all) __defProp(target, name, {
 		get: all[name],
 		enumerable: true
 	});
-	if (!no_symbols) __defProp(target, Symbol.toStringTag, { value: "Module" });
-	return target;
+	if (!(flags & 1)) __defProp(target, Symbol.toStringTag, { value: "Module" });
+	return flags & 2 ? target : Object.preventExtensions(target);
 };
 var __copyProps = (to, from, except, desc) => {
 	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
@@ -128,7 +128,7 @@ function toCommandProperties(annotationProperties) {
 */
 function issueCommand(command, properties, message) {
 	const cmd = new Command(command, properties, message);
-	process.stdout.write(cmd.toString() + os$3.EOL);
+	process.stdout.write(cmd.toString() + os$1.EOL);
 }
 function issue(name, message = "") {
 	issueCommand(name, {}, message);
@@ -169,15 +169,15 @@ function escapeProperty(s) {
 function issueFileCommand(command, message) {
 	const filePath = process.env[`GITHUB_${command}`];
 	if (!filePath) throw new Error(`Unable to find environment variable for file command ${command}`);
-	if (!fs$2.existsSync(filePath)) throw new Error(`Missing file at path: ${filePath}`);
-	fs$2.appendFileSync(filePath, `${toCommandValue(message)}${os$3.EOL}`, { encoding: "utf8" });
+	if (!fs$1.existsSync(filePath)) throw new Error(`Missing file at path: ${filePath}`);
+	fs$1.appendFileSync(filePath, `${toCommandValue(message)}${os$1.EOL}`, { encoding: "utf8" });
 }
 function prepareKeyValueMessage(key, value) {
 	const delimiter = `ghadelimiter_${crypto$1.randomUUID()}`;
 	const convertedValue = toCommandValue(value);
 	if (key.includes(delimiter)) throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter}"`);
 	if (convertedValue.includes(delimiter)) throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
-	return `${key}<<${delimiter}${os$3.EOL}${convertedValue}${os$3.EOL}${delimiter}`;
+	return `${key}<<${delimiter}${os$1.EOL}${convertedValue}${os$1.EOL}${delimiter}`;
 }
 // node_modules/.pnpm/@actions+http-client@4.0.1/node_modules/@actions/http-client/lib/proxy.js
 function getProxyUrl(reqUrl) {
@@ -6077,7 +6077,7 @@ var require_client_h2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		});
 		return {
 			version: "h2",
-			defaultPipelining: Infinity,
+			defaultPipelining: 1e400,
 			write(...args) {
 				return writeH2(client, ...args);
 			},
@@ -9382,7 +9382,7 @@ var require_pending_interceptors_formatter = /* @__PURE__ */ __commonJSMin(((exp
 				"Status code": statusCode,
 				Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
 				Invocations: timesInvoked,
-				Remaining: persist ? Infinity : times - timesInvoked
+				Remaining: persist ? 1e400 : times - timesInvoked
 			}));
 			this.logger.table(withPrettyHeaders);
 			return this.transform.read().toString();
@@ -9832,7 +9832,7 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			pick: interceptorOpts?.pick ?? null,
 			dualStack,
 			affinity,
-			maxItems: interceptorOpts?.maxItems ?? Infinity
+			maxItems: interceptorOpts?.maxItems ?? 1e400
 		});
 		return (dispatch) => {
 			return function dnsInterceptor(origDispatchOpts, handler) {
@@ -12915,7 +12915,7 @@ var require_cache = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			}
 			return true;
 		}
-		#internalMatchAll(request, options, maxResponses = Infinity) {
+		#internalMatchAll(request, options, maxResponses = 1e400) {
 			let r = null;
 			if (request !== void 0) {
 				if (request instanceof Request) {
@@ -16000,7 +16000,7 @@ var HttpClient = class {
 		const info = {};
 		info.parsedUrl = requestUrl;
 		const usingSsl = info.parsedUrl.protocol === "https:";
-		info.httpModule = usingSsl ? https$1 : http$1;
+		info.httpModule = usingSsl ? https : http;
 		const defaultPort = usingSsl ? 443 : 80;
 		info.options = {};
 		info.options.host = info.parsedUrl.hostname;
@@ -16070,7 +16070,7 @@ var HttpClient = class {
 		if (agent) return agent;
 		const usingSsl = parsedUrl.protocol === "https:";
 		let maxSockets = 100;
-		if (this.requestOptions) maxSockets = this.requestOptions.maxSockets || http$1.globalAgent.maxSockets;
+		if (this.requestOptions) maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
 		if (proxyUrl && proxyUrl.hostname) {
 			const agentOptions = {
 				maxSockets,
@@ -16092,7 +16092,7 @@ var HttpClient = class {
 				keepAlive: this._keepAlive,
 				maxSockets
 			};
-			agent = usingSsl ? new https$1.Agent(options) : new http$1.Agent(options);
+			agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
 			this._agent = agent;
 		}
 		if (usingSsl && this._ignoreSslError) agent.options = Object.assign(agent.options || {}, { rejectUnauthorized: false });
@@ -16347,7 +16347,7 @@ var Summary = class {
 	* @returns {Summary} summary instance
 	*/
 	addEOL() {
-		return this.addRaw(EOL);
+		return this.addRaw(EOL$1);
 	}
 	/**
 	* Adds an HTML codeblock to the summary buffer
@@ -16521,9 +16521,9 @@ var __awaiter$19 = function(thisArg, _arguments, P, generator) {
 		step((generator = generator.apply(thisArg, _arguments || [])).next());
 	});
 };
-const { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs$2.promises;
+const { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs$1.promises;
 const IS_WINDOWS$8 = process.platform === "win32";
-fs$2.constants.O_RDONLY;
+fs$1.constants.O_RDONLY;
 function exists(fsPath) {
 	return __awaiter$19(this, void 0, void 0, function* () {
 		try {
@@ -16561,7 +16561,7 @@ function tryGetExecutablePath(filePath, extensions) {
 		}
 		if (stats && stats.isFile()) {
 			if (IS_WINDOWS$8) {
-				const upperExt = path$2.extname(filePath).toUpperCase();
+				const upperExt = path$1.extname(filePath).toUpperCase();
 				if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) return filePath;
 			} else if (isUnixExecutable(stats)) return filePath;
 		}
@@ -16577,10 +16577,10 @@ function tryGetExecutablePath(filePath, extensions) {
 			if (stats && stats.isFile()) {
 				if (IS_WINDOWS$8) {
 					try {
-						const directory = path$2.dirname(filePath);
-						const upperName = path$2.basename(filePath).toUpperCase();
+						const directory = path$1.dirname(filePath);
+						const upperName = path$1.basename(filePath).toUpperCase();
 						for (const actualName of yield readdir(directory)) if (upperName === actualName.toUpperCase()) {
-							filePath = path$2.join(directory, actualName);
+							filePath = path$1.join(directory, actualName);
 							break;
 						}
 					} catch (err) {
@@ -16701,21 +16701,21 @@ function findInPath(tool) {
 		if (!tool) throw new Error("parameter 'tool' is required");
 		const extensions = [];
 		if (IS_WINDOWS$8 && process.env["PATHEXT"]) {
-			for (const extension of process.env["PATHEXT"].split(path$2.delimiter)) if (extension) extensions.push(extension);
+			for (const extension of process.env["PATHEXT"].split(path$1.delimiter)) if (extension) extensions.push(extension);
 		}
 		if (isRooted(tool)) {
 			const filePath = yield tryGetExecutablePath(tool, extensions);
 			if (filePath) return [filePath];
 			return [];
 		}
-		if (tool.includes(path$2.sep)) return [];
+		if (tool.includes(path$1.sep)) return [];
 		const directories = [];
 		if (process.env.PATH) {
-			for (const p of process.env.PATH.split(path$2.delimiter)) if (p) directories.push(p);
+			for (const p of process.env.PATH.split(path$1.delimiter)) if (p) directories.push(p);
 		}
 		const matches = [];
 		for (const directory of directories) {
-			const filePath = yield tryGetExecutablePath(path$2.join(directory, tool), extensions);
+			const filePath = yield tryGetExecutablePath(path$1.join(directory, tool), extensions);
 			if (filePath) matches.push(filePath);
 		}
 		return matches;
@@ -16785,11 +16785,11 @@ var ToolRunner = class extends events.EventEmitter {
 	_processLineBuffer(data, strBuffer, onLine) {
 		try {
 			let s = strBuffer + data.toString();
-			let n = s.indexOf(os$3.EOL);
+			let n = s.indexOf(os$1.EOL);
 			while (n > -1) {
 				onLine(s.substring(0, n));
-				s = s.substring(n + os$3.EOL.length);
-				n = s.indexOf(os$3.EOL);
+				s = s.substring(n + os$1.EOL.length);
+				n = s.indexOf(os$1.EOL);
 			}
 			return s;
 		} catch (err) {
@@ -16922,14 +16922,14 @@ var ToolRunner = class extends events.EventEmitter {
 	*/
 	exec() {
 		return __awaiter$17(this, void 0, void 0, function* () {
-			if (!isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS$7 && this.toolPath.includes("\\"))) this.toolPath = path$2.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+			if (!isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS$7 && this.toolPath.includes("\\"))) this.toolPath = path$1.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
 			this.toolPath = yield which(this.toolPath, true);
 			return new Promise((resolve, reject) => __awaiter$17(this, void 0, void 0, function* () {
 				this._debug(`exec tool: ${this.toolPath}`);
 				this._debug("arguments:");
 				for (const arg of this.args) this._debug(`   ${arg}`);
 				const optionsNonNull = this._cloneExecOptions(this.options);
-				if (!optionsNonNull.silent && optionsNonNull.outStream) optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os$3.EOL);
+				if (!optionsNonNull.silent && optionsNonNull.outStream) optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os$1.EOL);
 				const state = new ExecState(optionsNonNull, this.toolPath);
 				state.on("debug", (message) => {
 					this._debug(message);
@@ -17125,8 +17125,8 @@ function exec(commandLine, args, options) {
 		return new ToolRunner(toolPath, args, options).exec();
 	});
 }
-os.platform();
-os.arch();
+os$2.platform();
+os$2.arch();
 /**
 * The code to exit an action
 */
@@ -17191,7 +17191,7 @@ function setSecret(secret) {
 function addPath$1(inputPath) {
 	if (process.env["GITHUB_PATH"] || "") issueFileCommand("PATH", inputPath);
 	else issueCommand("add-path", {}, inputPath);
-	process.env["PATH"] = `${inputPath}${path$2.delimiter}${process.env["PATH"]}`;
+	process.env["PATH"] = `${inputPath}${path$1.delimiter}${process.env["PATH"]}`;
 }
 /**
 * Gets the value of an input.
@@ -17290,7 +17290,7 @@ function warning(message, properties = {}) {
 * @param message info message
 */
 function info(message) {
-	process.stdout.write(message + os$3.EOL);
+	process.stdout.write(message + os$1.EOL);
 }
 /**
 * Begin an output group.
@@ -17337,14 +17337,14 @@ const COMMANDLINE_TOOLS_MAC_URL = (version, architecture = process.arch) => {
 	return `https://dl.google.com/android/repository/commandlinetools-mac-${version}_latest.zip`;
 };
 const COMMANDLINE_TOOLS_WINDOWS_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-win-${version}_latest.zip`;
-const HOME = os$2.homedir();
-const ANDROID_HOME_DIR = path.join(HOME, ".android");
-const ANDROID_SDK_ROOT = path.join(ANDROID_HOME_DIR, "sdk");
+const HOME = os.homedir();
+const ANDROID_HOME_DIR = path$2.join(HOME, ".android");
+const ANDROID_SDK_ROOT = path$2.join(ANDROID_HOME_DIR, "sdk");
 // src/add-path.ts
 function addPath({ ndkVersion, cmakeVersion }) {
 	exportVariable("ANDROID_SDK_ROOT", ANDROID_SDK_ROOT);
 	exportVariable("ANDROID_HOME", ANDROID_SDK_ROOT);
-	const ndkPath = ndkVersion ? path$1.join(ANDROID_SDK_ROOT, "ndk", ndkVersion) : void 0;
+	const ndkPath = ndkVersion ? path.join(ANDROID_SDK_ROOT, "ndk", ndkVersion) : void 0;
 	if (ndkPath) {
 		exportVariable("ANDROID_NDK_ROOT", ndkPath);
 		exportVariable("ANDROID_NDK_HOME", ndkPath);
@@ -17361,12 +17361,12 @@ function addPath({ ndkVersion, cmakeVersion }) {
 	}
 	if (cmakeVersion) info(`  CMAKE_VERSION: ${cmakeVersion}`);
 	if (ndkPath) addPath$1(ndkPath);
-	addPath$1(path$1.join(ANDROID_SDK_ROOT, "platform-tools"));
-	addPath$1(path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin"));
+	addPath$1(path.join(ANDROID_SDK_ROOT, "platform-tools"));
+	addPath$1(path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin"));
 	info("Path");
 	if (ndkPath) info(`  ${ndkPath}`);
-	info(`  ${path$1.join(ANDROID_SDK_ROOT, "platform-tools")}`);
-	info(`  ${path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin")}`);
+	info(`  ${path.join(ANDROID_SDK_ROOT, "platform-tools")}`);
+	info(`  ${path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin")}`);
 }
 process.platform;
 // node_modules/.pnpm/@actions+glob@0.6.1/node_modules/@actions/glob/lib/internal-match-kind.js
@@ -19476,19 +19476,19 @@ function createTempDirectory() {
 			if (IS_WINDOWS) baseLocation = process.env["USERPROFILE"] || "C:\\";
 			else if (process.platform === "darwin") baseLocation = "/Users";
 			else baseLocation = "/home";
-			tempDirectory = path$2.join(baseLocation, "actions", "temp");
+			tempDirectory = path$1.join(baseLocation, "actions", "temp");
 		}
-		const dest = path$2.join(tempDirectory, crypto$1.randomUUID());
+		const dest = path$1.join(tempDirectory, crypto$1.randomUUID());
 		yield mkdirP(dest);
 		return dest;
 	});
 }
 function getArchiveFileSizeInBytes(filePath) {
-	return fs$2.statSync(filePath).size;
+	return fs$1.statSync(filePath).size;
 }
 function unlinkFile(filePath) {
 	return __awaiter$10(this, void 0, void 0, function* () {
-		return util$1.promisify(fs$2.unlink)(filePath);
+		return util.promisify(fs$1.unlink)(filePath);
 	});
 }
 function getVersion(app_1) {
@@ -19526,7 +19526,7 @@ function getCacheFileName(compressionMethod) {
 }
 function getGnuTarPathOnWindows() {
 	return __awaiter$10(this, void 0, void 0, function* () {
-		if (fs$2.existsSync(GnuTarPathOnWindows)) return GnuTarPathOnWindows;
+		if (fs$1.existsSync(GnuTarPathOnWindows)) return GnuTarPathOnWindows;
 		return (yield getVersion("tar")).toLowerCase().includes("gnu tar") ? which("tar") : "";
 	});
 }
@@ -19580,7 +19580,7 @@ var AbortError$1 = class extends Error {
 };
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.2_supports-color@7.2.0/node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
 function log(message, ...args) {
-	process$1.stderr.write(`${util.format(message, ...args)}${EOL$1}`);
+	process$1.stderr.write(`${util$1.format(message, ...args)}${EOL$2}`);
 }
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.2_supports-color@7.2.0/node_modules/@typespec/ts-http-runtime/dist/esm/logger/debug.js
 const debugEnvVariable = typeof process !== "undefined" && process.env && process.env.DEBUG || void 0;
@@ -20490,7 +20490,7 @@ var NodeHttpClient = class {
 			...request.requestOverrides
 		};
 		return new Promise((resolve, reject) => {
-			const req = isInsecure ? http.request(options, resolve) : https.request(options, resolve);
+			const req = isInsecure ? http$1.request(options, resolve) : https$1.request(options, resolve);
 			req.once("error", (err) => {
 				reject(new RestError$1(err.message, {
 					code: err.code ?? RestError$1.REQUEST_SEND_ERROR,
@@ -20516,16 +20516,16 @@ var NodeHttpClient = class {
 	getOrCreateAgent(request, isInsecure) {
 		const disableKeepAlive = request.disableKeepAlive;
 		if (isInsecure) {
-			if (disableKeepAlive) return http.globalAgent;
-			if (!this.cachedHttpAgent) this.cachedHttpAgent = new http.Agent({ keepAlive: true });
+			if (disableKeepAlive) return http$1.globalAgent;
+			if (!this.cachedHttpAgent) this.cachedHttpAgent = new http$1.Agent({ keepAlive: true });
 			return this.cachedHttpAgent;
 		} else {
-			if (disableKeepAlive && !request.tlsSettings) return https.globalAgent;
+			if (disableKeepAlive && !request.tlsSettings) return https$1.globalAgent;
 			const tlsSettings = request.tlsSettings ?? DEFAULT_TLS_SETTINGS;
 			let agent = this.cachedHttpsAgents.get(tlsSettings);
 			if (agent && agent.options.keepAlive === !disableKeepAlive) return agent;
 			logger$4.info("No cached TLS Agent exist, creating a new Agent");
-			agent = new https.Agent({
+			agent = new https$1.Agent({
 				keepAlive: !disableKeepAlive,
 				...tlsSettings
 			});
@@ -21958,7 +21958,7 @@ var require_dist$2 = /* @__PURE__ */ __commonJSMin(((exports, module, this$9) =>
 			return stack.split("\n").some((l) => l.indexOf("(https.js:") !== -1 || l.indexOf("node:https:") !== -1);
 		}
 		incrementSockets(name) {
-			if (this.maxSockets === Infinity && this.maxTotalSockets === Infinity) return null;
+			if (this.maxSockets === 1e400 && this.maxTotalSockets === 1e400) return null;
 			if (!this.sockets[name]) this.sockets[name] = [];
 			const fakeSocket = new net.Socket({ writable: false });
 			this.sockets[name].push(fakeSocket);
@@ -22715,7 +22715,7 @@ function getHeaderName() {
 */
 async function setPlatformSpecificData(map) {
 	if (process$1 && process$1.versions) {
-		const osInfo = `${os$1.type()} ${os$1.release()}; ${os$1.arch()}`;
+		const osInfo = `${os$3.type()} ${os$3.release()}; ${os$3.arch()}`;
 		const versions = process$1.versions;
 		if (versions.bun) map.set("Bun", `${versions.bun} (${osInfo})`);
 		else if (versions.deno) map.set("Deno", `${versions.deno} (${osInfo})`);
@@ -26708,7 +26708,7 @@ var XMLParser = class {
 	}
 };
 // node_modules/.pnpm/fast-xml-parser@5.3.3/node_modules/fast-xml-parser/src/xmlbuilder/orderedJs2Xml.js
-const EOL$2 = "\n";
+const EOL = "\n";
 /**
 * 
 * @param {array} jArray 
@@ -26717,7 +26717,7 @@ const EOL$2 = "\n";
 */
 function toXml(jArray, options) {
 	let indentation = "";
-	if (options.format && options.indentBy.length > 0) indentation = EOL$2;
+	if (options.format && options.indentBy.length > 0) indentation = EOL;
 	return arrToStr(jArray, options, "", indentation);
 }
 function arrToStr(arr, options, jPath, indentation) {
@@ -27148,7 +27148,7 @@ var BuffersStream = class extends Readable {
 /**
 * maxBufferLength is max size of each buffer in the pooled buffers.
 */
-const maxBufferLength = buffer.constants.MAX_LENGTH;
+const maxBufferLength = buffer$1.constants.MAX_LENGTH;
 /**
 * This class provides a buffer container which conceptually has no hard size limit.
 * It accepts a capacity, an array of input buffers and the total length of input data.
@@ -47211,7 +47211,7 @@ async function streamToBuffer(stream, buffer, offset, end, encoding) {
 */
 async function readStreamToLocalFile(rs, file) {
 	return new Promise((resolve, reject) => {
-		const ws = fs.createWriteStream(file);
+		const ws = fs$2.createWriteStream(file);
 		rs.on("error", (err) => {
 			reject(err);
 		});
@@ -47227,8 +47227,8 @@ async function readStreamToLocalFile(rs, file) {
 *
 * Promisified version of fs.stat().
 */
-const fsStat = util.promisify(fs.stat);
-const fsCreateReadStream = fs.createReadStream;
+const fsStat = util$1.promisify(fs$2.stat);
+const fsCreateReadStream = fs$2.createReadStream;
 // node_modules/.pnpm/@azure+storage-blob@12.32.0_supports-color@7.2.0/node_modules/@azure/storage-blob/dist/esm/Clients.js
 /**
 * A BlobClient represents a URL to an Azure Storage blob; the blob may be a block blob,
@@ -49024,7 +49024,7 @@ var BlockBlobClient = class BlockBlobClient extends BlobClient {
 			return this.uploadSeekableInternal((offset, count) => {
 				return () => fsCreateReadStream(filePath, {
 					autoClose: true,
-					end: count ? offset + count - 1 : Infinity,
+					end: count ? offset + count - 1 : 1e400,
 					start: offset
 				});
 			}, size, {
@@ -49988,7 +49988,7 @@ var __awaiter$7 = function(thisArg, _arguments, P, generator) {
 */
 function pipeResponseToStream(response, output) {
 	return __awaiter$7(this, void 0, void 0, function* () {
-		yield util$1.promisify(stream.pipeline)(response.message, output);
+		yield util.promisify(stream.pipeline)(response.message, output);
 	});
 }
 /**
@@ -50091,7 +50091,7 @@ var DownloadProgress = class {
 */
 function downloadCacheHttpClient(archiveLocation, archivePath) {
 	return __awaiter$7(this, void 0, void 0, function* () {
-		const writeStream = fs$2.createWriteStream(archivePath);
+		const writeStream = fs$1.createWriteStream(archivePath);
 		const httpClient = new HttpClient("actions/cache");
 		const downloadResponse = yield retryHttpClientResponse("downloadCache", () => __awaiter$7(this, void 0, void 0, function* () {
 			return httpClient.get(archiveLocation);
@@ -50118,7 +50118,7 @@ function downloadCacheHttpClient(archiveLocation, archivePath) {
 function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
 	return __awaiter$7(this, void 0, void 0, function* () {
 		var _a;
-		const archiveDescriptor = yield fs$2.promises.open(archivePath, "w");
+		const archiveDescriptor = yield fs$1.promises.open(archivePath, "w");
 		const httpClient = new HttpClient("actions/cache", void 0, {
 			socketTimeout: options.timeoutInMs,
 			keepAlive: true
@@ -50213,9 +50213,9 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
 			debug("Unable to determine content length, downloading file with http-client...");
 			yield downloadCacheHttpClient(archiveLocation, archivePath);
 		} else {
-			const maxSegmentSize = Math.min(134217728, buffer$1.constants.MAX_LENGTH);
+			const maxSegmentSize = Math.min(134217728, buffer.constants.MAX_LENGTH);
 			const downloadProgress = new DownloadProgress(contentLength);
-			const fd = fs$2.openSync(archivePath, "w");
+			const fd = fs$1.openSync(archivePath, "w");
 			try {
 				downloadProgress.startDisplayTimer();
 				const controller = new AbortController();
@@ -50232,11 +50232,11 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
 					if (result === "timeout") {
 						controller.abort();
 						throw new Error("Aborting cache download as the download time exceeded the timeout.");
-					} else if (Buffer.isBuffer(result)) fs$2.writeFileSync(fd, result);
+					} else if (Buffer.isBuffer(result)) fs$1.writeFileSync(fd, result);
 				}
 			} finally {
 				downloadProgress.stopDisplayTimer();
-				fs$2.closeSync(fd);
+				fs$1.closeSync(fd);
 			}
 		}
 	});
@@ -52245,6 +52245,12 @@ var require_reflection_json_reader = /* @__PURE__ */ __commonJSMin(((exports) =>
 						if (json === null) return "";
 						if (typeof json !== "string") {
 							e = "extra whitespace";
+							break;
+						}
+						try {
+							encodeURIComponent(json);
+						} catch (e) {
+							e = "invalid UTF8";
 							break;
 						}
 						return json;
@@ -55671,12 +55677,12 @@ function getTarArgs(tarPath_1, compressionMethod_1, type_1) {
 		const BSD_TAR_ZSTD = tarPath.type === ArchiveToolType.BSD && compressionMethod !== CompressionMethod.Gzip && IS_WINDOWS$1;
 		switch (type) {
 			case "create":
-				args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "--files-from", ManifestFilename);
+				args.push("--posix", "-cf", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "--exclude", BSD_TAR_ZSTD ? tarFile : cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "--files-from", ManifestFilename);
 				break;
 			case "extract":
-				args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"));
+				args.push("-xf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "-P", "-C", workingDirectory.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"));
 				break;
-			case "list": args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"), "-P");
+			case "list": args.push("-tf", BSD_TAR_ZSTD ? tarFile : archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"), "-P");
 		}
 		if (tarPath.type === ArchiveToolType.GNU) switch (process.platform) {
 			case "win32":
@@ -55711,12 +55717,12 @@ function getDecompressionProgram(tarPath, compressionMethod, archivePath) {
 			case CompressionMethod.Zstd: return BSD_TAR_ZSTD ? [
 				"zstd -d --long=30 --force -o",
 				TarFilename,
-				archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/")
+				archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/")
 			] : ["--use-compress-program", IS_WINDOWS$1 ? "\"zstd -d --long=30\"" : "unzstd --long=30"];
 			case CompressionMethod.ZstdWithoutLong: return BSD_TAR_ZSTD ? [
 				"zstd -d --force -o",
 				TarFilename,
-				archivePath.replace(new RegExp(`\\${path$2.sep}`, "g"), "/")
+				archivePath.replace(new RegExp(`\\${path$1.sep}`, "g"), "/")
 			] : ["--use-compress-program", IS_WINDOWS$1 ? "\"zstd -d\"" : "unzstd"];
 			default: return ["-z"];
 		}
@@ -55729,12 +55735,12 @@ function getCompressionProgram(tarPath, compressionMethod) {
 		switch (compressionMethod) {
 			case CompressionMethod.Zstd: return BSD_TAR_ZSTD ? [
 				"zstd -T0 --long=30 --force -o",
-				cacheFileName.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"),
+				cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"),
 				TarFilename
 			] : ["--use-compress-program", IS_WINDOWS$1 ? "\"zstd -T0 --long=30\"" : "zstdmt --long=30"];
 			case CompressionMethod.ZstdWithoutLong: return BSD_TAR_ZSTD ? [
 				"zstd -T0 --force -o",
-				cacheFileName.replace(new RegExp(`\\${path$2.sep}`, "g"), "/"),
+				cacheFileName.replace(new RegExp(`\\${path$1.sep}`, "g"), "/"),
 				TarFilename
 			] : ["--use-compress-program", IS_WINDOWS$1 ? "\"zstd -T0\"" : "zstdmt"];
 			default: return ["-z"];
@@ -55863,7 +55869,7 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 				info("Lookup only - skipping download");
 				return cacheEntry.cacheKey;
 			}
-			archivePath = path$2.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
+			archivePath = path$1.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
 			debug(`Archive Path: ${archivePath}`);
 			yield downloadCache(cacheEntry.archiveLocation, archivePath, options);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
@@ -55920,7 +55926,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 				info("Lookup only - skipping download");
 				return response.matchedKey;
 			}
-			archivePath = path$2.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
+			archivePath = path$1.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
 			debug(`Archive path: ${archivePath}`);
 			debug(`Starting download of archive to: ${archivePath}`);
 			yield downloadCache(response.signedDownloadUrl, archivePath, options);
@@ -56079,8 +56085,8 @@ const userAgent = "actions/tool-cache";
 */
 function downloadTool(url, dest, auth, headers) {
 	return __awaiter(this, void 0, void 0, function* () {
-		dest = dest || path$2.join(_getTempDirectory(), crypto$1.randomUUID());
-		yield mkdirP(path$2.dirname(dest));
+		dest = dest || path$1.join(_getTempDirectory(), crypto$1.randomUUID());
+		yield mkdirP(path$1.dirname(dest));
 		debug(`Downloading ${url}`);
 		debug(`Destination ${dest}`);
 		return yield new RetryHelper(3, _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS", 10), _getGlobal("TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS", 20)).execute(() => __awaiter(this, void 0, void 0, function* () {
@@ -56095,7 +56101,7 @@ function downloadTool(url, dest, auth, headers) {
 }
 function downloadToolAttempt(url, dest, auth, headers) {
 	return __awaiter(this, void 0, void 0, function* () {
-		if (fs$2.existsSync(dest)) throw new Error(`Destination file path ${dest} already exists`);
+		if (fs$1.existsSync(dest)) throw new Error(`Destination file path ${dest} already exists`);
 		const http = new HttpClient(userAgent, [], { allowRetries: false });
 		if (auth) {
 			debug("set auth");
@@ -56108,11 +56114,11 @@ function downloadToolAttempt(url, dest, auth, headers) {
 			debug(`Failed to download from "${url}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
 			throw err;
 		}
-		const pipeline = util$1.promisify(stream.pipeline);
+		const pipeline = util.promisify(stream.pipeline);
 		const readStream = _getGlobal("TEST_DOWNLOAD_TOOL_RESPONSE_MESSAGE_FACTORY", () => response.message)();
 		let succeeded = false;
 		try {
-			yield pipeline(readStream, fs$2.createWriteStream(dest));
+			yield pipeline(readStream, fs$1.createWriteStream(dest));
 			debug("download complete");
 			succeeded = true;
 			return dest;
@@ -56199,7 +56205,7 @@ function extractZipNix(file, dest) {
 }
 function _createExtractFolder(dest) {
 	return __awaiter(this, void 0, void 0, function* () {
-		if (!dest) dest = path$2.join(_getTempDirectory(), crypto$1.randomUUID());
+		if (!dest) dest = path$1.join(_getTempDirectory(), crypto$1.randomUUID());
 		yield mkdirP(dest);
 		return dest;
 	});
@@ -56221,16 +56227,16 @@ function _getGlobal(key, defaultValue) {
 }
 // src/installer.ts
 async function installAndroidSdk(versions) {
-	await fs$1.rm(ANDROID_SDK_ROOT, {
+	await fs.rm(ANDROID_SDK_ROOT, {
 		recursive: true,
 		force: true
 	});
-	await fs$1.rm(path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest"), {
+	await fs.rm(path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest"), {
 		recursive: true,
 		force: true
 	});
 	info("success cleanup");
-	await fs$1.mkdir(ANDROID_SDK_ROOT, { recursive: true });
+	await fs.mkdir(ANDROID_SDK_ROOT, { recursive: true });
 	info("success create directory");
 	let cmdlineToolsDownloadUrl;
 	switch (process.platform) {
@@ -56249,15 +56255,15 @@ async function installAndroidSdk(versions) {
 	const downloadedCmdlineToolsPath = await downloadTool(cmdlineToolsDownloadUrl);
 	info(`success download cmdline-tools path: ${downloadedCmdlineToolsPath}`);
 	info("start extract cmdline-tools.zip");
-	const extractedCmdlineToolPath = await extractZip(downloadedCmdlineToolsPath, path$1.join(ANDROID_SDK_ROOT, "cmdline-tools"));
+	const extractedCmdlineToolPath = await extractZip(downloadedCmdlineToolsPath, path.join(ANDROID_SDK_ROOT, "cmdline-tools"));
 	info(`success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`);
-	const from = path$1.join(extractedCmdlineToolPath, "cmdline-tools");
+	const from = path.join(extractedCmdlineToolPath, "cmdline-tools");
 	const to = "latest";
 	info(`start rename ${from} to ${to}`);
 	if (process.platform === "win32") await exec(`cmd /c "rename ${from} ${to}"`);
 	else {
-		await fs$1.mkdir(path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", to), { recursive: true });
-		await fs$1.rename(from, path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", to));
+		await fs.mkdir(path.join(ANDROID_SDK_ROOT, "cmdline-tools", to), { recursive: true });
+		await fs.rename(from, path.join(ANDROID_SDK_ROOT, "cmdline-tools", to));
 	}
 	info(`success rename ${from} to ${to}`);
 	info("start accept licenses");
