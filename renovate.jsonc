@@ -21,9 +21,30 @@
       "depNameTemplate": "GitHub Actions Node.js runtime",
       "datasourceTemplate": "custom.github-actions-node",
       "versioningTemplate": "regex:^node(?<major>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "action.yml",
+        "README.md"
+      ],
+      "matchStrings": [
+        "  command-line-tools-version:\\r?\\n(?:    [^\\n]*\\n)*?    default: \"(?<currentValue>\\d+)\"",
+        "# default: (?<currentValue>\\d+)\\r?\\n(?:[ \\t]*#[^\\n]*\\n)*[ \\t]*command-line-tools-version:",
+        "command-line-tools-version: (?<currentValue>\\d+)"
+      ],
+      "depNameTemplate": "Android SDK Command-line Tools",
+      "datasourceTemplate": "custom.android-command-line-tools",
+      "extractVersionTemplate": "/commandlinetools-linux-(?<version>\\d+)_latest\\.zip$",
+      // Build numbers can jump by millions between releases.
+      "versioningTemplate": "regex:^(?<minor>\\d+)$"
     }
   ],
   "customDatasources": {
+    "android-command-line-tools": {
+      "defaultRegistryUrlTemplate": "https://developer.android.com/studio",
+      "format": "html"
+    },
     // Only offer runtimes documented by GitHub, rather than every Node.js release.
     "github-actions-node": {
       "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/github/docs/main/content/actions/reference/workflows-and-actions/metadata-syntax.md",
@@ -34,6 +55,13 @@
     }
   },
   "packageRules": [
+    {
+      "matchDatasources": [
+        "custom.android-command-line-tools"
+      ],
+      // The download links include the build number but have no release timestamp.
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
     {
       "matchManagers": [
         "npm"
