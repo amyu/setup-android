@@ -5,6 +5,9 @@
   ],
   "timezone": "Asia/Tokyo",
   "minimumReleaseAge": "7 days",
+  "constraints": {
+    "ghActionsLock": "v0.5.1"
+  },
   "patch": {
     "automerge": true
   },
