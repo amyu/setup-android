@@ -44,6 +44,23 @@ steps:
   - run: ./gradlew build --stacktrace
 ```
 
+### Pin actions with a workflow lockfile
+
+To use release tags while keeping the exact commits from the basic example, add
+the steps above to a job in your own repository. If your workflow is named
+`.github/workflows/build.yml`, run these commands from the repository root
+with an authenticated GitHub CLI.
+
+```sh
+gh extension install github/gh-actions-lock
+gh actions-lock .github/workflows/build.yml
+```
+
+Review and commit the updated workflow and the generated
+`.github/workflows/actions.lock` together. GitHub Actions runs the commit
+recorded in your lockfile even if the release tag later moves.
+See [GitHub's workflow lockfile guide](https://docs.github.com/en/actions/how-tos/secure-your-work/lock-workflow-dependencies).
+
 ### Read the SDK version from a version catalog
 
 If your project uses a Gradle version catalog, the SDK version can be passed to
@@ -137,3 +154,9 @@ The scripts and documentation in this project are released under the [MIT Licens
 ## Contributing
 
 Contributions are welcome!
+
+The [Renovate workflow](.github/workflows/renovate.yml) uses the action's
+default Renovate image and updates action references and the
+[CI lockfile](.github/workflows/actions.lock) in the same pull request.
+When changing workflow dependencies manually, run `gh actions-lock` from the
+repository root and include the updated lockfile in your pull request.
