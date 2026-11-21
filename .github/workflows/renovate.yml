@@ -35,5 +35,5 @@ jobs:
         uses: renovatebot/github-action@v46.3.13
         with:
           configurationFile: .github/renovate-config.json
-          renovate-version: 44.65.5
+          renovate-version: 44.239.1
           token: ${{ steps.app-token.outputs.token }}
