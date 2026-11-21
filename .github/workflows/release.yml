@@ -84,25 +84,17 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const version = '${{ github.event.inputs.version }}';
-
-            // Get the SHA of the main branch (which the new tag points to)
-            const { data: ref } = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'heads/main',
-            });
-            const sha = ref.object.sha;
-            console.log(`main branch SHA: ${sha}`);
-
-            // Update README.md: replace all amyu/setup-android@<hash> # v* references
-            let readme = fs.readFileSync('README.md', 'utf8');
-            readme = readme.replace(
-              /amyu\/setup-android@[a-f0-9]+ # v[\d.]+/g,
-              `amyu/setup-android@${sha} # ${version}`
+            const version = context.payload.inputs.version;
+            const readme = fs.readFileSync('README.md', 'utf8');
+            const updatedReadme = readme.replace(
+              /\buses: amyu\/setup-android@v\d+\.\d+(?=\s|$)/g,
+              `uses: amyu/setup-android@${version}`
             );
-            fs.writeFileSync('README.md', readme);
-            console.log(`Updated README.md to amyu/setup-android@${sha} # ${version}`);
+            if (updatedReadme === readme) {
+              console.log('No README updates needed.');
+              return;
+            }
+            fs.writeFileSync('README.md', updatedReadme);
 
             // Commit and push to a new branch
             const branch = `release/update-readme-${version}`;
@@ -119,7 +111,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `docs: update README for ${version}`,
-              body: `Update \`amyu/setup-android\` references in README to \`@${sha} # ${version}\`.`,
+              body: `Update README examples to use \`amyu/setup-android@${version}\`.`,
               head: branch,
               base: context.payload.repository.default_branch,
             });

@@ -27,19 +27,24 @@ installation.
 
 See [action.yml](action.yml) for the complete input reference.
 
+The examples below use release tags. Use them with a
+[workflow lockfile](https://docs.github.com/en/actions/how-tos/secure-your-work/lock-workflow-dependencies)
+in your own repository. For workflows without a lockfile, pin each action in
+`uses:` to the full 40-character commit SHA for that release.
+
 ### Basic usage
 
 ```yaml
 steps:
-  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+  - uses: actions/checkout@v7.0.1
   - name: Setup JDK 17
-    uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
+    uses: actions/setup-java@v5.6.0
     with:
       java-version: 17
       distribution: jetbrains
 
   - name: Setup Android SDK
-    uses: amyu/setup-android@09345fc2cbed5b3a92beea84d843a22eac6cc841 # v6.0
+    uses: amyu/setup-android@v6.0
 
   - run: ./gradlew build --stacktrace
 ```
@@ -58,7 +63,7 @@ the action dynamically:
     echo "sdkVersion=$version" >> "$GITHUB_OUTPUT"
 
 - name: Setup Android SDK
-  uses: amyu/setup-android@09345fc2cbed5b3a92beea84d843a22eac6cc841 # v6.0
+  uses: amyu/setup-android@v6.0
   with:
     sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
 ```
@@ -67,7 +72,7 @@ the action dynamically:
 
 ```yaml
   - name: Setup Android SDK
-    uses: amyu/setup-android@09345fc2cbed5b3a92beea84d843a22eac6cc841 # v6.0
+    uses: amyu/setup-android@v6.0
     with:
       # default: false
       # Disable Android SDK caching.
