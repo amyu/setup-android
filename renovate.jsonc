@@ -69,7 +69,9 @@
       "rangeStrategy": "pin"
     },
     {
+      "enabled": true,
       "matchDepNames": [
+        "@actions/cache",
         "rolldown"
       ],
       "postUpgradeTasks": {
@@ -86,12 +88,6 @@
         ],
         "executionMode": "branch"
       }
-    },
-    {
-      "enabled": false,
-      "matchPackageNames": [
-        "/@actions/cache/"
-      ]
     },
     {
       "groupName": "Android Gradle Plugin",

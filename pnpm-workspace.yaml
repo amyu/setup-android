@@ -1,1 +1,3 @@
 minimumReleaseAge: 10080
+patchedDependencies:
+  '@actions/cache': patches/actions-cache.patch
