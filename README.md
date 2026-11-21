@@ -1,21 +1,9 @@
-# setup-android
+# setup-android — Android SDK setup for GitHub Actions
 
-`setup-android` installs Android SDK components on self-hosted GitHub Actions runners.
-
-- Downloads the Android command-line tools for Linux, macOS, and Windows.
-- Installs requested Android SDK platforms and optional Build Tools, NDK, and CMake versions.
-- Optionally caches the installed Android SDK.
-- Exports the following environment variables:
-  + `ANDROID_SDK_ROOT`
-  + `ANDROID_HOME`
-  + `ANDROID_NDK_ROOT` (when `ndk-version` is specified)
-  + `ANDROID_NDK_HOME` (when `ndk-version` is specified)
-  + `ANDROID_NDK` (when `ndk-version` is specified)
-  + `CMAKE_VERSION` (when `cmake-version` is specified)
-- Adds the following directories to `PATH`:
-  + `$ANDROID_SDK_ROOT/platform-tools`
-  + `$ANDROID_SDK_ROOT/cmdline-tools/latest/bin`
-  + `$ANDROID_SDK_ROOT/ndk/<version>` (when `ndk-version` is specified)
+`amyu/setup-android` installs and caches the Android SDK on self-hosted Linux,
+macOS, and Windows runners. Install the SDK platforms your Gradle build needs,
+or pin the Android NDK and CMake versions used by a native build.
+[View the action on GitHub Marketplace](https://github.com/marketplace/actions/setup-android-sdk-for-self-hosted-runners).
 
 ## When to use this action
 
@@ -49,18 +37,36 @@ steps:
   - run: ./gradlew build --stacktrace
 ```
 
+### Install the agent skill
+
+Run the following command from your Android project to install the skill for
+your coding agent.
+
+```sh
+npx skills add amyu/setup-android --skill setup-android
+```
+
+Try asking “Set up the Android SDK for our self-hosted runner using the versions
+from our Gradle build.” [Read the setup-android skill](https://github.com/amyu/setup-android/blob/main/skills/setup-android/SKILL.md).
+
 ### Read the SDK version from a version catalog
 
-If your project uses a Gradle version catalog, the SDK version can be passed to
-the action dynamically:
+If your build reads `compileSdk` from a Gradle version catalog, CI can read the
+same value. This example uses Python 3.11 or later and a catalog entry named
+`compileSdkVersion`. Use the key your build references.
 
 ```yaml
-- name: "Get sdkVersion from versions.toml"
+- name: Read compileSdk from the version catalog
   id: read_version
-  shell: bash
+  shell: python
   run: |
-    version=$(perl -nlE 'say if s/compileSdkVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml)
-    echo "sdkVersion=$version" >> "$GITHUB_OUTPUT"
+    import os
+    import tomllib
+
+    with open("gradle/libs.versions.toml", "rb") as catalog:
+        sdk = tomllib.load(catalog)["versions"]["compileSdkVersion"]
+    with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+        print(f"sdkVersion={sdk}", file=output)
 
 - name: Setup Android SDK
   uses: amyu/setup-android@v6.0
@@ -70,59 +76,47 @@ the action dynamically:
 
 ### Configuration examples
 
+#### Install multiple Android SDK platforms and Build Tools
+
+Pass one version per line when a job builds modules with different
+`compileSdk` values. For a single platform, use a scalar such as
+`sdk-version: "36"`. API level 37 and later use minor versions such as
+`"37.0"`. Add Build Tools versions when the build requires them.
+
 ```yaml
-  - name: Setup Android SDK
-    uses: amyu/setup-android@v6.0
-    with:
-      # default: false
-      # Disable Android SDK caching.
-      cache-disabled: false
+- uses: amyu/setup-android@v6.0
+  with:
+    sdk-version: |
+      36
+      37.0
+    build-tools-version: |
+      35.0.0
+      36.0.0
+```
 
-      # default: `${sdkVersion}-${buildToolsVersion}-${ndkVersion}-${cmakeVersion}-${commandLineToolsVersion}-${hashedCacheDirectory}-v6`
-      # Custom cache key. Ignored when `cache-disabled` is true.
-      cache-key: 'custom-cache-key'
+#### Set up the Android NDK and CMake
 
-      # default: 37.0
-      # Android SDK platform suffix. Supports major, major.minor, and published
-      # codename-based values.
-      # See https://developer.android.com/studio/releases/platforms
-      # API level 37 and later use minor versions in SDK Manager. A bare major
-      # version such as 37 is installed as 37.0 with a warning.
-      sdk-version: "37.0"
-      # Install multiple SDK platforms.
-      sdk-version: |
-        36
-        37.0
+For a native Android build, use the NDK and CMake versions declared in Gradle.
 
-      # default: ''
-      # Android SDK Build Tools version. If omitted, Build Tools are not
-      # preinstalled. Prefer letting AGP select the required version unless a
-      # specific version must be available in CI.
-      # See https://developer.android.com/studio/releases/build-tools
-      build-tools-version: 36.0.0
-      # Install multiple Build Tools versions.
-      build-tools-version: |
-        35.0.0
-        36.0.0
+```yaml
+- uses: amyu/setup-android@v6.0
+  with:
+    ndk-version: "28.2.13676358"
+    cmake-version: "3.31.6"
+```
 
-      # default: ''
-      # CMake version to install.
-      # See https://developer.android.com/studio/projects/install-ndk
-      cmake-version: 3.31.6
+#### Configure SDK caching and command-line tools
 
-      # default: ''
-      # Android NDK version to install.
-      # See https://developer.android.com/ndk/downloads
-      ndk-version: 28.2.13676358
+SDK caching is enabled by default. The generated cache key includes the requested
+component versions. Set `cache-disabled: true` to skip restoring and saving the
+SDK, or supply a `cache-key` that changes when your SDK requirements change.
 
-      # default: 15859902
-      # Android command-line tools package revision.
-      # See https://developer.android.com/studio#command-line-tools-only
-      command-line-tools-version: 15859902
-
-      # default: true
-      # Generate a job summary.
-      generate-job-summary: false
+```yaml
+- uses: amyu/setup-android@v6.0
+  with:
+    cache-disabled: true
+    command-line-tools-version: 15859902
+    generate-job-summary: false
 ```
 
 ### Codename-based preview platforms
@@ -134,6 +128,16 @@ For example, a package named
 `platforms;android-<codename>` is selected with `sdk-version: <codename>`.
 Availability depends on the current SDK repository; when no codename package is
 listed, use an available numeric platform suffix instead.
+
+## Environment for subsequent steps
+
+The action sets `ANDROID_HOME` and `ANDROID_SDK_ROOT` and adds
+`platform-tools` and `cmdline-tools/latest/bin` under the SDK root to `PATH`.
+Later steps can run `adb` and `sdkmanager` directly.
+
+When `ndk-version` is set, the action exports `ANDROID_NDK_ROOT`,
+`ANDROID_NDK_HOME`, and `ANDROID_NDK`, and adds the selected NDK directory
+to `PATH`. When `cmake-version` is set, it exports `CMAKE_VERSION`.
 
 ## License
 
