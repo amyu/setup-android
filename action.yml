@@ -1,5 +1,5 @@
 name: "Setup Android SDK for self-hosted runners"
-description: "Install and cache Android SDK components on self-hosted GitHub Actions runners"
+description: "Install and cache Android SDK platforms, Build Tools, NDK, and CMake on self-hosted Linux, macOS, and Windows runners"
 author: "amyu"
 inputs:
   sdk-version:
