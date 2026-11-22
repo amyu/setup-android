@@ -17,8 +17,6 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v7.0.1
-
       - name: Tag and publish the selected main commit
         uses: actions/github-script@v9.0.0
         with:
@@ -52,9 +50,12 @@ jobs:
         uses: actions/github-script@v9.0.0
         with:
           script: |
-            const fs = require('fs');
             const version = context.payload.inputs.version;
-            const readme = fs.readFileSync('README.md', 'utf8');
+            const path = 'README.md';
+            const { data: file } = await github.rest.repos.getContent({
+              ...context.repo, path, ref: context.sha,
+            });
+            const readme = Buffer.from(file.content, 'base64').toString('utf8');
             const updatedReadme = readme.replace(
               /\buses: amyu\/setup-android@v\d+\.\d+(?=\s|$)/g,
               `uses: amyu/setup-android@${version}`
@@ -63,17 +64,15 @@ jobs:
               console.log('No README updates needed.');
               return;
             }
-            fs.writeFileSync('README.md', updatedReadme);
-
-            // Commit and push to a new branch
             const branch = `release/update-readme-${version}`;
-            const { execFileSync } = require('node:child_process');
-            execFileSync('git', ['config', 'user.name', 'github-actions[bot]']);
-            execFileSync('git', ['config', 'user.email', 'github-actions[bot]@users.noreply.github.com']);
-            execFileSync('git', ['checkout', '-b', branch]);
-            execFileSync('git', ['add', 'README.md']);
-            execFileSync('git', ['commit', '-m', `docs: update README for ${version}`]);
-            execFileSync('git', ['push', 'origin', branch]);
+            await github.rest.git.createRef({
+              ...context.repo, ref: `refs/heads/${branch}`, sha: context.sha,
+            });
+            await github.rest.repos.createOrUpdateFileContents({
+              ...context.repo, path, branch, sha: file.sha,
+              message: `docs: update README for ${version}`,
+              content: Buffer.from(updatedReadme).toString('base64'),
+            });
 
             // Create a PR
             const { data: pr } = await github.rest.pulls.create({
