@@ -17,7 +17,7 @@
     }
   },
   "scripts": {
-    "check": "oxlint src && oxfmt --check src && tsc --noEmit",
+    "check": "oxlint src && oxfmt --check src && tsc",
     "package": "pnpm dlx rimraf dist && rolldown -c"
   },
   "repository": {
