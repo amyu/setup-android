@@ -31,16 +31,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Remove dist/ Directory
-        id: remove-dist
-        run: pnpm dlx rimraf ./dist
-
       - name: Install dependencies
         run: pnpm install
 
       - name: Rebuild the dist/ directory
-        run: |
-          pnpm run all
+        run: pnpm run package
 
       # This will fail the workflow if the `dist/` directory is different than
       # expected.

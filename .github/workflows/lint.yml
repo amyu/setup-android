@@ -1,6 +1,9 @@
 name: 'lint'
 on:
   pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   test:
@@ -25,5 +28,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run lint and format checks
-        run: pnpm run lint
+      - name: Check linting, formatting, and types
+        run: pnpm run check
