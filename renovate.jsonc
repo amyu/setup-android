@@ -1,138 +1,99 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "timezone": "Asia/Tokyo",
   "minimumReleaseAge": "7 days",
   "patch": {
-    "automerge": true
+    "automerge": true,
   },
   "customManagers": [
     {
       "customType": "jsonata",
       "fileFormat": "yaml",
-      "managerFilePatterns": [
-        "action.yml"
-      ],
-      "matchStrings": [
-        "runs.{ \"currentValue\": using }"
-      ],
+      "managerFilePatterns": ["action.yml"],
+      "matchStrings": ["runs.{ \"currentValue\": using }"],
       "depNameTemplate": "GitHub Actions Node.js runtime",
       "datasourceTemplate": "custom.github-actions-node",
-      "versioningTemplate": "regex:^node(?<major>\\d+)$"
+      "versioningTemplate": "regex:^node(?<major>\\d+)$",
     },
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "action.yml",
-        "README.md"
-      ],
+      "managerFilePatterns": ["action.yml", "README.md"],
       "matchStrings": [
         "  command-line-tools-version:\\r?\\n(?:    [^\\n]*\\n)*?    default: \"(?<currentValue>\\d+)\"",
         "# default: (?<currentValue>\\d+)\\r?\\n(?:[ \\t]*#[^\\n]*\\n)*[ \\t]*command-line-tools-version:",
-        "command-line-tools-version: (?<currentValue>\\d+)"
+        "command-line-tools-version: (?<currentValue>\\d+)",
       ],
       "depNameTemplate": "Android SDK Command-line Tools",
       "datasourceTemplate": "custom.android-command-line-tools",
       "extractVersionTemplate": "/commandlinetools-linux-(?<version>\\d+)_latest\\.zip$",
       // Build numbers can jump by millions between releases.
-      "versioningTemplate": "regex:^(?<minor>\\d+)$"
-    }
+      "versioningTemplate": "regex:^(?<minor>\\d+)$",
+    },
   ],
   "customDatasources": {
     "android-command-line-tools": {
       "defaultRegistryUrlTemplate": "https://developer.android.com/studio",
-      "format": "html"
+      "format": "html",
     },
     // Only offer runtimes documented by GitHub, rather than every Node.js release.
     "github-actions-node": {
       "defaultRegistryUrlTemplate": "https://raw.githubusercontent.com/github/docs/main/content/actions/reference/workflows-and-actions/metadata-syntax.md",
       "format": "plain",
       "transformTemplates": [
-        "{ \"releases\": [releases.version.$match(/^[-*] Use `(node[0-9]+)` for Node\\.js/).{ \"version\": groups[0] }], \"homepage\": \"https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runsusing-for-javascript-actions\" }"
-      ]
-    }
+        "{ \"releases\": [releases.version.$match(/^[-*] Use `(node[0-9]+)` for Node\\.js/).{ \"version\": groups[0] }], \"homepage\": \"https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runsusing-for-javascript-actions\" }",
+      ],
+    },
   },
   "packageRules": [
     {
-      "matchDatasources": [
-        "custom.android-command-line-tools"
-      ],
+      "matchDatasources": ["custom.android-command-line-tools"],
       // The download links include the build number but have no release timestamp.
-      "minimumReleaseAgeBehaviour": "timestamp-optional"
+      "minimumReleaseAgeBehaviour": "timestamp-optional",
     },
     {
-      "matchManagers": [
-        "npm"
-      ],
-      "rangeStrategy": "pin"
+      "matchManagers": ["npm"],
+      "rangeStrategy": "pin",
     },
     {
       "enabled": true,
-      "matchDepNames": [
-        "@actions/cache",
-        "rolldown"
-      ],
+      "matchDepNames": ["@actions/cache", "rolldown"],
       "postUpgradeTasks": {
-        "commands": [
-          "pnpm install --frozen-lockfile",
-          "pnpm run check",
-          "pnpm run package"
-        ],
+        "commands": ["pnpm install --frozen-lockfile", "pnpm run check", "pnpm run package"],
         "installTools": {
           "node": {},
-          "pnpm": {}
+          "pnpm": {},
         },
-        "fileFilters": [
-          "dist/**"
-        ],
-        "executionMode": "branch"
-      }
+        "fileFilters": ["dist/**"],
+        "executionMode": "branch",
+      },
     },
     {
       "groupName": "Android Gradle Plugin",
-      "matchPackageNames": [
-        "com.android.library{/,}**",
-        "com.android.application{/,}**"
-      ]
+      "matchPackageNames": ["com.android.library{/,}**", "com.android.application{/,}**"],
     },
     {
       "groupName": "Oxc",
       "groupSlug": "oxc",
       "groupSingleUpdates": true,
-      "matchDepNames": [
-        "oxfmt",
-        "oxlint",
-        "oxlint-tsgolint"
-      ]
+      "matchDepNames": ["oxfmt", "oxlint", "oxlint-tsgolint"],
     },
     {
       "groupName": "Node.js",
-      "matchDepNames": [
-        "node",
-        "@types/node",
-        "GitHub Actions Node.js runtime"
-      ]
+      "matchDepNames": ["node", "@types/node", "GitHub Actions Node.js runtime"],
     },
     {
-      "matchDatasources": [
-        "node-version"
-      ],
-      "matchDepNames": [
-        "node"
-      ],
+      "matchDatasources": ["node-version"],
+      "matchDepNames": ["node"],
       "ignoreUnstable": true,
       "rangeStrategy": "pin",
-      "versioning": "node"
+      "versioning": "node",
     },
     {
-      "matchFileNames": [
-        "sample-android-project/**"
-      ],
+      "matchFileNames": ["sample-android-project/**"],
       "automerge": true,
       "minimumReleaseAge": "0 days",
-      "platformAutomerge": false
-    }
-  ]
+      "platformAutomerge": false,
+    },
+  ],
 }

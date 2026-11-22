@@ -2,39 +2,27 @@
   "name": "setup-android",
   "version": "6",
   "description": "Install and cache Android SDK components on self-hosted GitHub Actions runners",
-  "type": "module",
-  "main": "dist/setup/index.js",
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "version": "24.22.3",
-      "onFail": "download"
-    },
-    "packageManager": {
-      "name": "pnpm",
-      "version": "12.21.0",
-      "onFail": "download"
-    }
-  },
-  "scripts": {
-    "check": "oxlint src && oxfmt --check src && tsc",
-    "package": "pnpm dlx rimraf dist && rolldown -c"
-  },
+  "keywords": [
+    "actions",
+    "android",
+    "hosted",
+    "runner",
+    "self",
+    "setup",
+    "setup-android"
+  ],
+  "license": "MIT",
+  "author": "amyu",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amyu/setup-android.git"
   },
-  "keywords": [
-    "setup-android",
-    "actions",
-    "android",
-    "setup",
-    "self",
-    "hosted",
-    "runner"
-  ],
-  "author": "amyu",
-  "license": "MIT",
+  "type": "module",
+  "main": "dist/setup/index.js",
+  "scripts": {
+    "check": "oxlint . && oxfmt --check . && tsc",
+    "package": "pnpm dlx rimraf dist && rolldown -c"
+  },
   "dependencies": {
     "@actions/cache": "6.3.0",
     "@actions/core": "3.0.1",
@@ -49,5 +37,17 @@
     "oxlint-tsgolint": "7.0.2007",
     "rolldown": "1.3.2",
     "typescript": "7.0.2"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.21.0",
+      "onFail": "download"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.22.3",
+      "onFail": "download"
+    }
   }
 }

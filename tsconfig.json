@@ -10,5 +10,5 @@
     "noUnusedLocals": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "rolldown.config.ts"]
 }
