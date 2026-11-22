@@ -19,6 +19,9 @@ inputs:
     required: false
     description: "Android command-line tools package revision"
     default: "15859902"
+  command-line-tools-sha256:
+    required: false
+    description: "Trusted SHA-256 for the selected OS and architecture; required for command-line tools archives without a bundled checksum"
   cache-disabled:
     required: false
     description: "Disable Android SDK caching"

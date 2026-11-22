@@ -20,8 +20,8 @@
   "type": "module",
   "main": "dist/setup/index.js",
   "scripts": {
-    "check": "oxlint . && oxfmt --check . && tsc",
-    "package": "pnpm dlx rimraf dist && rolldown -c"
+    "check": "oxlint . && oxfmt --check . && tsc && node --test tests/sdk-security.test.mjs",
+    "package": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && rolldown -c"
   },
   "dependencies": {
     "@actions/cache": "6.3.0",

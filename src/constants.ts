@@ -51,4 +51,5 @@ export type Versions = {
   ndkVersion: string;
   cmakeVersion: string;
   commandLineToolsVersion: string;
+  commandLineToolsArchive: { url: string; sha256: string };
 };

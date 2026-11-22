@@ -24,12 +24,13 @@ function generateRestoreKey(versions: Versions, cacheKey: string): string {
   // https://github.com/actions/cache/issues/1127
   const dirHash = simpleHash(ANDROID_SDK_ROOT);
 
-  const baseKey = cacheKey
-    ? `${cacheKey}-${dirHash}-${suffixVersion}`
-    : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`;
-
-  // cache keys can't contain `,`
-  return baseKey.replace(/,/g, "").toLowerCase();
+  const prefix =
+    cacheKey ||
+    `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}`;
+  // Cache keys cannot contain commas.
+  return `${prefix}-${versions.commandLineToolsArchive.sha256}-${dirHash}-${suffixVersion}`
+    .replace(/,/g, "")
+    .toLowerCase();
 }
 
 export async function restoreCache(
