@@ -2,7 +2,7 @@ import * as cache from "@actions/cache";
 import { type CacheEntry, ReserveCacheError } from "@actions/cache";
 import * as core from "@actions/core";
 
-import { ANDROID_HOME_DIR, type Versions } from "./constants.js";
+import { ANDROID_SDK_ROOT, type Versions } from "./constants.js";
 
 const RESTORED_ENTRY_STATE_KEY = "restoredEntry";
 
@@ -20,9 +20,9 @@ function simpleHash(str: string): string {
 }
 
 function generateRestoreKey(versions: Versions, cacheKey: string): string {
-  const suffixVersion = "v6";
+  const suffixVersion = "v7";
   // https://github.com/actions/cache/issues/1127
-  const dirHash = simpleHash(ANDROID_HOME_DIR);
+  const dirHash = simpleHash(ANDROID_SDK_ROOT);
 
   const baseKey = cacheKey
     ? `${cacheKey}-${dirHash}-${suffixVersion}`
@@ -38,7 +38,7 @@ export async function restoreCache(
 ): Promise<CacheEntry | undefined> {
   const restoreKey = generateRestoreKey(versions, cacheKey);
 
-  const restoredEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey);
+  const restoredEntry = await cache.restoreCache([ANDROID_SDK_ROOT], restoreKey);
   if (restoredEntry) {
     core.info(`Found in cache: ${restoreKey}`);
   } else {
@@ -55,8 +55,8 @@ export async function saveCache(
   const restoreKey = generateRestoreKey(versions, cacheKey);
 
   core.info(`checking if "${restoreKey}" is already cached ...`);
-  core.info(`cacheDir: ${ANDROID_HOME_DIR}`);
-  const hasEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey, [], {
+  core.info(`cacheDir: ${ANDROID_SDK_ROOT}`);
+  const hasEntry = await cache.restoreCache([ANDROID_SDK_ROOT], restoreKey, [], {
     lookupOnly: true,
   });
   if (hasEntry) {
@@ -66,7 +66,7 @@ export async function saveCache(
 
   core.info(`caching "${restoreKey}" ...`);
   try {
-    const savedEntry = await cache.saveCache([ANDROID_HOME_DIR], restoreKey);
+    const savedEntry = await cache.saveCache([ANDROID_SDK_ROOT], restoreKey);
     return Promise.resolve(savedEntry);
   } catch (error) {
     if (error instanceof ReserveCacheError) {

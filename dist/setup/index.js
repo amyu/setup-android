@@ -54642,13 +54642,13 @@ function simpleHash(str) {
 	return Math.abs(hash).toString(16).substring(0, 8);
 }
 function generateRestoreKey(versions, cacheKey) {
-	const suffixVersion = "v6";
-	const dirHash = simpleHash(ANDROID_HOME_DIR);
+	const suffixVersion = "v7";
+	const dirHash = simpleHash(ANDROID_SDK_ROOT);
 	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
 }
 async function restoreCache(versions, cacheKey) {
 	const restoreKey = generateRestoreKey(versions, cacheKey);
-	const restoredEntry = await restoreCache$1([ANDROID_HOME_DIR], restoreKey);
+	const restoredEntry = await restoreCache$1([ANDROID_SDK_ROOT], restoreKey);
 	if (restoredEntry) info(`Found in cache: ${restoreKey}`);
 	else info(`Not Found cache: ${restoreKey}`);
 	saveState(RESTORED_ENTRY_STATE_KEY, restoredEntry);

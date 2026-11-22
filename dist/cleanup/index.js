@@ -55709,7 +55709,7 @@ const INPUT_GENERATE_JOB_SUMMARY = "generate-job-summary";
 const INPUT_JOB_STATUS = "job-status";
 const HOME = os.homedir();
 const ANDROID_HOME_DIR = path$2.join(HOME, ".android");
-path$2.join(ANDROID_HOME_DIR, "sdk");
+const ANDROID_SDK_ROOT = path$2.join(ANDROID_HOME_DIR, "sdk");
 // src/cache.ts
 const RESTORED_ENTRY_STATE_KEY = "restoredEntry";
 function simpleHash(str) {
@@ -55723,21 +55723,21 @@ function simpleHash(str) {
 	return Math.abs(hash).toString(16).substring(0, 8);
 }
 function generateRestoreKey(versions, cacheKey) {
-	const suffixVersion = "v6";
-	const dirHash = simpleHash(ANDROID_HOME_DIR);
+	const suffixVersion = "v7";
+	const dirHash = simpleHash(ANDROID_SDK_ROOT);
 	return (cacheKey ? `${cacheKey}-${dirHash}-${suffixVersion}` : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`).replace(/,/g, "").toLowerCase();
 }
 async function saveCache(versions, cacheKey) {
 	const restoreKey = generateRestoreKey(versions, cacheKey);
 	info(`checking if "${restoreKey}" is already cached ...`);
-	info(`cacheDir: ${ANDROID_HOME_DIR}`);
-	if (await restoreCache([ANDROID_HOME_DIR], restoreKey, [], { lookupOnly: true })) {
+	info(`cacheDir: ${ANDROID_SDK_ROOT}`);
+	if (await restoreCache([ANDROID_SDK_ROOT], restoreKey, [], { lookupOnly: true })) {
 		info(`Found in cache: ${restoreKey}`);
 		return;
 	}
 	info(`caching "${restoreKey}" ...`);
 	try {
-		const savedEntry = await saveCache$1([ANDROID_HOME_DIR], restoreKey);
+		const savedEntry = await saveCache$1([ANDROID_SDK_ROOT], restoreKey);
 		return Promise.resolve(savedEntry);
 	} catch (error) {
 		if (error instanceof ReserveCacheError) info(error.message);
