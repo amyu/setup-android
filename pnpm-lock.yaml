@@ -187,9 +187,6 @@ importers:
       '@actions/exec':
         specifier: 3.0.0
         version: 3.0.0
-      '@actions/io':
-        specifier: 3.0.2
-        version: 3.0.2
       '@actions/tool-cache':
         specifier: 4.0.0
         version: 4.0.0

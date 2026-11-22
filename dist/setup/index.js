@@ -56249,31 +56249,22 @@ async function installAndroidSdk(versions) {
 	const extractedCmdlineToolPath = await extractZip(downloadedCmdlineToolsPath, path$1.join(ANDROID_SDK_ROOT, "cmdline-tools"));
 	info(`success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`);
 	const from = path$1.join(extractedCmdlineToolPath, "cmdline-tools");
-	const to = "latest";
+	const to = path$1.join(extractedCmdlineToolPath, "latest");
 	info(`start rename ${from} to ${to}`);
-	if (process.platform === "win32") await exec(`cmd /c "rename ${from} ${to}"`);
-	else {
-		await fs.mkdir(path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", to), { recursive: true });
-		await fs.rename(from, path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", to));
-	}
+	await fs.rename(from, to);
 	info(`success rename ${from} to ${to}`);
+	const isWindows = process.platform === "win32";
+	const sdkManager = isWindows ? "./sdkmanager.bat" : "./sdkmanager";
+	const execOptions = {
+		cwd: path$1.join(to, "bin"),
+		silent: !isDebug()
+	};
 	info("start accept licenses");
-	switch (process.platform) {
-		case "win32":
-			if (await which("yes") !== "") await exec(`cmd /c "yes | sdkmanager --licenses"`, [], { silent: !isDebug() });
-			else await exec("sdkmanager", ["--licenses"], {
-				input: Buffer.from(Array(100).fill("y").join("\n")),
-				silent: !isDebug()
-			});
-			break;
-		case "darwin":
-			await exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], { silent: !isDebug() });
-			break;
-		case "linux":
-			await exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], { silent: !isDebug() });
-			break;
-		default: throw Error("Unsupported platform");
-	}
+	if (isWindows) await exec(sdkManager, ["--licenses"], {
+		...execOptions,
+		input: Buffer.from("y\n".repeat(100))
+	});
+	else await exec("/bin/bash", ["-c", "yes | ./sdkmanager --licenses"], execOptions);
 	info("success accept licenses");
 	const sdkVersionCommand = versions.sdkVersion.map((version) => `platforms;android-${version}`);
 	const packages = [
@@ -56285,7 +56276,7 @@ async function installAndroidSdk(versions) {
 	if (versions.buildToolsVersion.length > 0) info(`start install build-tools:${versions.buildToolsVersion.join(",")} and platform-tools and sdk:${versions.sdkVersion.join(",")}`);
 	else info(`start install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`);
 	try {
-		await exec("sdkmanager", packages, { silent: !isDebug() });
+		await exec(sdkManager, packages, execOptions);
 	} catch (error) {
 		const codenamePackages = versions.sdkVersion.filter((version) => !/^\d+(?:\.\d+)?$/.test(version)).map((version) => `"platforms;android-${version}"`);
 		if (codenamePackages.length === 0) throw error;
@@ -56296,12 +56287,12 @@ async function installAndroidSdk(versions) {
 	else info(`success install platform-tools and sdk:${versions.sdkVersion.join(",")} (build-tools skipped)`);
 	if (versions.cmakeVersion) {
 		info(`start install cmake:${versions.cmakeVersion}`);
-		await exec("sdkmanager", [`cmake;${versions.cmakeVersion}`, "--verbose"], { silent: !isDebug() });
+		await exec(sdkManager, [`cmake;${versions.cmakeVersion}`, "--verbose"], execOptions);
 		info(`success install cmake:${versions.cmakeVersion}`);
 	}
 	if (versions.ndkVersion) {
 		info(`start install ndk:${versions.ndkVersion}`);
-		await exec("sdkmanager", [`ndk;${versions.ndkVersion}`, "--verbose"], { silent: !isDebug() });
+		await exec(sdkManager, [`ndk;${versions.ndkVersion}`, "--verbose"], execOptions);
 		info(`success install ndk:${versions.ndkVersion}`);
 	}
 }
