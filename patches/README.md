@@ -9,4 +9,5 @@ handle cache errors. It was adapted from the
 same patch is tried on each update. Self-hosted Renovate installs the updated
 lockfile and rebuilds `dist/` before committing. If an upstream change prevents
 the patch from applying, rebase the patch on the new package, run `pnpm install`
-to refresh the lockfile, then run `pnpm run all` to verify and rebuild the action.
+to refresh the lockfile, then run `pnpm run check && pnpm run package` to
+verify and rebuild the action.
