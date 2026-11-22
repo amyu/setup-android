@@ -111,11 +111,6 @@ SDK caching is enabled by default. The generated cache key includes the requeste
 component versions. Set `cache-disabled: true` to skip restoring and saving the
 SDK, or supply a `cache-key` that changes when your SDK requirements change.
 
-The action caches only `~/.android/sdk`. Upgrading from v6.0, which cached
-the entire `~/.android` directory, starts a fresh cache even with a custom key.
-If an old cache may contain an ADB key or debug keystore, delete that cache
-from the consuming repository.
-
 ```yaml
 - uses: amyu/setup-android@v6.0
   with:
