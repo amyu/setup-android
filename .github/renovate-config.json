@@ -5,5 +5,9 @@
   "onboarding": false,
   "requireConfig": "required",
   "binarySource": "install",
-  "allowedCommands": ["^pnpm install --frozen-lockfile$", "^pnpm run check$", "^pnpm run package$"]
+  "allowedCommands": [
+    "^pnpm install --frozen-lockfile$",
+    "^pnpm run check$",
+    "^pnpm run package$"
+  ]
 }

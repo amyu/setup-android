@@ -1,5 +1,11 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "sortImports": true,
-  "ignorePatterns": ["**/dist/", "**/lib/", "**/node_modules/"]
+  "ignorePatterns": ["**/dist/", "**/lib/", "**/node_modules/"],
+  "overrides": [
+    {
+      "files": [".github/renovate-config.json"],
+      "options": { "printWidth": 80 }
+    }
+  ]
 }
