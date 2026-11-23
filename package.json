@@ -20,7 +20,7 @@
   "type": "module",
   "main": "dist/setup/index.js",
   "scripts": {
-    "check": "oxlint . && oxfmt --check . && tsc && node --test tests/sdk-security.test.mjs",
+    "check": "oxlint . && oxfmt --check . && tsc && node --test tests/*.test.mjs",
     "package": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && rolldown -c"
   },
   "dependencies": {

@@ -16,7 +16,7 @@ import { Readable, Transform } from "node:stream";
 import buffer$1 from "node:buffer";
 import util$1, { inspect } from "node:util";
 import zlib from "node:zlib";
-import { createHash, createHmac } from "node:crypto";
+import { createHash, createHmac, randomUUID as randomUUID$2 } from "node:crypto";
 import * as child from "child_process";
 import { setTimeout as setTimeout$1 } from "timers";
 import path$3, * as path$1 from "node:path";
@@ -17911,7 +17911,6 @@ const INPUT_BUILD_TOOLS_VERSION = "build-tools-version";
 const INPUT_NDK_VERSION = "ndk-version";
 const INPUT_CMAKE_VERSION = "cmake-version";
 const INPUT_COMMAND_LINE_TOOLS_VERSION = "command-line-tools-version";
-const INPUT_CACHE_DISABLED = "cache-disabled";
 const INPUT_CACHE_KEY = "cache-key";
 const MACOS_ARCH_SPECIFIC_COMMAND_LINE_TOOLS_VERSION = 15859902;
 const COMMANDLINE_TOOLS_LINUX_URL = (version) => `https://dl.google.com/android/repository/commandlinetools-linux-${version}_latest.zip`;
@@ -17962,6 +17961,34 @@ async function addPath({ ndkVersion, cmakeVersion }) {
 	if (ndkPath) info(`  ${ndkPath}`);
 	info(`  ${path$1.join(ANDROID_SDK_ROOT, "platform-tools")}`);
 	info(`  ${path$1.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest", "bin")}`);
+}
+// src/cache-state.ts
+const SDK_OWNER_ENV = "SETUP_ANDROID_SDK_OWNER";
+const COMPLETED_SETUP_STATE = "completedSetup";
+function generateCacheKey(versions, customKey, sdkRoot) {
+	const selection = customKey ? { customKey: customKey.toLowerCase() } : {
+		sdk: versions.sdkVersion,
+		buildTools: versions.buildToolsVersion,
+		ndk: versions.ndkVersion,
+		cmake: versions.cmakeVersion,
+		commandLineTools: versions.commandLineToolsVersion
+	};
+	const inputs = [
+		process.platform,
+		process.arch,
+		sdkRoot,
+		versions.commandLineToolsArchive.sha256,
+		selection
+	];
+	return `setup-android-v8-${createHash("sha256").update(JSON.stringify(inputs)).digest("hex")}`;
+}
+function beginSdkSetup() {
+	const owner = randomUUID$2();
+	exportVariable(SDK_OWNER_ENV, owner);
+	return owner;
+}
+function recordCompletedSetup(setup) {
+	saveState(COMPLETED_SETUP_STATE, setup);
 }
 process.platform;
 // node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-match-kind.js
@@ -58932,23 +58959,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 }
 // src/cache.ts
 const RESTORED_ENTRY_STATE_KEY = "restoredEntry";
-function simpleHash(str) {
-	let hash = 0;
-	if (str.length === 0) return hash.toString(16);
-	for (let i = 0; i < str.length; i++) {
-		const char = str.charCodeAt(i);
-		hash = (hash << 5) - hash + char;
-		hash = hash & hash;
-	}
-	return Math.abs(hash).toString(16).substring(0, 8);
-}
-function generateRestoreKey(versions, cacheKey) {
-	const suffixVersion = "v7";
-	const dirHash = simpleHash(ANDROID_SDK_ROOT);
-	return `${cacheKey || `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}`}-${versions.commandLineToolsArchive.sha256}-${dirHash}-${suffixVersion}`.replace(/,/g, "").toLowerCase();
-}
-async function restoreCache(versions, cacheKey) {
-	const restoreKey = generateRestoreKey(versions, cacheKey);
+async function restoreCache(restoreKey) {
 	const restoredEntry = await restoreCache$1([ANDROID_SDK_ROOT], restoreKey);
 	if (restoredEntry) info(`Found in cache: ${restoreKey}`);
 	else info(`Not Found cache: ${restoreKey}`);
@@ -60724,14 +60735,14 @@ function readVersions(warn) {
 async function run() {
 	try {
 		const versions = readVersions((message) => warning(message));
-		const cacheDisabled = getBooleanInput(INPUT_CACHE_DISABLED);
-		const cacheKey = getInput(INPUT_CACHE_KEY);
+		const cacheKey = getBooleanInput("cache-disabled") ? void 0 : generateCacheKey(versions, getInput(INPUT_CACHE_KEY), ANDROID_SDK_ROOT);
+		const owner = beginSdkSetup();
 		exportVariable("ANDROID_SDK_ROOT", ANDROID_SDK_ROOT);
 		exportVariable("ANDROID_HOME", ANDROID_SDK_ROOT);
 		let restored = false;
-		if (!cacheDisabled) {
+		if (cacheKey) {
 			startGroup("Restored Android SDK from Cache");
-			restored = Boolean(await restoreCache(versions, cacheKey));
+			restored = Boolean(await restoreCache(cacheKey));
 			endGroup();
 		}
 		if (!restored) {
@@ -60742,6 +60753,11 @@ async function run() {
 		startGroup("Environment details for Android SDK");
 		await addPath(versions);
 		endGroup();
+		recordCompletedSetup({
+			owner,
+			versions,
+			cacheKey: restored ? void 0 : cacheKey
+		});
 	} catch (error) {
 		info("To see the logs executed by sdkmanager, set ACTIONS_STEP_DEBUG to true");
 		info("https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging");

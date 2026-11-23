@@ -1,11 +1,11 @@
 import type { CacheEntry } from "@actions/cache";
 import * as core from "@actions/core";
 
+import { getCompletedSetup } from "./cache-state.js";
 import { saveCache } from "./cache.js";
 import * as constants from "./constants.js";
 import { INPUT_JOB_STATUS } from "./constants.js";
 import { renderSummary } from "./summary.js";
-import { readVersions } from "./versions.js";
 
 async function run(): Promise<void> {
   try {
@@ -13,20 +13,19 @@ async function run(): Promise<void> {
       return Promise.resolve();
     }
 
-    const versions = readVersions();
-    const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
-    const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
+    const setup = getCompletedSetup();
+    if (!setup) return;
     const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
 
     let savedCacheEntry: CacheEntry | undefined;
-    if (!cacheDisabled) {
+    if (setup.cacheKey) {
       core.startGroup("Save Cache");
-      savedCacheEntry = await saveCache(versions, cacheKey);
+      savedCacheEntry = await saveCache(setup.cacheKey);
       core.endGroup();
     }
 
     if (generateJobSummary) {
-      await renderSummary(versions, savedCacheEntry);
+      await renderSummary(setup.versions, savedCacheEntry);
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
