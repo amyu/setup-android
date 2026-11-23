@@ -35,6 +35,10 @@ export async function saveCache(restoreKey: string): Promise<CacheEntry | undefi
   } catch (error) {
     if (error instanceof ReserveCacheError) {
       core.info(error.message);
+    } else {
+      core.warning(
+        `Failed to save the Android SDK cache: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
   return undefined;

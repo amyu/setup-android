@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -20,6 +20,20 @@ const versions = {
 function key(selection, customKey = "", root = "/sdk") {
   return generateCacheKey(selection, customKey, root);
 }
+
+test("the installed cache library selects only the SDK directory for the archive", async (t) => {
+  const home = mkdtempSync(path.join(tmpdir(), "setup-android-glob-"));
+  t.after(() => rmSync(home, { recursive: true, force: true }));
+  const sdk = path.join(home, ".android", "sdk");
+  mkdirSync(path.join(sdk, "platform-tools"), { recursive: true });
+  writeFileSync(path.join(home, ".android", "settings.txt"), "outside the SDK");
+  const cacheUtils = new URL("./internal/cacheUtils.js", import.meta.resolve("@actions/cache"));
+  const { resolvePaths } = await import(cacheUtils.href);
+  const workspace = process.env.GITHUB_WORKSPACE ?? process.cwd();
+  assert.deepEqual(await resolvePaths([sdk]), [
+    path.relative(workspace, sdk).split(path.sep).join("/"),
+  ]);
+});
 
 test("cache keys preserve component boundaries, custom overrides and bootstrap identity", () => {
   const otherSdk = { ...versions, sdkVersion: ["2", "3"] };

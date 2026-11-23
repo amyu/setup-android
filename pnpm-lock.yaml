@@ -176,6 +176,7 @@ overrides:
 
 patchedDependencies:
   '@actions/cache': 355c0d2caa05df58e9d01b1584c1575629e9e2e80a42dcd4393696cc6a2e36ed
+  '@actions/glob@0.7.0': cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa
 
 importers:
 
@@ -1111,7 +1112,7 @@ snapshots:
     dependencies:
       '@actions/core': 3.0.1
       '@actions/exec': 3.0.0
-      '@actions/glob': 0.7.0
+      '@actions/glob': 0.7.0(patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa)
       '@actions/http-client': 4.0.1
       '@actions/io': 3.0.2
       '@azure/core-rest-pipeline': 1.23.0(supports-color@7.2.0)
@@ -1130,7 +1131,7 @@ snapshots:
     dependencies:
       '@actions/io': 3.0.2
 
-  '@actions/glob@0.7.0':
+  '@actions/glob@0.7.0(patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa)':
     dependencies:
       '@actions/core': 3.0.1
       minimatch: 11.0.8

@@ -17865,7 +17865,7 @@ function getCompletedSetup() {
 	if (setup.owner !== process.env[SDK_OWNER_ENV]) delete setup.cacheKey;
 	return setup;
 }
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-glob-options-helper.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-glob-options-helper.js
 /**
 * Returns a copy with defaults filled in.
 */
@@ -17901,7 +17901,7 @@ function getOptions(copy) {
 	}
 	return result;
 }
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-path-helper.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-path-helper.js
 const IS_WINDOWS$5 = process.platform === "win32";
 /**
 * Similar to path.dirname except normalizes the path separators and slightly better handling for Windows UNC paths.
@@ -17999,7 +17999,7 @@ function safeTrimTrailingSeparator(p) {
 	if (IS_WINDOWS$5 && /^[A-Z]:\\$/i.test(p)) return p;
 	return p.substr(0, p.length - 1);
 }
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-match-kind.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-match-kind.js
 /**
 * Indicates whether a pattern matches a path
 */
@@ -18014,7 +18014,7 @@ var MatchKind;
 	/** Matched */
 	MatchKind[MatchKind["All"] = 3] = "All";
 })(MatchKind || (MatchKind = {}));
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-pattern-helper.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-pattern-helper.js
 const IS_WINDOWS$4 = process.platform === "win32";
 /**
 * Given an array of patterns, returns an array of paths to search.
@@ -20218,7 +20218,7 @@ var Minimatch = class {
 minimatch.Minimatch = Minimatch;
 minimatch.escape = escape$1;
 minimatch.unescape = unescape;
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-path.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-path.js
 const IS_WINDOWS$3 = process.platform === "win32";
 /**
 * Helper class for parsing paths into segments
@@ -20276,7 +20276,7 @@ var Path = class {
 		return result;
 	}
 };
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-pattern.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-pattern.js
 const IS_WINDOWS$2 = process.platform === "win32";
 var Pattern = class Pattern {
 	constructor(patternOrNegate, isImplicitPattern = false, segments, homedir) {
@@ -20335,7 +20335,7 @@ var Pattern = class Pattern {
 	partialMatch(itemPath) {
 		itemPath = safeTrimTrailingSeparator(itemPath);
 		if (dirname(itemPath) === itemPath) return this.rootRegExp.test(itemPath);
-		return this.minimatch.matchOne(itemPath.split(IS_WINDOWS$2 ? /\\+/ : /\/+/), this.minimatch.set[0], true);
+		return this.minimatch.match(itemPath, true);
 	}
 	/**
 	* Escapes glob patterns within a path
@@ -20415,14 +20415,14 @@ var Pattern = class Pattern {
 		return s.replace(/[[\\^$.|?*+()]/g, "\\$&");
 	}
 };
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-search-state.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-search-state.js
 var SearchState = class {
 	constructor(path, level) {
 		this.path = path;
 		this.level = level;
 	}
 };
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-globber.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/internal-globber.js
 var __awaiter$10 = function(thisArg, _arguments, P, generator) {
 	function adopt(value) {
 		return value instanceof P ? value : new P(function(resolve) {
@@ -20638,7 +20638,7 @@ var DefaultGlobber = class DefaultGlobber {
 		});
 	}
 };
-// node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/glob.js
+// node_modules/.pnpm/@actions+glob@0.7.0_patch_hash=cbd024df920dcbd3d6da4437c880e6fa8d912dc5ebc9b3ba0af59283bba378aa/node_modules/@actions/glob/lib/glob.js
 var __awaiter$8 = function(thisArg, _arguments, P, generator) {
 	function adopt(value) {
 		return value instanceof P ? value : new P(function(resolve) {
@@ -60007,6 +60007,7 @@ async function saveCache(restoreKey) {
 		return Promise.resolve(savedEntry);
 	} catch (error) {
 		if (error instanceof ReserveCacheError) info(error.message);
+		else warning(`Failed to save the Android SDK cache: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 function getRestoredEntry() {

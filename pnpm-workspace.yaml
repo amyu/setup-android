@@ -1,5 +1,6 @@
 minimumReleaseAge: 10080
 patchedDependencies:
   "@actions/cache": patches/actions-cache.patch
+  "@actions/glob@0.7.0": patches/actions-glob.patch
 overrides:
   "@actions/glob@0.7.0>minimatch": "11.0.8"
