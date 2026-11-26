@@ -10,70 +10,37 @@ on:
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: main
-
-      - name: Validate version format
-        run: |
-          if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version format. Expected format: v<major>.<minor> (e.g. v6.0)"
-            exit 1
-          fi
-
-      - name: Create or update release tag
+      - name: Tag and publish the selected main commit
         uses: actions/github-script@v9.0.0
         with:
           script: |
-            const version = '${{ github.event.inputs.version }}';
-
-            const { data: ref } = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'heads/main',
-            });
-            const sha = ref.object.sha;
-            console.log(`main branch SHA: ${sha}`);
-
-            // Create or update the release tag (e.g. v6.0)
+            const version = context.payload.inputs.version;
+            if (!/^v[0-9]+\.[0-9]+$/.test(version)) {
+              throw new Error('Expected a release version in the form v<major>.<minor>.');
+            }
             try {
               await github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                ...context.repo,
                 ref: `refs/tags/${version}`,
-                sha,
+                sha: context.sha,
               });
-              console.log(`Created tag ${version}`);
-            } catch (e) {
-              if (e.status === 422) {
-                await github.rest.git.updateRef({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  ref: `tags/${version}`,
-                  sha,
-                  force: true,
-                });
-                console.log(`Updated tag ${version}`);
-              } else {
-                throw e;
-              }
+            } catch (error) {
+              if (error.status !== 422) throw error;
+              // Allow publication to resume if tag creation succeeded on a previous attempt.
+              const { data: tag } = await github.rest.git.getRef({ ...context.repo, ref: `tags/${version}` });
+              if (tag.object.type !== 'commit' || tag.object.sha !== context.sha) throw error;
             }
-
-      - name: Create GitHub Release
-        uses: actions/github-script@v9.0.0
-        with:
-          script: |
-            const version = '${{ github.event.inputs.version }}';
             const { data: release } = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              ...context.repo,
               tag_name: version,
+              target_commitish: context.sha,
               name: version,
               generate_release_notes: true,
             });
@@ -83,9 +50,12 @@ jobs:
         uses: actions/github-script@v9.0.0
         with:
           script: |
-            const fs = require('fs');
             const version = context.payload.inputs.version;
-            const readme = fs.readFileSync('README.md', 'utf8');
+            const path = 'README.md';
+            const { data: file } = await github.rest.repos.getContent({
+              ...context.repo, path, ref: context.sha,
+            });
+            const readme = Buffer.from(file.content, 'base64').toString('utf8');
             const updatedReadme = readme.replace(
               /\buses: amyu\/setup-android@v\d+\.\d+(?=\s|$)/g,
               `uses: amyu/setup-android@${version}`
@@ -94,17 +64,15 @@ jobs:
               console.log('No README updates needed.');
               return;
             }
-            fs.writeFileSync('README.md', updatedReadme);
-
-            // Commit and push to a new branch
             const branch = `release/update-readme-${version}`;
-            const { execSync } = require('child_process');
-            execSync(`git config user.name "github-actions[bot]"`);
-            execSync(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
-            execSync(`git checkout -b ${branch}`);
-            execSync(`git add README.md`);
-            execSync(`git commit -m "docs: update README for ${version}"`);
-            execSync(`git push origin ${branch}`);
+            await github.rest.git.createRef({
+              ...context.repo, ref: `refs/heads/${branch}`, sha: context.sha,
+            });
+            await github.rest.repos.createOrUpdateFileContents({
+              ...context.repo, path, branch, sha: file.sha,
+              message: `docs: update README for ${version}`,
+              content: Buffer.from(updatedReadme).toString('base64'),
+            });
 
             // Create a PR
             const { data: pr } = await github.rest.pulls.create({

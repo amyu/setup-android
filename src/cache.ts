@@ -2,43 +2,12 @@ import * as cache from "@actions/cache";
 import { type CacheEntry, ReserveCacheError } from "@actions/cache";
 import * as core from "@actions/core";
 
-import { ANDROID_HOME_DIR, type Versions } from "./constants.js";
+import { ANDROID_SDK_ROOT } from "./constants.js";
 
 const RESTORED_ENTRY_STATE_KEY = "restoredEntry";
 
-function simpleHash(str: string): string {
-  let hash = 0;
-  if (str.length === 0) return hash.toString(16);
-
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-
-  return Math.abs(hash).toString(16).substring(0, 8);
-}
-
-function generateRestoreKey(versions: Versions, cacheKey: string): string {
-  const suffixVersion = "v6";
-  // https://github.com/actions/cache/issues/1127
-  const dirHash = simpleHash(ANDROID_HOME_DIR);
-
-  const baseKey = cacheKey
-    ? `${cacheKey}-${dirHash}-${suffixVersion}`
-    : `${versions.sdkVersion.join(",")}-${versions.buildToolsVersion.join(",")}-${versions.ndkVersion}-${versions.cmakeVersion}-${versions.commandLineToolsVersion}-${dirHash}-${suffixVersion}`;
-
-  // cache keys can't contain `,`
-  return baseKey.replace(/,/g, "").toLowerCase();
-}
-
-export async function restoreCache(
-  versions: Versions,
-  cacheKey: string,
-): Promise<CacheEntry | undefined> {
-  const restoreKey = generateRestoreKey(versions, cacheKey);
-
-  const restoredEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey);
+export async function restoreCache(restoreKey: string): Promise<CacheEntry | undefined> {
+  const restoredEntry = await cache.restoreCache([ANDROID_SDK_ROOT], restoreKey);
   if (restoredEntry) {
     core.info(`Found in cache: ${restoreKey}`);
   } else {
@@ -48,15 +17,10 @@ export async function restoreCache(
   return Promise.resolve(restoredEntry);
 }
 
-export async function saveCache(
-  versions: Versions,
-  cacheKey: string,
-): Promise<CacheEntry | undefined> {
-  const restoreKey = generateRestoreKey(versions, cacheKey);
-
+export async function saveCache(restoreKey: string): Promise<CacheEntry | undefined> {
   core.info(`checking if "${restoreKey}" is already cached ...`);
-  core.info(`cacheDir: ${ANDROID_HOME_DIR}`);
-  const hasEntry = await cache.restoreCache([ANDROID_HOME_DIR], restoreKey, [], {
+  core.info(`cacheDir: ${ANDROID_SDK_ROOT}`);
+  const hasEntry = await cache.restoreCache([ANDROID_SDK_ROOT], restoreKey, [], {
     lookupOnly: true,
   });
   if (hasEntry) {
@@ -66,11 +30,15 @@ export async function saveCache(
 
   core.info(`caching "${restoreKey}" ...`);
   try {
-    const savedEntry = await cache.saveCache([ANDROID_HOME_DIR], restoreKey);
+    const savedEntry = await cache.saveCache([ANDROID_SDK_ROOT], restoreKey);
     return Promise.resolve(savedEntry);
   } catch (error) {
     if (error instanceof ReserveCacheError) {
       core.info(error.message);
+    } else {
+      core.warning(
+        `Failed to save the Android SDK cache: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
   return undefined;

@@ -3,45 +3,18 @@ import * as path from "node:path";
 
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import * as io from "@actions/io";
 import * as toolCache from "@actions/tool-cache";
 
-import {
-  ANDROID_SDK_ROOT,
-  COMMANDLINE_TOOLS_LINUX_URL,
-  COMMANDLINE_TOOLS_MAC_URL,
-  COMMANDLINE_TOOLS_WINDOWS_URL,
-  type Versions,
-} from "./constants.js";
+import { ANDROID_SDK_ROOT, type Versions } from "./constants.js";
+import { verifyArchive } from "./verify-archive.js";
 
 export async function installAndroidSdk(versions: Versions): Promise<void> {
+  const { url } = versions.commandLineToolsArchive;
+  core.info(`start download cmdline-tools url: ${url}`);
+  const downloadedCmdlineToolsPath = await toolCache.downloadTool(url);
+  await verifyArchive(downloadedCmdlineToolsPath, versions.commandLineToolsArchive);
   await fs.rm(ANDROID_SDK_ROOT, { recursive: true, force: true });
-  await fs.rm(path.join(ANDROID_SDK_ROOT, "cmdline-tools", "latest"), {
-    recursive: true,
-    force: true,
-  });
-  core.info("success cleanup");
-
   await fs.mkdir(ANDROID_SDK_ROOT, { recursive: true });
-  core.info("success create directory");
-
-  let cmdlineToolsDownloadUrl: string;
-  switch (process.platform) {
-    case "win32":
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_WINDOWS_URL(versions.commandLineToolsVersion);
-      break;
-    case "darwin":
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_MAC_URL(versions.commandLineToolsVersion);
-      break;
-    case "linux":
-      cmdlineToolsDownloadUrl = COMMANDLINE_TOOLS_LINUX_URL(versions.commandLineToolsVersion);
-      break;
-    default:
-      throw Error(`Unsupported platform: ${process.platform}`);
-  }
-  core.info(`start download cmdline-tools url: ${cmdlineToolsDownloadUrl}`);
-  const downloadedCmdlineToolsPath = await toolCache.downloadTool(cmdlineToolsDownloadUrl);
-  core.info(`success download cmdline-tools path: ${downloadedCmdlineToolsPath}`);
   core.info("start extract cmdline-tools.zip");
   const extractedCmdlineToolPath = await toolCache.extractZip(
     downloadedCmdlineToolsPath,
@@ -50,48 +23,23 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
   core.info(`success extract cmdline-tools.zip path: ${extractedCmdlineToolPath}`);
 
   const from = path.join(extractedCmdlineToolPath, "cmdline-tools");
-  const to = "latest";
+  const to = path.join(extractedCmdlineToolPath, "latest");
   core.info(`start rename ${from} to ${to}`);
-  if (process.platform === "win32") {
-    await exec.exec(`cmd /c "rename ${from} ${to}"`);
-  } else {
-    await fs.mkdir(path.join(ANDROID_SDK_ROOT, "cmdline-tools", to), {
-      recursive: true,
-    });
-    await fs.rename(from, path.join(ANDROID_SDK_ROOT, "cmdline-tools", to));
-  }
+  await fs.rename(from, to);
   core.info(`success rename ${from} to ${to}`);
 
+  const isWindows = process.platform === "win32";
+  const sdkManager = isWindows ? "./sdkmanager.bat" : "./sdkmanager";
+  const execOptions = { cwd: path.join(to, "bin"), silent: !core.isDebug() };
+
   core.info("start accept licenses");
-  // https://github.com/actions/toolkit/issues/359 pipes workaround
-  switch (process.platform) {
-    case "win32": {
-      const yesPath = await io.which("yes");
-      if (yesPath !== "") {
-        await exec.exec(`cmd /c "yes | sdkmanager --licenses"`, [], {
-          silent: !core.isDebug(),
-        });
-      } else {
-        const licenseInput = Buffer.from(Array(100).fill("y").join("\n"));
-        await exec.exec("sdkmanager", ["--licenses"], {
-          input: licenseInput,
-          silent: !core.isDebug(),
-        });
-      }
-      break;
-    }
-    case "darwin":
-      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug(),
-      });
-      break;
-    case "linux":
-      await exec.exec(`/bin/bash -c "yes | sdkmanager --licenses"`, [], {
-        silent: !core.isDebug(),
-      });
-      break;
-    default:
-      throw Error("Unsupported platform");
+  if (isWindows) {
+    await exec.exec(sdkManager, ["--licenses"], {
+      ...execOptions,
+      input: Buffer.from("y\n".repeat(100)),
+    });
+  } else {
+    await exec.exec("/bin/bash", ["-c", "yes | ./sdkmanager --licenses"], execOptions);
   }
   core.info("success accept licenses");
 
@@ -116,7 +64,7 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
     );
   }
   try {
-    await exec.exec("sdkmanager", packages, { silent: !core.isDebug() });
+    await exec.exec(sdkManager, packages, execOptions);
   } catch (error) {
     const codenamePackages = versions.sdkVersion
       .filter((version) => !/^\d+(?:\.\d+)?$/.test(version))
@@ -149,16 +97,12 @@ export async function installAndroidSdk(versions: Versions): Promise<void> {
 
   if (versions.cmakeVersion) {
     core.info(`start install cmake:${versions.cmakeVersion}`);
-    await exec.exec("sdkmanager", [`cmake;${versions.cmakeVersion}`, "--verbose"], {
-      silent: !core.isDebug(),
-    });
+    await exec.exec(sdkManager, [`cmake;${versions.cmakeVersion}`, "--verbose"], execOptions);
     core.info(`success install cmake:${versions.cmakeVersion}`);
   }
   if (versions.ndkVersion) {
     core.info(`start install ndk:${versions.ndkVersion}`);
-    await exec.exec("sdkmanager", [`ndk;${versions.ndkVersion}`, "--verbose"], {
-      silent: !core.isDebug(),
-    });
+    await exec.exec(sdkManager, [`ndk;${versions.ndkVersion}`, "--verbose"], execOptions);
     core.info(`success install ndk:${versions.ndkVersion}`);
   }
 }

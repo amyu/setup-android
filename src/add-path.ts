@@ -3,17 +3,16 @@ import * as path from "node:path";
 import * as core from "@actions/core";
 
 import { ANDROID_SDK_ROOT } from "./constants.js";
+import { installedNdkPath } from "./ndk.js";
 
-export function addPath({
+export async function addPath({
   ndkVersion,
   cmakeVersion,
 }: {
   ndkVersion?: string;
   cmakeVersion?: string;
-}): void {
-  core.exportVariable("ANDROID_SDK_ROOT", ANDROID_SDK_ROOT);
-  core.exportVariable("ANDROID_HOME", ANDROID_SDK_ROOT);
-  const ndkPath = ndkVersion ? path.join(ANDROID_SDK_ROOT, "ndk", ndkVersion) : undefined;
+}): Promise<void> {
+  const ndkPath = ndkVersion ? await installedNdkPath(ANDROID_SDK_ROOT, ndkVersion) : undefined;
   if (ndkPath) {
     core.exportVariable("ANDROID_NDK_ROOT", ndkPath);
     core.exportVariable("ANDROID_NDK_HOME", ndkPath);

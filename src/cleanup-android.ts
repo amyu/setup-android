@@ -1,10 +1,10 @@
 import type { CacheEntry } from "@actions/cache";
 import * as core from "@actions/core";
 
+import { getCompletedSetup } from "./cache-state.js";
 import { saveCache } from "./cache.js";
 import * as constants from "./constants.js";
-import { INPUT_JOB_STATUS, type Versions } from "./constants.js";
-import { normalizeSdkVersions } from "./sdk-version.js";
+import { INPUT_JOB_STATUS } from "./constants.js";
 import { renderSummary } from "./summary.js";
 
 async function run(): Promise<void> {
@@ -13,32 +13,19 @@ async function run(): Promise<void> {
       return Promise.resolve();
     }
 
-    const sdkVersion = normalizeSdkVersions(core.getMultilineInput(constants.INPUT_SDK_VERSION));
-    const buildToolsVersion = core.getMultilineInput(constants.INPUT_BUILD_TOOLS_VERSION);
-    const ndkVersion = core.getInput(constants.INPUT_NDK_VERSION);
-    const cmakeVersion = core.getInput(constants.INPUT_CMAKE_VERSION);
-    const commandLineToolsVersion = core.getInput(constants.INPUT_COMMAND_LINE_TOOLS_VERSION);
-    const cacheDisabled = core.getBooleanInput(constants.INPUT_CACHE_DISABLED);
-    const cacheKey = core.getInput(constants.INPUT_CACHE_KEY);
+    const setup = getCompletedSetup();
+    if (!setup) return;
     const generateJobSummary = core.getBooleanInput(constants.INPUT_GENERATE_JOB_SUMMARY);
 
-    const versions: Versions = {
-      sdkVersion,
-      buildToolsVersion,
-      ndkVersion,
-      cmakeVersion,
-      commandLineToolsVersion,
-    };
-
     let savedCacheEntry: CacheEntry | undefined;
-    if (!cacheDisabled) {
+    if (setup.cacheKey) {
       core.startGroup("Save Cache");
-      savedCacheEntry = await saveCache(versions, cacheKey);
+      savedCacheEntry = await saveCache(setup.cacheKey);
       core.endGroup();
     }
 
     if (generateJobSummary) {
-      await renderSummary(versions, savedCacheEntry);
+      await renderSummary(setup.versions, savedCacheEntry);
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);

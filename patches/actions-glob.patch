@@ -1,0 +1,17 @@
+diff --git a/lib/internal-pattern.js b/lib/internal-pattern.js
+--- a/lib/internal-pattern.js
++++ b/lib/internal-pattern.js
+@@ -97,11 +97,11 @@ export class Pattern {
+     partialMatch(itemPath) {
+         // Normalize slashes and trim unnecessary trailing slash
+         itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+-        // matchOne does not handle root path correctly
++        // Handle the root separately before checking for a partial match.
+         if (pathHelper.dirname(itemPath) === itemPath) {
+             return this.rootRegExp.test(itemPath);
+         }
+-        return this.minimatch.matchOne(itemPath.split(IS_WINDOWS ? /\\+/ : /\/+/), this.minimatch.set[0], true);
++        return this.minimatch.match(itemPath, true);
+     }
+     /**
+      * Escapes glob patterns within a path

@@ -20,14 +20,13 @@
   "type": "module",
   "main": "dist/setup/index.js",
   "scripts": {
-    "check": "oxlint . && oxfmt --check . && tsc",
-    "package": "pnpm dlx rimraf dist && rolldown -c"
+    "check": "oxlint . && oxfmt --check . && tsc && node --test tests/*.test.mjs",
+    "package": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && rolldown -c"
   },
   "dependencies": {
     "@actions/cache": "6.3.0",
     "@actions/core": "3.0.1",
     "@actions/exec": "3.0.0",
-    "@actions/io": "3.0.2",
     "@actions/tool-cache": "4.0.0"
   },
   "devDependencies": {

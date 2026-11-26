@@ -50,6 +50,17 @@
       "matchDatasources": ["custom.android-command-line-tools"],
       // The download links include the build number but have no release timestamp.
       "minimumReleaseAgeBehaviour": "timestamp-optional",
+      "postUpgradeTasks": {
+        "commands": [
+          "node scripts/update-command-line-tools-checksums.mjs",
+          "pnpm install --frozen-lockfile",
+          "pnpm run check",
+          "pnpm run package",
+        ],
+        "installTools": { "node": {}, "pnpm": {} },
+        "fileFilters": ["src/command-line-tools-checksums.json", "dist/**"],
+        "executionMode": "branch",
+      },
     },
     {
       "matchManagers": ["npm"],
@@ -57,7 +68,14 @@
     },
     {
       "enabled": true,
-      "matchDepNames": ["@actions/cache", "rolldown"],
+      "matchPackageNames": [
+        "@actions/cache",
+        "@actions/core",
+        "@actions/tool-cache",
+        "@actions/exec",
+        "minimatch",
+        "rolldown",
+      ],
       "postUpgradeTasks": {
         "commands": ["pnpm install --frozen-lockfile", "pnpm run check", "pnpm run package"],
         "installTools": {
