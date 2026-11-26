@@ -7,29 +7,29 @@ import { constants, existsSync, promises, writeFileSync } from "fs";
 import * as path$1 from "path";
 import * as http from "http";
 import * as https from "https";
-import * as events from "events";
-import { EventEmitter } from "events";
 import assert, { ok } from "assert";
-import * as util from "util";
-import http$1 from "node:http";
-import { Readable, Transform } from "node:stream";
-import buffer$1 from "node:buffer";
-import util$1, { inspect } from "node:util";
-import zlib from "node:zlib";
-import { createHmac } from "node:crypto";
-import * as child from "child_process";
 import { setTimeout as setTimeout$1 } from "timers";
-import * as stream from "stream";
-import { Readable as Readable$1 } from "stream";
+import * as util from "util";
 import { URL as URL$1 } from "url";
 import * as os from "node:os";
 import os$3, { EOL as EOL$2 } from "node:os";
+import util$1, { inspect } from "node:util";
 import process$1 from "node:process";
-import https$1 from "node:https";
-import path$2 from "node:path";
+import { Readable, Transform } from "node:stream";
 import * as buffer from "buffer";
 import { Buffer as Buffer$1 } from "buffer";
+import * as child from "child_process";
+import { createHmac } from "node:crypto";
+import * as events from "events";
+import { EventEmitter } from "events";
+import buffer$1 from "node:buffer";
+import * as stream from "stream";
+import { Readable as Readable$1 } from "stream";
+import http$1 from "node:http";
+import https$1 from "node:https";
+import zlib from "node:zlib";
 import fs$1 from "node:fs";
+import path$2 from "node:path";
 // \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -179,8 +179,7 @@ function getProxyUrl(reqUrl) {
 }
 function checkBypass(reqUrl) {
 	if (!reqUrl.hostname) return false;
-	const reqHost = reqUrl.hostname;
-	if (isLoopbackAddress(reqHost)) return true;
+	if (isLoopbackAddress(reqUrl.hostname)) return true;
 	const noProxy = process.env["no_proxy"] || process.env["NO_PROXY"] || "";
 	if (!noProxy) return false;
 	let reqPort;
@@ -19559,7 +19558,7 @@ var require_constants = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		MAX_SAFE_COMPONENT_LENGTH: 16,
 		MAX_SAFE_BUILD_LENGTH: 250,
 		MAX_SAFE_INTEGER: Number.MAX_SAFE_INTEGER || 
-		/* istanbul ignore next */ 9007199254740991,
+		/* istanbul ignore next */ 0x1fffffffffffff,
 		WHITESPACE_CHARACTERS: [
 			"	",
 			"\n",
@@ -22357,8 +22356,7 @@ var NodeHttpClient = class {
 		let responseStream;
 		try {
 			if (body && request.onUploadProgress) {
-				const onUploadProgress = request.onUploadProgress;
-				const uploadReportStream = new ReportTransform(onUploadProgress);
+				const uploadReportStream = new ReportTransform(request.onUploadProgress);
 				uploadReportStream.on("error", (e) => {
 					logger$4.error("Error in upload progress", e);
 				});
@@ -26348,9 +26346,8 @@ function getOperationArgumentValueFromParameter(operationArguments, parameter, f
 		if (parameterMapper.required) value = {};
 		for (const propertyName in parameterPath) {
 			const propertyMapper = parameterMapper.type.modelProperties[propertyName];
-			const propertyPath = parameterPath[propertyName];
 			const propertyValue = getOperationArgumentValueFromParameter(operationArguments, {
-				parameterPath: propertyPath,
+				parameterPath: parameterPath[propertyName],
 				mapper: propertyMapper
 			}, fallbackObject);
 			if (propertyValue !== void 0) {
@@ -26418,8 +26415,7 @@ function deserializationPolicy(options = {}) {
 }
 function getOperationResponseMap(parsedResponse) {
 	let result;
-	const request = parsedResponse.request;
-	const operationInfo = getOperationRequestInfo(request);
+	const operationInfo = getOperationRequestInfo(parsedResponse.request);
 	const operationSpec = operationInfo?.operationSpec;
 	if (operationSpec) {
 		if (!operationInfo?.operationResponseGetter) result = operationSpec.responses[parsedResponse.status];
@@ -26428,8 +26424,7 @@ function getOperationResponseMap(parsedResponse) {
 	return result;
 }
 function shouldDeserializeResponse(parsedResponse) {
-	const request = parsedResponse.request;
-	const shouldDeserialize = getOperationRequestInfo(request)?.shouldDeserialize;
+	const shouldDeserialize = getOperationRequestInfo(parsedResponse.request)?.shouldDeserialize;
 	let result;
 	if (shouldDeserialize === void 0) result = true;
 	else if (typeof shouldDeserialize === "boolean") result = shouldDeserialize;
@@ -47232,14 +47227,13 @@ var BlobClient = class BlobClient extends StorageClient {
 			for (let off = offset; off < offset + count; off = off + blockSize) batch.addOperation(async () => {
 				let chunkEnd = offset + count;
 				if (off + blockSize < chunkEnd) chunkEnd = off + blockSize;
-				const stream = (await this.download(off, chunkEnd - off, {
+				await streamToBuffer((await this.download(off, chunkEnd - off, {
 					abortSignal: options.abortSignal,
 					conditions: options.conditions,
 					maxRetryRequests: options.maxRetryRequestsPerBlock,
 					customerProvidedKey: options.customerProvidedKey,
 					tracingOptions: updatedOptions.tracingOptions
-				})).readableStreamBody;
-				await streamToBuffer(stream, buffer, off - offset, chunkEnd - offset);
+				})).readableStreamBody, buffer, off - offset, chunkEnd - offset);
 				transferProgress += chunkEnd - off;
 				if (options.onProgress) options.onProgress({ loadedBytes: transferProgress });
 			});
@@ -48193,7 +48187,7 @@ var BlockBlobClient = class BlockBlobClient extends BlobClient {
 		const maxSingleShotSize = options.maxSingleShotSize ?? 268435456;
 		if (maxSingleShotSize < 0 || maxSingleShotSize > 268435456) throw new RangeError(`maxSingleShotSize option must be >= 0 and <= ${BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES}`);
 		if (blockSize === 0) {
-			if (size > 4194304e3 * 5e4) throw new RangeError(`${size} is too larger to upload to a block blob.`);
+			if (size > 2097152e8) throw new RangeError(`${size} is too larger to upload to a block blob.`);
 			if (size > maxSingleShotSize) {
 				blockSize = Math.ceil(size / BLOCK_BLOB_MAX_BLOCKS);
 				if (blockSize < 4194304) blockSize = DEFAULT_BLOB_DOWNLOAD_BLOCK_BYTES;
@@ -49191,7 +49185,7 @@ function uploadCacheArchiveSDK(signedUploadURL, archivePath, options) {
 		const uploadOptions = {
 			blockSize: options === null || options === void 0 ? void 0 : options.uploadChunkSize,
 			concurrency: options === null || options === void 0 ? void 0 : options.uploadConcurrency,
-			maxSingleShotSize: 134217728,
+			maxSingleShotSize: 0x8000000,
 			onProgress: uploadProgress.onProgress()
 		};
 		try {
@@ -49570,7 +49564,7 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
 			debug("Unable to determine content length, downloading file with http-client...");
 			yield downloadCacheHttpClient(archiveLocation, archivePath);
 		} else {
-			const maxSegmentSize = Math.min(134217728, buffer.constants.MAX_LENGTH);
+			const maxSegmentSize = Math.min(0x8000000, buffer.constants.MAX_LENGTH);
 			const downloadProgress = new DownloadProgress(contentLength);
 			const fd = fs.openSync(archivePath, "w");
 			try {
@@ -49629,7 +49623,7 @@ function getUploadOptions(copy) {
 	* Add env var overrides
 	*/
 	result.uploadConcurrency = !isNaN(Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) ? Math.min(32, Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) : result.uploadConcurrency;
-	result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(134217728, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
+	result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(0x8000000, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
 	debug(`Use Azure SDK: ${result.useAzureSdk}`);
 	debug(`Upload concurrency: ${result.uploadConcurrency}`);
 	debug(`Upload chunk size: ${result.uploadChunkSize}`);
@@ -50327,8 +50321,8 @@ var require_goog_varint = /* @__PURE__ */ __commonJSMin(((exports) => {
 	*/
 	function int64toString(bitsLow, bitsHigh) {
 		if (bitsHigh >>> 0 <= 2097151) return "" + (TWO_PWR_32_DBL * bitsHigh + (bitsLow >>> 0));
-		let low = bitsLow & 16777215;
-		let mid = (bitsLow >>> 24 | bitsHigh << 8) >>> 0 & 16777215;
+		let low = bitsLow & 0xffffff;
+		let mid = (bitsLow >>> 24 | bitsHigh << 8) >>> 0 & 0xffffff;
 		let high = bitsHigh >> 16 & 65535;
 		let digitA = low + mid * 6777216 + high * 6710656;
 		let digitB = mid + high * 8147497;
@@ -50436,7 +50430,7 @@ var require_pb_long = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 	const RE_DECIMAL_STR = /^-?[0-9]+$/;
 	const TWO_PWR_32_DBL = 4294967296;
-	const HALF_2_PWR_32 = 2147483648;
+	const HALF_2_PWR_32 = 0x80000000;
 	var SharedPbLong = class {
 		/**
 		* Create a new instance with the given bits.
@@ -50798,9 +50792,9 @@ var require_assert = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.assertNever = assertNever;
 	const FLOAT32_MAX = 34028234663852886e22;
 	const FLOAT32_MIN = -34028234663852886e22;
-	const UINT32_MAX = 4294967295;
-	const INT32_MAX = 2147483647;
-	const INT32_MIN = -2147483648;
+	const UINT32_MAX = 0xffffffff;
+	const INT32_MAX = 0x7fffffff;
+	const INT32_MIN = -0x80000000;
 	function assertInt32(arg) {
 		if (typeof arg !== "number") throw new Error("invalid int 32: " + typeof arg);
 		if (!Number.isInteger(arg) || arg > INT32_MAX || arg < INT32_MIN) throw new Error("invalid int 32: " + arg);
@@ -55592,7 +55586,7 @@ function saveCacheV1(paths_1, key_1, options_1) {
 		try {
 			yield createTar(archiveFolder, cachePaths, compressionMethod);
 			if (isDebug()) yield listTar(archivePath, compressionMethod);
-			const fileSizeLimit = 10737418240;
+			const fileSizeLimit = 0x280000000;
 			const archiveFileSize = getArchiveFileSizeInBytes(archivePath);
 			debug(`File Size: ${archiveFileSize}`);
 			if (archiveFileSize > fileSizeLimit && !isGhes()) throw new Error(`Cache size of ~${Math.round(archiveFileSize / 1048576)} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
